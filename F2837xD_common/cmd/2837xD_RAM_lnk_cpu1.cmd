@@ -14,6 +14,8 @@ PAGE 0 :
    RAMLS4      		: origin = 0x00A000, length = 0x000800
    RESET           	: origin = 0x3FFFC0, length = 0x000002
 
+   RAMGS2      		: origin = 0x00E000, length = 0x0E000
+
 PAGE 1 :
 
    BOOT_RSVD       : origin = 0x000002, length = 0x000120     /* Part of M0, BOOT rom will use this for stack */
@@ -24,20 +26,20 @@ PAGE 1 :
 
    RAMGS0      : origin = 0x00C000, length = 0x001000
    RAMGS1      : origin = 0x00D000, length = 0x001000
-   RAMGS2      : origin = 0x00E000, length = 0x001000
-   RAMGS3      : origin = 0x00F000, length = 0x001000
-   RAMGS4      : origin = 0x010000, length = 0x001000
-   RAMGS5      : origin = 0x011000, length = 0x001000
-   RAMGS6      : origin = 0x012000, length = 0x001000
-   RAMGS7      : origin = 0x013000, length = 0x001000
-   RAMGS8      : origin = 0x014000, length = 0x001000
-   RAMGS9      : origin = 0x015000, length = 0x001000
-   RAMGS10     : origin = 0x016000, length = 0x001000
-   RAMGS11     : origin = 0x017000, length = 0x001000
-   RAMGS12     : origin = 0x018000, length = 0x001000     /* Only Available on F28379D, F28377D, F28375D devices. Remove line on other devices. */
-   RAMGS13     : origin = 0x019000, length = 0x001000     /* Only Available on F28379D, F28377D, F28375D devices. Remove line on other devices. */
-   RAMGS14     : origin = 0x01A000, length = 0x001000     /* Only Available on F28379D, F28377D, F28375D devices. Remove line on other devices. */
-   RAMGS15     : origin = 0x01B000, length = 0x001000     /* Only Available on F28379D, F28377D, F28375D devices. Remove line on other devices. */
+   //RAMGS2      : origin = 0x00E000, length = 0x001000
+   //RAMGS3      : origin = 0x00F000, length = 0x001000
+   //RAMGS4      : origin = 0x010000, length = 0x001000
+   //RAMGS5      : origin = 0x011000, length = 0x001000
+   //RAMGS6      : origin = 0x012000, length = 0x001000
+   //RAMGS7      : origin = 0x013000, length = 0x001000
+   //RAMGS8      : origin = 0x014000, length = 0x001000
+   //RAMGS9      : origin = 0x015000, length = 0x001000
+   //RAMGS10     : origin = 0x016000, length = 0x001000
+   //RAMGS11     : origin = 0x017000, length = 0x001000
+   //RAMGS12     : origin = 0x018000, length = 0x001000     /* Only Available on F28379D, F28377D, F28375D devices. Remove line on other devices. */
+   //RAMGS13     : origin = 0x019000, length = 0x001000     /* Only Available on F28379D, F28377D, F28375D devices. Remove line on other devices. */
+   //RAMGS14     : origin = 0x01A000, length = 0x001000     /* Only Available on F28379D, F28377D, F28375D devices. Remove line on other devices. */
+   //RAMGS15     : origin = 0x01B000, length = 0x001000     /* Only Available on F28379D, F28377D, F28375D devices. Remove line on other devices. */
 
    CPU2TOCPU1RAM   : origin = 0x03F800, length = 0x000400
    CPU1TOCPU2RAM   : origin = 0x03FC00, length = 0x000400
@@ -50,7 +52,7 @@ PAGE 1 :
 SECTIONS
 {
    codestart        : > BEGIN,     PAGE = 0
-   .text            : >>RAMM0 | RAMD0 |  RAMLS0 | RAMLS1 | RAMLS2 | RAMLS3 | RAMLS4,   PAGE = 0
+   .text            : >> RAMGS2,   PAGE = 0  //>>RAMM0 | RAMD0 |  RAMLS0 | RAMLS1 | RAMLS2 | RAMLS3 | RAMLS4,   PAGE = 0
    .cinit           : > RAMM0,     PAGE = 0
    .pinit           : > RAMM0,     PAGE = 0
    .switch          : > RAMM0,     PAGE = 0
@@ -89,11 +91,11 @@ SECTIONS
     }
 
     /* The following section definition are for SDFM examples */
-   Filter1_RegsFile : > RAMGS1,	PAGE = 1, fill=0x1111
-   Filter2_RegsFile : > RAMGS2,	PAGE = 1, fill=0x2222
-   Filter3_RegsFile : > RAMGS3,	PAGE = 1, fill=0x3333
-   Filter4_RegsFile : > RAMGS4,	PAGE = 1, fill=0x4444
-   Difference_RegsFile : >RAMGS5, 	PAGE = 1, fill=0x3333
+   //Filter1_RegsFile : > RAMGS1,	PAGE = 1, fill=0x1111
+   //Filter2_RegsFile : > RAMGS2,	PAGE = 1, fill=0x2222
+   //Filter3_RegsFile : > RAMGS3,	PAGE = 1, fill=0x3333
+   //Filter4_RegsFile : > RAMGS4,	PAGE = 1, fill=0x4444
+   //Difference_RegsFile : >RAMGS5, 	PAGE = 1, fill=0x3333
 }
 
 /*
