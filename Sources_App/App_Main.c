@@ -1,6 +1,4 @@
-
-#include "F2837xD_device.h"
-#include "F2837xD_Examples.h"
+#include "App_Include.h"
 
 int main(void)
 {
@@ -30,6 +28,23 @@ int main(void)
 
     // Step 4. Initialize the Device Peripherals:
 
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_SCI1);
+
+    EALLOW;
+    GpioCtrlRegs.GPCMUX1.bit.GPIO64 = 2;
+    GpioCtrlRegs.GPCMUX1.bit.GPIO65 = 2;
+    GpioCtrlRegs.GPCGMUX1.bit.GPIO64 = 1;
+    GpioCtrlRegs.GPCGMUX1.bit.GPIO65 = 1;
+    EDIS;
+
+    UARTStdioConfig(0, 230400, SysCtlLowSpeedClockGet(SYSTEM_CLOCK_SPEED));
+    UARTprintf("\n==================USB Host Connect Usb4000 Test==================\n");
+
+
+    Mod_Usb4000Init();
+    Mod_UsbHostInit();
+
+
     // Step 5. User specific code, enable interrupts:
 
     // Enable global Interrupts and higher priority real-time debug events:
@@ -39,8 +54,7 @@ int main(void)
     // Step 6. IDLE loop. Just sit and loop forever (optional):
     for(;;)
     {
-
+        Mod_UsbHostPoll();
+        Mod_Usb4000Poll();
     }
-
-	return 0;
 }

@@ -41,6 +41,16 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
+			<name>Sources_Mod</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>usbhspe.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Sources_Mod/usbhspe.c</locationURI>
+		</link>
+		<link>
 			<name>usblib.lib</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/F2837xD_common/lib/usblib.lib</locationURI>
@@ -58,7 +68,7 @@
 		<link>
 			<name>Sources_App/App_Main.c</name>
 			<type>1</type>
-			<location>D:/Wangjiangbo/Documents/GitHub/__CCS/Gas_LaserBoard/Soucres_App/App_Main.c</location>
+			<locationURI>PARENT-1-PROJECT_LOC/Sources_App/App_Main.c</locationURI>
 		</link>
 		<link>
 			<name>Sources_Drive/F2837xD_Adc.c</name>
@@ -236,6 +246,11 @@
 			<locationURI>PARENT-1-PROJECT_LOC/F2837xD_common/driverlib/uart.c</locationURI>
 		</link>
 		<link>
+			<name>Sources_DriveLib/uartstdio.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/F2837xD_common/utils/uartstdio.c</locationURI>
+		</link>
+		<link>
 			<name>Sources_DriveLib/usb.c</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/F2837xD_common/driverlib/usb.c</locationURI>
@@ -244,6 +259,16 @@
 			<name>Sources_DriveLib/usb_hal.c</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/F2837xD_common/driverlib/usb_hal.c</locationURI>
+		</link>
+		<link>
+			<name>Sources_Mod/Mod_Usb4000.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Sources_Mod/Mod_Usb4000.c</locationURI>
+		</link>
+		<link>
+			<name>Sources_Mod/Mod_UsbHost.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Sources_Mod/Mod_USBHost.c</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>

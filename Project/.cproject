@@ -42,6 +42,9 @@
 									<listOptionValue builtIn="false" value="${PROJECT_ROOT}/../F2837xD_headers/include"/>
 									<listOptionValue builtIn="false" value="${PROJECT_ROOT}/../F2837xD_common/include"/>
 									<listOptionValue builtIn="false" value="${PROJECT_ROOT}/../F2837xD_common/"/>
+									<listOptionValue builtIn="false" value="${PROJECT_ROOT}/../Sources_Bsp"/>
+									<listOptionValue builtIn="false" value="${PROJECT_ROOT}/../Sources_Mod"/>
+									<listOptionValue builtIn="false" value="${PROJECT_ROOT}/../Sources_App"/>
 								</option>
 								<option id="com.ti.ccstudio.buildDefinitions.C2000_18.1.compilerID.ADVICE__PERFORMANCE.1351153303" name="Provide advice on optimization techniques (--advice:performance)" superClass="com.ti.ccstudio.buildDefinitions.C2000_18.1.compilerID.ADVICE__PERFORMANCE" value="--advice:performance=all" valueType="string"/>
 								<option id="com.ti.ccstudio.buildDefinitions.C2000_18.1.compilerID.DEFINE.1833005055" name="Pre-define NAME (--define, -D)" superClass="com.ti.ccstudio.buildDefinitions.C2000_18.1.compilerID.DEFINE" valueType="definedSymbols">
