@@ -56,6 +56,11 @@
 			<locationURI>PARENT-1-PROJECT_LOC/F2837xD_common/lib/usblib.lib</locationURI>
 		</link>
 		<link>
+			<name>Cmd/2837xD_FLASH_lnk_cpu1.cmd</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/F2837xD_common/cmd/2837xD_FLASH_lnk_cpu1.cmd</locationURI>
+		</link>
+		<link>
 			<name>Cmd/2837xD_RAM_lnk_cpu1.cmd</name>
 			<type>1</type>
 			<location>D:/Wangjiangbo/Documents/GitHub/__CCS/Gas_LaserBoard/F2837xD_common/cmd/2837xD_RAM_lnk_cpu1.cmd</location>
@@ -69,6 +74,26 @@
 			<name>Sources_App/App_Main.c</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/Sources_App/App_Main.c</locationURI>
+		</link>
+		<link>
+			<name>Sources_App/App_MasterDeal.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Sources_App/App_MasterDeal.c</locationURI>
+		</link>
+		<link>
+			<name>Sources_Bsp/Bsp.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Sources_Bsp/Bsp.c</locationURI>
+		</link>
+		<link>
+			<name>Sources_Bsp/Bsp_Timer.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Sources_Bsp/Bsp_Timer.c</locationURI>
+		</link>
+		<link>
+			<name>Sources_Bsp/Bsp_Usart.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Sources_Bsp/Bsp_Usart.c</locationURI>
 		</link>
 		<link>
 			<name>Sources_Drive/F2837xD_Adc.c</name>
@@ -259,6 +284,26 @@
 			<name>Sources_DriveLib/usb_hal.c</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/F2837xD_common/driverlib/usb_hal.c</locationURI>
+		</link>
+		<link>
+			<name>Sources_Mod/Mod_CRC16.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Sources_Mod/Mod_CRC16.c</locationURI>
+		</link>
+		<link>
+			<name>Sources_Mod/Mod_StdbusCode.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Sources_Mod/Mod_StdbusCode.c</locationURI>
+		</link>
+		<link>
+			<name>Sources_Mod/Mod_StdbusMaster.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Sources_Mod/Mod_StdbusMaster.c</locationURI>
+		</link>
+		<link>
+			<name>Sources_Mod/Mod_StdbusSlave.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Sources_Mod/Mod_StdbusSlave.c</locationURI>
 		</link>
 		<link>
 			<name>Sources_Mod/Mod_Usb4000.c</name>

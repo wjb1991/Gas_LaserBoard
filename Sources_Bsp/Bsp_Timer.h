@@ -1,40 +1,41 @@
 #ifndef __BSP_TIMER_H__
-#define __BSP_TIMER_H__
+#define	 __BSP_TIMER_H__
 
-#define     DEF_SOFT_TIMER_MAX      20
+#include "Bsp.h"
 
-typedef struct {
-    BOOL    b_IsOneShot;        //单次模式
-    INT32U  ul_Dly;             //第一次的定时时间    
-    INT32U  ul_Period;          //周期定时时间
-    void    (*cb_CallBack)(void* pv_Timer);         //回调函数
-    
-    BOOL    b_Run;              //是否运行
-    BOOL    b_First;            //第一次运行
-    INT32U  ul_Cnt;             //计数值
-}SoftTimer_t;
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-typedef struct  {
-    INT32U ul_Cnt; 
-    INT32U ul_Tick;
-    INT32U ul_CntReload;
-    INT32U ul_TickReload;
-}TimeSample_t;
+//定时器0初始化
+void Bsp_Time0Init(float timeUs);
+//定时器0开始
+void Bsp_Time0Start(void);
+//定时器0结束
+void Bsp_Time0Stop(void);
+//定时器0开启中断
+void Bsp_Time0IntEnable(void);
+//定时器0关闭中断
+void Bsp_Time0IntDisable(void);
+//定时器0回掉函数注册
+void Bsp_Time0HookRegister(void (*hook)(void));
 
-void Bsp_DelayUs(INT32U us);
-void Bsp_DelayMs(INT32U ms);
+//定时器1初始化
+void Bsp_Time1Init(float timeUs);
+//定时器1开始
+void Bsp_Time1Start(void);
+//定时器1结束
+void Bsp_Time1Stop(void);
+//定时器1开启中断
+void Bsp_Time1IntEnable(void);
+//定时器1关闭中断
+void Bsp_Time1IntDisable(void);
+//定时器1回掉函数注册
+void Bsp_Time1HookRegister(void (*hook)(void));
 
-BOOL Bsp_TimerReg(SoftTimer_t* pst_Timer);
 
-BOOL Bsp_TimerStart(SoftTimer_t* pst_Timer);
-
-BOOL Bsp_TimerStop(SoftTimer_t* pst_Timer);
-
-void Bsp_TimerPoll(void);
-
-void Bsp_TimeSampleInit(void);
-void Bsp_GetTimeSample(TimeSample_t* pst_Ts);
-INT32U Bsp_GetInterval(TimeSample_t* pst_TsOld,TimeSample_t * pst_TsNew);
-
+#ifdef __cplusplus
+} /* extern "C" */
+#endif  /* __cplusplus */
 
 #endif

@@ -1,235 +1,193 @@
 #include "bsp_sram.h"
 //STM32F4开发版地址 0x68000000~ 0x680FFFFF   1M Byte
+//尾气激光板 0x100000 512k
 
+__STATIC_INLINE void HAL_SRAM_MspInit(void);
 
-SRAM_HandleTypeDef hsram1;
+BOOL Bsp_SramSelfTest(void)
+{
+	//DEF_EXSRAM_SIZE
+	volatile INT16U* puin_addr = (volatile INT16U*)DEF_EXSRAM_STA_ADDR;
+	INT32U i;
 
-/* FSMC initialization function */
+	for(i = 0; i < DEF_EXSRAM_SIZE; i++)
+	{
+		puin_addr[i] = 0;
+	}
+
+	for(i = 0; i < DEF_EXSRAM_SIZE; i++)
+	{
+		puin_addr[i] = (INT16U)(i % 65000);
+	}
+
+	for(i = 0; i < DEF_EXSRAM_SIZE; i++)
+	{
+		if (puin_addr[i] != (INT16U)(i % 65000))
+			return FALSE;
+	}
+
+	return TRUE;
+}
+
 void Bsp_SramInit(void)
 {
-  FSMC_NORSRAM_TimingTypeDef Timing;
+	int ErrCount = 0;
+	//Configure to run EMIF1 on full Rate (EMIF1CLK = CPU1SYSCLK)
+	EALLOW;
+	ClkCfgRegs.PERCLKDIVSEL.bit.EMIF1CLKDIV = 0x1;
+	EDIS;
 
-  /** Perform the SRAM1 memory initialization sequence
-  */
-  hsram1.Instance = FSMC_NORSRAM_DEVICE;
-  hsram1.Extended = FSMC_NORSRAM_EXTENDED_DEVICE;
-  /* hsram1.Init */
-  hsram1.Init.NSBank = FSMC_NORSRAM_BANK3;
-  hsram1.Init.DataAddressMux = FSMC_DATA_ADDRESS_MUX_DISABLE;
-  hsram1.Init.MemoryType = FSMC_MEMORY_TYPE_SRAM;
-  hsram1.Init.MemoryDataWidth = FSMC_NORSRAM_MEM_BUS_WIDTH_16;
-  hsram1.Init.BurstAccessMode = FSMC_BURST_ACCESS_MODE_DISABLE;
-  hsram1.Init.WaitSignalPolarity = FSMC_WAIT_SIGNAL_POLARITY_LOW;
-  hsram1.Init.WrapMode = FSMC_WRAP_MODE_DISABLE;
-  hsram1.Init.WaitSignalActive = FSMC_WAIT_TIMING_BEFORE_WS;
-  hsram1.Init.WriteOperation = FSMC_WRITE_OPERATION_ENABLE;
-  hsram1.Init.WaitSignal = FSMC_WAIT_SIGNAL_DISABLE;
-  hsram1.Init.ExtendedMode = FSMC_EXTENDED_MODE_DISABLE;
-  hsram1.Init.AsynchronousWait = FSMC_ASYNCHRONOUS_WAIT_DISABLE;
-  hsram1.Init.WriteBurst = FSMC_WRITE_BURST_DISABLE;
-  hsram1.Init.PageSize = FSMC_PAGE_SIZE_NONE;
-  /* Timing */
-  Timing.AddressSetupTime = 24;
-  Timing.AddressHoldTime = 24;
-  Timing.DataSetupTime = 24;
-  Timing.BusTurnAroundDuration = 8;
-  Timing.CLKDivision = 0;
-  Timing.DataLatency = 16;
-  Timing.AccessMode = FSMC_ACCESS_MODE_A;
-  /* ExtTiming */
+	EALLOW;
 
-  if (HAL_SRAM_Init(&hsram1, &Timing, NULL) != HAL_OK)
-  {
+	//Disable Access Protection (CPU_FETCH/CPU_WR/DMA_WR)
+	Emif1ConfigRegs.EMIF1ACCPROT0.all = 0x0;
+	if (Emif1ConfigRegs.EMIF1ACCPROT0.all != 0x0)
+	{
+		ErrCount++;
+	}
 
-  }
+	// Commit the configuration related to protection. Till this bit remains set
+	// content of EMIF1ACCPROT0 register can't be changed.
+	Emif1ConfigRegs.EMIF1COMMIT.all = 0x1;
+	if(Emif1ConfigRegs.EMIF1COMMIT.all != 0x1)
+	{
+		ErrCount++;
+	}
 
+	// Lock the configuration so that EMIF1COMMIT register can't be changed any more.
+	Emif1ConfigRegs.EMIF1LOCK.all = 0x1;
+	if (Emif1ConfigRegs.EMIF1LOCK.all != 1)
+	{
+		ErrCount++;
+	}
+
+	EDIS;
+
+	//
+	//Configure the access timing for CS2 space	Sram
+	//
+	Emif1Regs.ASYNC_CS2_CR.all = (EMIF_ASYNC_ASIZE_16    | // 16Bit Memory
+														  // Interface
+								 EMIF_ASYNC_TA_4        | // Turn Around time
+														  // of 2 Emif Clock
+								 EMIF_ASYNC_RHOLD_8     | // Read Hold time
+														  // of 1 Emif Clock
+								 EMIF_ASYNC_RSTROBE_32   | // Read Strobe time
+														  // of 4 Emif Clock
+								 EMIF_ASYNC_RSETUP_8    | // Read Setup time
+														  // of 1 Emif Clock
+								 EMIF_ASYNC_WHOLD_8     | // Write Hold time
+														  // of 1 Emif Clock
+								 EMIF_ASYNC_WSTROBE_32   | // Write Strobe time
+														  // of 1 Emif Clock
+								 EMIF_ASYNC_WSETUP_8    | // Write Setup time
+														  // of 1 Emif Clock
+								 EMIF_ASYNC_EW_DISABLE  | // Extended Wait
+														  // Disable.
+								 EMIF_ASYNC_SS_DISABLE    // Strobe Select Mode
+														  // Disable.
+								);
+
+	//
+	//Configure the access timing for CS3 space	AD5546 DAC
+	//
+	Emif1Regs.ASYNC_CS3_CR.all = (EMIF_ASYNC_ASIZE_16    | // 16Bit Memory
+														  // Interface
+								 EMIF_ASYNC_TA_4        | // Turn Around time
+														  // of 2 Emif Clock
+								 EMIF_ASYNC_RHOLD_8     | // Read Hold time
+														  // of 1 Emif Clock
+								 EMIF_ASYNC_RSTROBE_32   | // Read Strobe time
+														  // of 4 Emif Clock
+								 EMIF_ASYNC_RSETUP_8    | // Read Setup time
+														  // of 1 Emif Clock
+								 EMIF_ASYNC_WHOLD_1     | // Write Hold time
+														  // of 1 Emif Clock
+								 EMIF_ASYNC_WSTROBE_32   | // Write Strobe time
+														  // of 1 Emif Clock
+								 EMIF_ASYNC_WSETUP_8    | // Write Setup time
+														  // of 1 Emif Clock
+								 EMIF_ASYNC_EW_DISABLE  | // Extended Wait
+														  // Disable.
+								 EMIF_ASYNC_SS_DISABLE    // Strobe Select Mode
+														  // Disable.
+								);
+
+	//
+	//Configure the access timing for CS4 space	AD7622
+	//
+	Emif1Regs.ASYNC_CS4_CR.all = (EMIF_ASYNC_ASIZE_16    | // 16Bit Memory
+														  // Interface
+								 EMIF_ASYNC_TA_4        | // Turn Around time
+														  // of 2 Emif Clock
+								 EMIF_ASYNC_RHOLD_8     | // Read Hold time
+														  // of 1 Emif Clock
+								 EMIF_ASYNC_RSTROBE_32   | // Read Strobe time
+														  // of 4 Emif Clock
+								 EMIF_ASYNC_RSETUP_8    | // Read Setup time
+														  // of 1 Emif Clock
+								 EMIF_ASYNC_WHOLD_1     | // Write Hold time
+														  // of 1 Emif Clock
+								 EMIF_ASYNC_WSTROBE_1   | // Write Strobe time
+														  // of 1 Emif Clock
+								 EMIF_ASYNC_WSETUP_1    | // Write Setup time
+														  // of 1 Emif Clock
+								 EMIF_ASYNC_EW_DISABLE  | // Extended Wait
+														  // Disable.
+								 EMIF_ASYNC_SS_DISABLE    // Strobe Select Mode
+														  // Disable.
+								);
+	HAL_SRAM_MspInit();
+
+	EDIS;
 }
 
-static uint32_t FSMC_Initialized = 0;
+__STATIC_INLINE void HAL_SRAM_MspInit(void)
+{
+	uint16_t cpu_sel = GPIO_MUX_CPU1;
+	uint16_t i;
 
-static void HAL_FSMC_MspInit(void){
+    for (i=28; i<=52; i++)
+    {
+        if ((i != 29) &&(i != 30) &&(i != 33) && (i != 42) && (i != 43))
+        {
+            GPIO_SetupPinMux(i,cpu_sel,2);
+        }
+    }
+    for (i=69; i<=87; i++)
+    {
+        if (i != 84)
+        {
+            GPIO_SetupPinMux(i,cpu_sel,2);
+        }
+    }
 
-  GPIO_InitTypeDef GPIO_InitStruct;
-  if (FSMC_Initialized) {
-    return;
-  }
-  FSMC_Initialized = 1;
-  /* Peripheral clock enable */
-  __HAL_RCC_FSMC_CLK_ENABLE();
-  /* GPIO Ports Clock Enable */
-  __HAL_RCC_GPIOF_CLK_ENABLE();
-  __HAL_RCC_GPIOH_CLK_ENABLE();
-  __HAL_RCC_GPIOG_CLK_ENABLE();
-  __HAL_RCC_GPIOE_CLK_ENABLE();
-  __HAL_RCC_GPIOD_CLK_ENABLE();
-  __HAL_RCC_GPIOA_CLK_ENABLE();
-  __HAL_RCC_GPIOB_CLK_ENABLE();
-  /** FSMC GPIO Configuration  
-  PF0   ------> FSMC_A0
-  PF1   ------> FSMC_A1
-  PF2   ------> FSMC_A2
-  PF3   ------> FSMC_A3
-  PF4   ------> FSMC_A4
-  PF5   ------> FSMC_A5
-  PF12   ------> FSMC_A6
-  PF13   ------> FSMC_A7
-  PF14   ------> FSMC_A8
-  PF15   ------> FSMC_A9
-  PG0   ------> FSMC_A10
-  PG1   ------> FSMC_A11
-  PE7   ------> FSMC_D4
-  PE8   ------> FSMC_D5
-  PE9   ------> FSMC_D6
-  PE10   ------> FSMC_D7
-  PE11   ------> FSMC_D8
-  PE12   ------> FSMC_D9
-  PE13   ------> FSMC_D10
-  PE14   ------> FSMC_D11
-  PE15   ------> FSMC_D12
-  PD8   ------> FSMC_D13
-  PD9   ------> FSMC_D14
-  PD10   ------> FSMC_D15
-  PD11   ------> FSMC_A16
-  PD12   ------> FSMC_A17
-  PD14   ------> FSMC_D0
-  PD15   ------> FSMC_D1
-  PG2   ------> FSMC_A12
-  PG3   ------> FSMC_A13
-  PG4   ------> FSMC_A14
-  PG5   ------> FSMC_A15
-  PD0   ------> FSMC_D2
-  PD1   ------> FSMC_D3
-  PD4   ------> FSMC_NOE
-  PD5   ------> FSMC_NWE
-  PG10   ------> FSMC_NE3
-  PE0   ------> FSMC_NBL0
-  PE1   ------> FSMC_NBL1
-  */
-  /* GPIO_InitStruct */
-  GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3 
-                          |GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_12|GPIO_PIN_13 
-                          |GPIO_PIN_14|GPIO_PIN_15;
-  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-  GPIO_InitStruct.Alternate = GPIO_AF12_FSMC;
+    GPIO_SetupPinMux(88,cpu_sel,2);
+    GPIO_SetupPinMux(89,cpu_sel,2);
+    GPIO_SetupPinMux(90,cpu_sel,2);
+    //GPIO_SetupPinMux(91,cpu_sel,3);
+    GPIO_SetupPinMux(92,cpu_sel,3);
+    //GPIO_SetupPinMux(93,cpu_sel,3);
+    //GPIO_SetupPinMux(94,cpu_sel,2);
 
-  HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
-
-  /* GPIO_InitStruct */
-  GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3 
-                          |GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_10;
-  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-  GPIO_InitStruct.Alternate = GPIO_AF12_FSMC;
-
-  HAL_GPIO_Init(GPIOG, &GPIO_InitStruct);
-
-  /* GPIO_InitStruct */
-  GPIO_InitStruct.Pin = GPIO_PIN_7|GPIO_PIN_8|GPIO_PIN_9|GPIO_PIN_10 
-                          |GPIO_PIN_11|GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14 
-                          |GPIO_PIN_15|GPIO_PIN_0|GPIO_PIN_1;
-  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-  GPIO_InitStruct.Alternate = GPIO_AF12_FSMC;
-
-  HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
-
-  /* GPIO_InitStruct */
-  GPIO_InitStruct.Pin = GPIO_PIN_8|GPIO_PIN_9|GPIO_PIN_10|GPIO_PIN_11 
-                          |GPIO_PIN_12|GPIO_PIN_14|GPIO_PIN_15|GPIO_PIN_0 
-                          |GPIO_PIN_1|GPIO_PIN_4|GPIO_PIN_5;
-  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-  GPIO_InitStruct.Alternate = GPIO_AF12_FSMC;
-
-  HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
-
+    //
+    //setup async mode and enable pull-ups for Data pins
+    //
+    for (i=69; i<=85; i++)
+    {
+        if (i != 84)
+        {
+            GPIO_SetupPinOptions(i,0,0x31); // GPIO_ASYNC||GPIO_PULLUP
+        }
+    }
 }
 
-void HAL_SRAM_MspInit(SRAM_HandleTypeDef* sramHandle){
 
-  HAL_FSMC_MspInit();
+//__STATIC_INLINE void HAL_SRAM_MspDeInit(void)
+//{
+//
+//}
 
-}
-
-static uint32_t FSMC_DeInitialized = 0;
-
-static void HAL_FSMC_MspDeInit(void){
-
-  if (FSMC_DeInitialized) {
-    return;
-  }
-  FSMC_DeInitialized = 1;
-  /* Peripheral clock enable */
-  __HAL_RCC_FSMC_CLK_DISABLE();
-  
-  /** FSMC GPIO Configuration  
-  PF0   ------> FSMC_A0
-  PF1   ------> FSMC_A1
-  PF2   ------> FSMC_A2
-  PF3   ------> FSMC_A3
-  PF4   ------> FSMC_A4
-  PF5   ------> FSMC_A5
-  PF12   ------> FSMC_A6
-  PF13   ------> FSMC_A7
-  PF14   ------> FSMC_A8
-  PF15   ------> FSMC_A9
-  PG0   ------> FSMC_A10
-  PG1   ------> FSMC_A11
-  PE7   ------> FSMC_D4
-  PE8   ------> FSMC_D5
-  PE9   ------> FSMC_D6
-  PE10   ------> FSMC_D7
-  PE11   ------> FSMC_D8
-  PE12   ------> FSMC_D9
-  PE13   ------> FSMC_D10
-  PE14   ------> FSMC_D11
-  PE15   ------> FSMC_D12
-  PD8   ------> FSMC_D13
-  PD9   ------> FSMC_D14
-  PD10   ------> FSMC_D15
-  PD11   ------> FSMC_A16
-  PD12   ------> FSMC_A17
-  PD14   ------> FSMC_D0
-  PD15   ------> FSMC_D1
-  PG2   ------> FSMC_A12
-  PG3   ------> FSMC_A13
-  PG4   ------> FSMC_A14
-  PG5   ------> FSMC_A15
-  PD0   ------> FSMC_D2
-  PD1   ------> FSMC_D3
-  PD4   ------> FSMC_NOE
-  PD5   ------> FSMC_NWE
-  PG10   ------> FSMC_NE3
-  PE0   ------> FSMC_NBL0
-  PE1   ------> FSMC_NBL1
-  */
-
-  HAL_GPIO_DeInit(GPIOF, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3 
-                          |GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_12|GPIO_PIN_13 
-                          |GPIO_PIN_14|GPIO_PIN_15);
-
-  HAL_GPIO_DeInit(GPIOG, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3 
-                          |GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_10);
-
-  HAL_GPIO_DeInit(GPIOE, GPIO_PIN_7|GPIO_PIN_8|GPIO_PIN_9|GPIO_PIN_10 
-                          |GPIO_PIN_11|GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14 
-                          |GPIO_PIN_15|GPIO_PIN_0|GPIO_PIN_1);
-
-  HAL_GPIO_DeInit(GPIOD, GPIO_PIN_8|GPIO_PIN_9|GPIO_PIN_10|GPIO_PIN_11 
-                          |GPIO_PIN_12|GPIO_PIN_14|GPIO_PIN_15|GPIO_PIN_0 
-                          |GPIO_PIN_1|GPIO_PIN_4|GPIO_PIN_5);
-}
-
-void HAL_SRAM_MspDeInit(SRAM_HandleTypeDef* sramHandle){
-
-  HAL_FSMC_MspDeInit();
-
-}
 /**
   * @}
   */

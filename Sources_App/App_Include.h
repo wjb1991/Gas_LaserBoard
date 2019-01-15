@@ -11,6 +11,9 @@ extern  "C" {                                  /* See Note #1.                  
 #include "Mod_Usb4000.h"
 #include "Mod_UsbHost.h"
 
+#include "Mod_CRC16.h"
+#include "Mod_StdbusCode.h"
+
 
 
 #ifdef __cplusplus

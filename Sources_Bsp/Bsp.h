@@ -59,17 +59,19 @@ extern  "C" {                                  /* See Note #1.                  
 #include  "Bsp_DataType.h"
 #include  "Bsp_Converter.h"
 
+#include  "Bsp_Timer.h"
+#include  "Bsp_Usart.h"
 
 #if 0
 #include  "bsp_sram.h"
 #include  "bsp_led.h"
 
 #include  "bsp_clock.h"
-#include  "bsp_usart.h"
+
 #include  "bsp_spi.h"
 #include  "bsp_i2c.h"
 #include  "bsp_at24c512.h"
-#include  "Bsp_Timer.h"
+
 #include  "Bsp_Gpio.h"
 #include  "Bsp_Dma.h"
   
@@ -83,11 +85,13 @@ void Bsp_Init(void);
 void Bsp_Init(void);
 
 __STATIC_INLINE void Bsp_Nop(void){;}
-__STATIC_INLINE void Bsp_IntDis(void){ __disable_irq(); }
-__STATIC_INLINE void Bsp_IntEn(void){ __enable_irq(); }
+__STATIC_INLINE void Bsp_IntDis(void){ DINT }
+__STATIC_INLINE void Bsp_IntEn(void){ EINT }
 #endif
 
-#define	Bsp_Printf		Bsp_UartPrintf
+void Bsp_Init(void);
+
+#define	 Bsp_Printf		Bsp_UartPrintf
 
 //#define	TRACE_DBG 	    //Bsp_UartPrintf
 

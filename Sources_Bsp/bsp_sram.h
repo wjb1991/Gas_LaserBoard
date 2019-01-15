@@ -3,10 +3,20 @@
 
 #include "bsp.h"
 
-#define DEF_EXSRAM_STA_ADDR    (0x68000000u)
-#define DEF_EXSRAM_END_ADDR    (0x680FFFFFu)
-#define DEF_EXSRAM_SIZE        (0x100000u)
+#ifdef __cplusplus
+extern "C" {
+#endif
 
+
+#define DEF_EXSRAM_STA_ADDR    (0x100000u)
+#define DEF_EXSRAM_END_ADDR    (0x17FFFFu)
+#define DEF_EXSRAM_SIZE        (0x080000u)	//512K Word
+
+BOOL Bsp_SramSelfTest(void);
 void Bsp_SramInit(void);
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif  /* __cplusplus */
 
 #endif

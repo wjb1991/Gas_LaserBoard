@@ -50,5 +50,14 @@ typedef double          FP64;
 }                                              /* End of 'extern'al C lang linkage.                    */
 #endif
 
+
+#ifndef __STATIC_INLINE
+#define __STATIC_INLINE static inline
+#endif
+
+#ifndef __weak
+#define __weak      weak
+#endif
+
 #endif                                                          /* End of module include.                               */
 

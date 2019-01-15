@@ -1,43 +1,46 @@
-//==================================================================================================
-//| 文件名称 | Bsp_Usart.h
-//|--------- |--------------------------------------------------------------------------------------
-//| 文件描述 | 板级串口功能的实现 STM32版本
-//|--------- |--------------------------------------------------------------------------------------
-//| 版权声明 | 
-//|----------|--------------------------------------------------------------------------------------
-//|  版本    |  时间       |  作者     | 描述
-//|--------- |-------------|-----------|------------------------------------------------------------
-//|  V1.0    | 2018.10.31  |  wjb      | 初版
-//|  V1.01   | 2018.10.31  |  wjb      | 添加串口打印函数和串口打印缓冲区
-//|  V1.02   | 2018.10.31  |  wjb      | 修正数据接收到没有处理函数后一直进中断的问题
-//|  V1.03   | 2018.11.06  |  wjb      | 添加DEF_USE_COMx宏定义可以取消不用的端口
-//==================================================================================================
+//==================================================================================
+//| 文件名称 | bsp_usart.h
+//|----------|----------------------------------------------------------------------
+//| 文件功能 | 向上层提供统一的接口 需根据不同的平台更改底层
+//|----------|----------------------------------------------------------------------
+//| 输入参数 | 无
+//|----------|----------------------------------------------------------------------
+//| 返回参数 | 无
+//==================================================================================
 #ifndef __BSP_USART_H__
 #define __BSP_USART_H__
 
 #include "bsp.h"
 
-#define  DEF_USART_RX_DMA  (TRUE)
-
-#define DEF_USE_COM1   (TRUE)
-#define DEF_USE_COM2   (TRUE)
-#define DEF_USE_COM3   (TRUE)
-#define DEF_USE_COM4   (TRUE)
-#define DEF_USE_COM5   (TRUE)
-#define DEF_USE_COM6   (TRUE)
-
 typedef struct _DEV_SERIALPORT  Dev_SerialPort;
+
+#define UART_WORDLENGTH_8B                  0x00000000U
+#define UART_WORDLENGTH_9B                  ((uint32_t)0)
+
+#define UART_STOPBITS_1                     0x00000000U
+#define UART_STOPBITS_2                     ((uint32_t)0)
+
+#define UART_PARITY_NONE                    0x00000000U
+#define UART_PARITY_EVEN                    ((uint32_t)0)
+#define UART_PARITY_ODD                     ((uint32_t)(0 | 0))
+
+#define UART_HWCONTROL_NONE                  0x00000000U
+#define UART_HWCONTROL_RTS                   ((uint32_t)0)
+#define UART_HWCONTROL_CTS                   ((uint32_t)0)
+#define UART_HWCONTROL_RTS_CTS               ((uint32_t)(0 | 0))
+
+#define UART_MODE_RX                        ((uint32_t)0)
+#define UART_MODE_TX                        ((uint32_t)0)
+#define UART_MODE_TX_RX                     ((uint32_t)(0 |0))
 
 extern Dev_SerialPort COM1;
 extern Dev_SerialPort COM2;
 extern Dev_SerialPort COM3;
 extern Dev_SerialPort COM4;
-extern Dev_SerialPort COM5;
-extern Dev_SerialPort COM6;
 
 struct _DEV_SERIALPORT{
     /*  配置参数  */
-    const INT8U *       puch_Name;    
+    const INT8S *       puch_Name;
     INT32U              ul_BaudRate;
     INT32U              ul_WordLength;
     INT32U              ul_StopBits;
@@ -65,8 +68,6 @@ struct _DEV_SERIALPORT{
 
     /*  底层句柄      */
     void * pv_UartHandle; //句柄
-    void * pv_TxDma;      
-    void * pv_RxDma;
 };
 
 

@@ -27,19 +27,7 @@ int main(void)
     InitPieVectTable();
 
     // Step 4. Initialize the Device Peripherals:
-
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_SCI1);
-
-    EALLOW;
-    GpioCtrlRegs.GPCMUX1.bit.GPIO64 = 2;
-    GpioCtrlRegs.GPCMUX1.bit.GPIO65 = 2;
-    GpioCtrlRegs.GPCGMUX1.bit.GPIO64 = 1;
-    GpioCtrlRegs.GPCGMUX1.bit.GPIO65 = 1;
-    EDIS;
-
-    UARTStdioConfig(0, 230400, SysCtlLowSpeedClockGet(SYSTEM_CLOCK_SPEED));
-    UARTprintf("\n==================USB Host Connect Usb4000 Test==================\n");
-
+    Bsp_Init();
 
     Mod_Usb4000Init();
     Mod_UsbHostInit();
@@ -54,7 +42,11 @@ int main(void)
     // Step 6. IDLE loop. Just sit and loop forever (optional):
     for(;;)
     {
+
+
         Mod_UsbHostPoll();
         Mod_Usb4000Poll();
+
+
     }
 }

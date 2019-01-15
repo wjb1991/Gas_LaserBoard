@@ -23,7 +23,10 @@
 *
 *                                    MICRIUM BOARD SUPPORT PACKAGE
 *
-* Filename      : bsp_os.c
+*                                         STM32746G-EVAL2
+*                                         Evaluation Board
+*
+* Filename      : bsp_clock.h
 * Version       : V1.00
 * Programmer(s) : FF
 *********************************************************************************************************
@@ -31,139 +34,100 @@
 
 /*
 *********************************************************************************************************
-*                                             INCLUDES
+*                                                 MODULE
+*
+* Note(s) : (1) This header file is protected from multiple pre-processor inclusion through use of the
+*               BSP present pre-processor macro definition.
 *********************************************************************************************************
 */
 
-#include  "os.h"
-#include  "bsp_clock.h"
-
-#include  "stm32f7xx_hal.h"
+#ifndef  BSP_CLOCK_H_
+#define  BSP_CLOCK_H_
 
 
 /*
 *********************************************************************************************************
-*                                            LOCAL DEFINES
+*                                            INCLUDE FILES
 *********************************************************************************************************
 */
+
+#include  <cpu_core.h>
 
 
 /*
 *********************************************************************************************************
-*                                       LOCAL GLOBAL VARIABLES
+*                                     EXTERNAL C LANGUAGE LINKAGE
+*
+* Note(s) : (1) C++ compilers MUST 'extern'ally declare ALL C function prototypes & variable/object
+*               declarations for correct C language linkage.
 *********************************************************************************************************
 */
 
-
-/*
-*********************************************************************************************************
-*                                           LOCAL CONSTANTS
-*********************************************************************************************************
-*/
-
-
-/*
-*********************************************************************************************************
-*                                          LOCAL DATA TYPES
-*********************************************************************************************************
-*/
-
-
-/*
-*********************************************************************************************************
-*                                      LOCAL FUNCTION PROTOTYPES
-*********************************************************************************************************
-*/
-
-
-/*
-*********************************************************************************************************
-*                                     LOCAL CONFIGURATION ERRORS
-*********************************************************************************************************
-*/
-
-/*
-*********************************************************************************************************
-*                                    INITIALIZE OS TICK INTERRUPT
-*
-* Description : Initialize the tick interrupt.
-*
-* Argument(s) : none.
-*
-* Return(s)   : none.
-*
-* Caller(s)   : Application.
-*
-* Note(s)     : none
-*********************************************************************************************************
-*/
-
-void  BSP_OSTickInit (void)
-{
-    CPU_INT32U  cpu_clk_freq;
-
-
-    cpu_clk_freq = BSP_ClkFreqGet(BSP_CLK_ID_HCLK);             /* Determine SysTick reference freq.                    */
-
-    OS_CPU_SysTickInitFreq(cpu_clk_freq);                       /* Init uC/OS periodic time src (SysTick).              */
-}
-
-
-/*
-*********************************************************************************************************
-*                                            HAL_InitTick()
-*
-* Description : This function has been overwritten from the STM32F7xx HAL libraries because Micrium's RTOS
-*               has its own Systick initialization and because it is recomended to initialize the tick after
-*               multi-tasking has started.
-*
-* Argument(s) : TickPriority          Tick interrupt priority.
-*
-* Return(s)   : HAL_OK.
-*
-* Caller(s)   : HAL_InitTick ()) is called automatically at the beginning of the program after reset by
-*               HAL_Init() or at any time when clock is configured, by HAL_RCC_ClockConfig().
-*
-* Note(s)     : none.
-*********************************************************************************************************
-*/
-
-HAL_StatusTypeDef  HAL_InitTick (uint32_t  TickPriority)
-{
-    //HAL_NVIC_SetPriorityGrouping(0);
-
-    return (HAL_OK);
-}
-
-
-/*
-*********************************************************************************************************
-*                                            HAL_GetTick()
-*
-* Description : This function has been overwritten from the STM32F7xx HAL libraries because Micrium's OS's
-*               has their own Tick counter values.
-*
-* Argument(s) : None.
-*
-* Return(s)   : Tick current value.
-*
-* Caller(s)   : STM32F7xx HAL driver files.
-*
-* Note(s)     : (1) Please ensure that the Tick Task has a higher priority than the App Start Task.
-*********************************************************************************************************
-*/
-
-uint32_t  HAL_GetTick(void)
-{
-    CPU_INT32U  os_tick_ctr;
-#if (OS_VERSION >= 30000u)
-    OS_ERR      os_err;
-
-
-    os_tick_ctr = OSTimeGet(&os_err);
-#else
-    os_tick_ctr = OSTimeGet();
+#ifdef __cplusplus
+extern  "C" {                                  /* See Note #1.                                         */
 #endif
 
-    return os_tick_ctr;
-}
+
+/*
+*********************************************************************************************************
+*                                               DEFINES
+*********************************************************************************************************
+*/
+
+
+/*
+*********************************************************************************************************
+*                                              DATA TYPES
+*********************************************************************************************************
+*/
+                                                                /* System clock IDs.                                    */
+typedef  enum  bsp_clk_id {
+    BSP_CLK_ID_SYSCLK,
+    BSP_CLK_ID_HCLK,
+    BSP_CLK_ID_PCLK1,
+    BSP_CLK_ID_PCLK2,
+} BSP_CLK_ID;
+
+
+/*
+*********************************************************************************************************
+*                                          GLOBAL VARIABLES
+*********************************************************************************************************
+*/
+
+
+/*
+*********************************************************************************************************
+*                                         FUNCTION PROTOTYPES
+*********************************************************************************************************
+*/
+
+void        BSP_SystemClkCfg(void);
+CPU_INT32U  BSP_ClkFreqGet  (BSP_CLK_ID  clk_id);
+
+
+/*
+*********************************************************************************************************
+*                                   EXTERNAL C LANGUAGE LINKAGE END
+*********************************************************************************************************
+*/
+
+#ifdef __cplusplus
+}                                              /* End of 'extern'al C lang linkage.                    */
+#endif
+
+
+/*
+*********************************************************************************************************
+*                                          CONFIGURATION ERRORS
+*********************************************************************************************************
+*/
+
+
+/*
+*********************************************************************************************************
+*                                              MODULE END
+*********************************************************************************************************
+*/
+
+#endif                                                          /* End of module include.                               */
