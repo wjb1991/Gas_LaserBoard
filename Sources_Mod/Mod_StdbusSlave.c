@@ -1,7 +1,7 @@
 #include "App_Include.h"
 
 
-#define DEF_STDBUS_SLAVE_PORT  &COM4
+#define DEF_STDBUS_SLAVE_PORT  &COM3
 #define DEF_STDBUS_SLAVE_BUFF_LEN   100
 #define DEF_STDBUS_SLAVE_DEV_LEN    10
 

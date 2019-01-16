@@ -86,6 +86,11 @@
 			<locationURI>PARENT-1-PROJECT_LOC/Sources_Bsp/Bsp.c</locationURI>
 		</link>
 		<link>
+			<name>Sources_Bsp/Bsp_SoftTimer.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Sources_Bsp/Bsp_SoftTimer.c</locationURI>
+		</link>
+		<link>
 			<name>Sources_Bsp/Bsp_Timer.c</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/Sources_Bsp/Bsp_Timer.c</locationURI>

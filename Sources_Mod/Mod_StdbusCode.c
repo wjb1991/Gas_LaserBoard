@@ -15,11 +15,8 @@
 #define DEF_STDBUS_DBG_EN           FALSE
 
 #if (DEF_STDBUS_DBG_EN == TRUE)
-    #define STDBUS_DBG(...)             do {                                \
-                                            OS_ERR os_err;                  \
-                                            OSSchedLock(&os_err);           \
-                                            printf(__VA_ARGS__);            \
-                                            OSSchedUnlock(&os_err);         \
+    #define STDBUS_DBG(...)             do {                            \
+                                            Bsp_Printf(__VA_ARGS__);    \
                                         }while(0)
 #else
     #define STDBUS_DBG(...)             

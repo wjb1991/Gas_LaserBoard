@@ -58,9 +58,12 @@ extern  "C" {                                  /* See Note #1.                  
   
 #include  "Bsp_DataType.h"
 #include  "Bsp_Converter.h"
+#include  "Bsp_SoftTimer.h"
 
 #include  "Bsp_Timer.h"
 #include  "Bsp_Usart.h"
+
+
 
 #if 0
 #include  "bsp_sram.h"

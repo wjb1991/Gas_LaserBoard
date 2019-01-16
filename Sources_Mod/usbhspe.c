@@ -16,6 +16,18 @@
 #include "usbhspe.h"
 #include "bsp.h"
 
+#define DEF_USBHSPE_DBG_EN           TRUE
+
+#if (DEF_USBHSPE_DBG_EN == TRUE)
+    #define USBHSPE_DBG(...)           do {                            \
+                                            Bsp_Printf(__VA_ARGS__);    \
+                                        }while(0)
+#else
+    #define USBHSPE_DBG(...)
+#endif
+
+
+
 //*****************************************************************************
 //
 // Forward declarations for the driver open and close calls.
@@ -138,18 +150,17 @@ USBHSPEOpen(tUSBHostDevice *psDevice)
         {
             break;
         }
-#if 1
-#include "utils/uartstdio.h"
-        UARTprintf("EP Address = 0x%x, EP Size = %d ",psEndpointDescriptor->bEndpointAddress,
-        												   readusb16_t(&(psEndpointDescriptor->wMaxPacketSize)));
+
+        USBHSPE_DBG("EP Address = 0x%x, EP Size = %d ",psEndpointDescriptor->bEndpointAddress,
+        											   readusb16_t(&(psEndpointDescriptor->wMaxPacketSize)));
 
         if((psEndpointDescriptor->bmAttributes & USB_EP_ATTR_TYPE_M) == USB_EP_ATTR_BULK)
-        	UARTprintf("USB_EP_ATTR_BULK\r\n");
+            USBHSPE_DBG("USB_EP_ATTR_BULK\r\n");
         else if((psEndpointDescriptor->bmAttributes & USB_EP_ATTR_TYPE_M) == USB_EP_ATTR_INT)
-        	UARTprintf("USB_EP_ATTR_INT\r\n");
+            USBHSPE_DBG("USB_EP_ATTR_INT\r\n");
         else if((psEndpointDescriptor->bmAttributes & USB_EP_ATTR_TYPE_M) == USB_EP_ATTR_ISOC)
-        	UARTprintf("USB_EP_ATTR_ISOC\r\n");
-#endif
+            USBHSPE_DBG("USB_EP_ATTR_ISOC\r\n");
+
         if((psEndpointDescriptor->bmAttributes & USB_EP_ATTR_TYPE_M) ==
            USB_EP_ATTR_BULK)
         {

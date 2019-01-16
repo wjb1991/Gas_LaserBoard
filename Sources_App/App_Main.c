@@ -29,6 +29,9 @@ int main(void)
     // Step 4. Initialize the Device Peripherals:
     Bsp_Init();
 
+    Mod_StdbusSlaveInit();
+    Mod_StdbusMasterInit();
+
     Mod_Usb4000Init();
     Mod_UsbHostInit();
 
@@ -43,10 +46,10 @@ int main(void)
     for(;;)
     {
 
-
         Mod_UsbHostPoll();
         Mod_Usb4000Poll();
-
+        //Mod_StdbusSlavePoll();
+        //Mod_StdbusMasterPoll();
 
     }
 }

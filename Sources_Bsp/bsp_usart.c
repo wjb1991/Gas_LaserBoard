@@ -163,6 +163,13 @@ void Bsp_UsartTxDisable(Dev_SerialPort* pst_Dev)
 		PieCtrlRegs.PIEIER8.bit.INTx8 = 0;          // Enable PIE Group 8 INT7
 	}
 }
+__STATIC_INLINE void Bsp_PutChar(Dev_SerialPort* pst_Dev, INT8U byte)
+{
+    struct SCI_REGS* UartHandle = pst_Dev->pv_UartHandle;
+    while (UartHandle->SCIFFTX.bit.TXFFST != 0) {}
+    UartHandle->SCITXBUF.all = byte;
+    while (UartHandle->SCICTL2.bit.TXRDY == 0) {}
+}
 
 __STATIC_INLINE void Bsp_SendOneByte(Dev_SerialPort* pst_Dev, INT8U byte)
 {
@@ -583,7 +590,7 @@ void HAL_UART_MspDeInit(struct SCI_REGS *huart)
 void Bsp_UartPrintf(const char * Format,...)
 {
 	Dev_SerialPort* p = &COM1;
-	while(p->uin_TxLen != 0){}
+	//while(p->uin_TxLen != 0){}
 	va_list pArgs;
 	va_start(pArgs,Format);
 	vsprintf((char *)auch_PrintfBuff,Format,pArgs);
@@ -595,7 +602,13 @@ void Bsp_UartPrintf(const char * Format,...)
         //Bsp_Rs485de(eRs485Trans);
 	}
 
-	Bsp_UartSendBlock(p,auch_PrintfBuff,strlen((const char*)auch_PrintfBuff));
+	INT16U i;
+	for(i = 0; i < strlen((const char*)auch_PrintfBuff) ;i++)
+	{
+	    //Bsp_SendOneByte(p, auch_PrintfBuff[i]);
+	    Bsp_PutChar(p, auch_PrintfBuff[i]);
+	}
+	//Bsp_UartSendBlock(p,auch_PrintfBuff,strlen((const char*)auch_PrintfBuff));
 }
 
 

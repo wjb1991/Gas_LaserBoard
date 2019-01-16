@@ -1,6 +1,6 @@
 #include "App_Include.h"
 
-static FP64 lf_Buff[3840] = {0};//¡Ÿ ±
+//static FP64 lf_Buff[3840] = {0};//¡Ÿ ±
 
 BOOL App_StdbusMasterDealFram(StdbusFram_t* pst_Fram)
 {

@@ -1,5 +1,23 @@
 #include "App_Include.h"
 
+#define DEF_USBHOST_DBG_EN           TRUE
+
+#if (DEF_USBHOST_DBG_EN == TRUE)
+    #define USBHOST_DBG(...)           do {                            \
+                                            Bsp_Printf(__VA_ARGS__);    \
+                                        }while(0)
+#else
+    #define USBHOST_DBG(...)
+#endif
+
+void USBHConnectTimeOut(void* timer);
+
+SoftTimer_t st_USBHTimeOut = {
+    FALSE,                  //单次模式
+    5000,                   //第一次的定时时间
+    5000,                   //周期定时时间
+    &USBHConnectTimeOut     //回调函数
+};
 //*****************************************************************************
 //
 // The size of the host controller's memory pool in bytes.
@@ -141,18 +159,20 @@ USBHCDEvents(void *pvData)
     switch(pEventInfo->ui32Event)
     {
         case USB_EVENT_CONNECTED:
-            UARTprintf("USB_EVENT_CONNECTED\r\n");
+            USBHOST_DBG("USB_EVENT_CONNECTED\r\n");
+            Bsp_SoftTimerStop(&st_USBHTimeOut);
             break;
 
         case USB_EVENT_DISCONNECTED:
-            UARTprintf("USB_EVENT_DISCONNECTED\r\n");
+            USBHOST_DBG("USB_EVENT_DISCONNECTED\r\n");
+            Bsp_SoftTimerStart(&st_USBHTimeOut);
             break;
         case USB_EVENT_UNKNOWN_CONNECTED:
-            UARTprintf("USB_EVENT_UNKNOWN_CONNECTED\r\n");
+            USBHOST_DBG("USB_EVENT_UNKNOWN_CONNECTED\r\n");
             break;
 
         case USB_EVENT_POWER_FAULT:
-            UARTprintf("USB_EVENT_POWER_FAULT\r\n");
+            USBHOST_DBG("USB_EVENT_POWER_FAULT\r\n");
             break;
 
         default:
@@ -197,6 +217,11 @@ BOOL Mod_UsbHostInit(void)
     //
     USBHCDInit(0,g_pHCDPool, HCD_MEMORY_SIZE);
 
+
+    Bsp_SoftTimerReg(&st_USBHTimeOut);
+
+    Bsp_SoftTimerStart(&st_USBHTimeOut);
+
     return TRUE;
 }
 
@@ -205,3 +230,9 @@ BOOL Mod_UsbHostPoll(void)
     USBHCDMain();
     return TRUE;
 }
+
+void USBHConnectTimeOut(void* timer)
+{
+    //USBHCDReset(0);
+}
+

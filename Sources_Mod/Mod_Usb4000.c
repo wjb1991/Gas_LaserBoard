@@ -1,5 +1,16 @@
 #include "App_Include.h"
 
+#define DEF_USB4000_DBG_EN           TRUE
+
+#if (DEF_USB4000_DBG_EN == TRUE)
+    #define USB4000_DBG(...)           do {                            \
+                                            Bsp_Printf(__VA_ARGS__);    \
+                                        }while(0)
+#else
+    #define USB4000_DBG(...)
+#endif
+
+
 typedef enum
 {
 	USB4000_DISCONNECT = 0,
@@ -56,6 +67,17 @@ typedef struct _USB4000_Process
 
 USB4000_HandleTypeDef	st_Usb4000;
 
+void USBHSPESample(void* timer);
+
+SoftTimer_t st_USBHSampleTimer = {
+    FALSE,                  //单次模式
+    1000,                   //第一次的定时时间
+    0,                      //周期定时时间
+    &USBHSPESample          //回调函数
+};
+
+static BOOL b_SyncFlag = FALSE;
+
 //*****************************************************************************
 //
 // The instance data for the MSC driver.
@@ -99,6 +121,9 @@ SPECallback(tUSBHSPEInstance *psSPEInstance, uint32_t ui32Event, void *pvEventDa
     }
 }
 
+
+
+
 BOOL Mod_Usb4000Init(void)
 {
     //
@@ -106,6 +131,8 @@ BOOL Mod_Usb4000Init(void)
     //
     g_psSPEInstance = USBHSPEDriveOpen(0, (tUSBHSPECallback)SPECallback);
     st_Usb4000.e_State = USB4000_DISCONNECT;
+
+    Bsp_SoftTimerReg(&st_USBHSampleTimer);
     return TRUE;
 }
 
@@ -158,48 +185,47 @@ BOOL Mod_Usb4000Poll(void)
             {
                 st_Usb4000.uch_NlcOrder = atoi((const char*)string);
             }
-#if 1
-#include "utils/uartstdio.h"
-        UARTprintf("QueryInfo %d = %s\r\n",i,string);
-#endif
+
+            USB4000_DBG("QueryInfo %d = %s\r\n",i,string);
         }
 
-#if 1
-#include "utils/uartstdio.h"
-        UARTprintf("USB4000 INIT SUCESS\r\n");
-#endif
+        USB4000_DBG("USB4000 INIT SUCESS\r\n");
+
         st_Usb4000.e_State = USB4000_CONFIG;
 
 	    break;
 	}
 
 	case USB4000_CONFIG:
-	    res =  USBHSPESetIntegralTime(g_psSPEInstance,200,10000);
+	    res =  USBHSPESetIntegralTime(g_psSPEInstance,200,20000);
         if ( res != TRUE )
             break;
 
-#if 1
-#include "utils/uartstdio.h"
-        UARTprintf("USB4000_CONFIG SUCESS\r\n");
-#endif
+        USB4000_DBG("USB4000_CONFIG SUCESS\r\n");
 
         st_Usb4000.e_State = USB4000_SAMPLE;
+
+        st_USBHSampleTimer.ul_Period = 50;
+        Bsp_SoftTimerStart(&st_USBHSampleTimer);
         break;
 	case USB4000_SAMPLE:
-        res =  USBHSPEGetSpectrum(g_psSPEInstance,200,st_Usb4000.ain_Spectrum);
-        if ( res != TRUE )
-        {
-            //UARTprintf("USB4000_SAMPLE_FAIL\r\n");
-            break;
-        }
-#if 1
-#include "utils/uartstdio.h"
-        UARTprintf("USB4000_SAMPLE\r\n");
-#endif
+	    //if (b_SyncFlag == TRUE)
+	    {
+	        b_SyncFlag = FALSE;
+	        res =  USBHSPEGetSpectrum(g_psSPEInstance,200,st_Usb4000.ain_Spectrum);
+	        if ( res != TRUE )
+	        {
+	            //USBHCDReset(0);
+	            USB4000_DBG("_FAIL\r\n");
+	            break;
+	        }
+
+	        USB4000_DBG("_SUCCESS\r\n");
+	    }
 	    break;
 	case USB4000_DISCONNECT:
 
-
+        Bsp_SoftTimerStop(&st_USBHSampleTimer);
 
 	    break;
 
@@ -211,7 +237,10 @@ BOOL Mod_Usb4000Poll(void)
 	return TRUE;
 }
 
-
+void USBHSPESample(void* timer)
+{
+    b_SyncFlag = TRUE;
+}
 
 
 

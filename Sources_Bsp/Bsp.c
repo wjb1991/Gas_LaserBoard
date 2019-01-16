@@ -18,6 +18,8 @@ void  Bsp_Init (void)
     Bsp_Time1Init(1000);
     Bsp_Time1IntEnable();
     Bsp_Time1Start();
+    Bsp_Time1HookRegister(Bsp_SoftTimerPoll);
+
 
     /* 调试口  RS485 */
     COM1.ul_BaudRate   = 230400;
@@ -37,7 +39,7 @@ void  Bsp_Init (void)
     COM2.ul_Mode       = UART_MODE_TX_RX;
     Bsp_UartOpen(&COM2);
 
-    /* STDBUS 间接上位机 */
+    /* STDBUS 连接上位机 */
     COM3.ul_BaudRate   = 230400;
     COM3.ul_WordLength = UART_WORDLENGTH_8B;
     COM3.ul_StopBits   = UART_STOPBITS_1;
@@ -47,15 +49,5 @@ void  Bsp_Init (void)
     Bsp_UartOpen(&COM3);
 
     //Bsp_SramSelfTest();
-
-
-
-    while(1)
-    {
-        EINT;  // Enable Global interrupt INTM
-        ERTM;  // Enable Global realtime interrupt DBGM
-        //sprintf(buff,"abc = %d\r\n", 12);
-        Bsp_UartPrintf("abc = %d\r\n", 12);
-    }
 }
 

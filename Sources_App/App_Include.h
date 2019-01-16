@@ -13,6 +13,8 @@ extern  "C" {                                  /* See Note #1.                  
 
 #include "Mod_CRC16.h"
 #include "Mod_StdbusCode.h"
+#include "Mod_StdbusMaster.h"
+#include "Mod_StdbusSlave.h"
 
 
 
