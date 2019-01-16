@@ -369,7 +369,7 @@ USBHSPEDriveOpen(uint32_t ui32Drive, tUSBHSPECallback pfnCallback)
 
 static uint16_t SemPend(tUSBHSPEInstance *psSPEInstance,uint16_t uiTimeOut)
 {
-    uint32_t ulTimeCnt = uiTimeOut * 4000;
+    uint32_t ulTimeCnt = uiTimeOut * 4000UL;// * 1000;
     psSPEInstance->bSem = FALSE;
 
     while( ulTimeCnt-- )
@@ -472,7 +472,7 @@ USBHSPEGetState(tUSBHSPEInstance *psSPEInstance,
         *pbLampEnable = FALSE;
 
     if(puiPacketCount != NULL)
-        *puiPacketCount = ui8Data[9] & 0x00ff ;
+        *puiPacketCount = ui8Data[11] & 0x00ff ;
 
     if(pbUsbSpeed != NULL)
         *pbUsbSpeed = (ui8Data[14] != 0) ? TRUE : FALSE;
@@ -630,7 +630,7 @@ USBHSPEGetSpectrum(tUSBHSPEInstance *psSPEInstance,
 
          if( i == 120 && ui8Data[0] == 0x69)
              return(TRUE);
-
+/**/
          for(j = 0; j < 32; j++)
              pi_Spectrum[j + i*32] = (((uint16_t)ui8Data[j*2]) & 0xff) + (((uint16_t)ui8Data[j * 2 + 1])<<8);
 
@@ -665,6 +665,39 @@ USBHSPEInit(tUSBHSPEInstance *psSPEInstance,
 
     ui8Data[0] = 0x01;
     USBHCDPipeWrite(psSPEInstance->ui32EP1OutPipe, ui8Data, 1);
+    return(TRUE);
+}
+
+//*****************************************************************************
+//
+//! This function is used to release an instance of the SPE driver.
+//!
+//! \param pvInstance is an instance pointer that needs to be released.
+//!
+//! This function will free up any resources in use by the SPE driver instance
+//! that is passed in.  The \e pvInstance pointer should be a valid value that
+//! was returned from a call to USBSPEOpen().
+//!
+//! \return None.
+//
+//*****************************************************************************
+uint16_t
+USBHSPESetTrigger(tUSBHSPEInstance *psSPEInstance,
+                    uint16_t  ui_TimeOut,
+                    uint8_t  uc_Trigger)
+{
+    uint8_t  ui8Data[64] = {0};
+    //
+    // If there is no device present then return an error.
+    //
+    if(psSPEInstance->psDevice == 0)
+    {
+        return(FALSE);
+    }
+
+    ui8Data[0] = 0x0A;
+    ui8Data[1] = uc_Trigger;
+    USBHCDPipeWrite(psSPEInstance->ui32EP1OutPipe, ui8Data, 2);
     return(TRUE);
 }
 

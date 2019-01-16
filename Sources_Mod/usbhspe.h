@@ -76,6 +76,10 @@ extern uint16_t USBHSPESetIntegralTime(tUSBHSPEInstance *psSPEInstance,
 
 extern uint16_t USBHSPEInit(tUSBHSPEInstance *psSPEInstance,
                                   uint16_t  ui_TimeOut);
+extern uint16_t USBHSPESetTrigger(tUSBHSPEInstance *psSPEInstance,
+                                      uint16_t  ui_TimeOut,
+                                      uint8_t  uc_Trigger);
+
 extern uint16_t USBHSPEGetSpectrum(tUSBHSPEInstance *psSPEInstance,
                                    uint16_t  ui_TimeOut,
                                    int16_t*  i_Spectrum);

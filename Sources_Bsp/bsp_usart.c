@@ -165,7 +165,7 @@ void Bsp_UsartTxDisable(Dev_SerialPort* pst_Dev)
 }
 __STATIC_INLINE void Bsp_PutChar(Dev_SerialPort* pst_Dev, INT8U byte)
 {
-    struct SCI_REGS* UartHandle = pst_Dev->pv_UartHandle;
+    volatile struct SCI_REGS* UartHandle = pst_Dev->pv_UartHandle;
     while (UartHandle->SCIFFTX.bit.TXFFST != 0) {}
     UartHandle->SCITXBUF.all = byte;
     while (UartHandle->SCICTL2.bit.TXRDY == 0) {}
