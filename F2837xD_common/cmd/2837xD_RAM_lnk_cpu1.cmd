@@ -18,11 +18,11 @@ PAGE 1 :
    RAMM1           : origin = 0x000400, length = 0x000400     /* on-chip RAM block M1 */
    RAMD1           : origin = 0x00B800, length = 0x000800
 
-   RAMLS0          	: origin = 0x008000, length = 0x000800
-   RAMLS1          	: origin = 0x008800, length = 0x000800
-   RAMLS2      		: origin = 0x009000, length = 0x000800
-   RAMLS3      		: origin = 0x009800, length = 0x000800
-   RAMLS4      		: origin = 0x00A000, length = 0x000800
+   RAMLS0_4          	: origin = 0x008000, length = 0x002800
+   //RAMLS1          	: origin = 0x008800, length = 0x000800
+   //RAMLS2      		: origin = 0x009000, length = 0x000800
+   //RAMLS3      		: origin = 0x009800, length = 0x000800
+   //RAMLS4      		: origin = 0x00A000, length = 0x000800
 
    RAMLS5      : origin = 0x00A800, length = 0x000800
 
@@ -53,17 +53,17 @@ PAGE 1 :
 
 SECTIONS
 {
-   codestart         : > BEGIN,     PAGE = 0
-   .text            : >> RAMGS2,   PAGE = 0  //>>RAMM0 | RAMD0 |  RAMLS0 | RAMLS1 | RAMLS2 | RAMLS3 | RAMLS4,   PAGE = 0
-   .cinit           : > RAMM0,     PAGE = 0
+   codestart         : > BEGIN,     PAGE = 0												//程序入口
+   .text            : >> RAMGS2,   PAGE = 0  												//代码段
+   .cinit           : > RAMM0,     PAGE = 0												//存放程序中的变量初值和常量
    .pinit           : > RAMM0,     PAGE = 0
    .switch           : > RAMM0,     PAGE = 0
    .reset           : > RESET,     PAGE = 0, TYPE = DSECT /* not used, */
 
-   .stack           : > RAMM1,     PAGE = 1
-   .ebss            : > RAMLS0 | RAMLS1 | RAMLS2 | RAMLS3 | RAMGS0 | RAMGS1,    PAGE = 1
-   .econst           : > RAMLS4 | RAMLS5,    PAGE = 1
-   .esysmem          : > RAMLS5,    PAGE = 1
+   .stack           : > RAMM1,     PAGE = 1												//程序栈
+   .ebss            : > RAMGS0 | RAMGS1,    PAGE = 1										//程序变量
+   .econst           : > RAMLS0_4,    PAGE = 1												//程序常量
+   .esysmem          : > RAMLS5,    PAGE = 1												//程序堆
    Filter_RegsFile   : > RAMGS0,	   PAGE = 1
 
    ramgs0            : > RAMGS0,    PAGE = 1

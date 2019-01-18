@@ -51,16 +51,16 @@ typedef struct _USB4000_Process
 
 
 
-    uint8_t             auc_SerialNumber[20];          /* åºåˆ—å· */
-    uint16_t            auin_EdcIndexs[11];        /* 5-15åƒç´  */
-    float               af_WlcCoeff[4];            /* æ³¢é•¿æ‹Ÿåˆç³»æ•° */
-    float               af_NlcCoeff[8];            /* éçº¿æ€§æ ¡æ­£ç³»æ•° */
-    uint8_t              uch_NlcOrder;             /* éçº¿æ€§çŸ«æ­£é˜¶æ•° */
+    uint8_t              auc_SerialNumber[20];      /* ĞòÁĞºÅ */
+    uint16_t             auin_EdcIndexs[11];        /* 5-15ÏñËØ  */
+    float               af_WlcCoeff[4];            /* ²¨³¤ÄâºÏÒò×Ó */
+    float               af_NlcCoeff[8];            /* ·ÇÏßĞÔÄâºÏÒò×Ó */
+    uint8_t              uch_NlcOrder;             /* ·ÇÏßĞÔ½ÃÕıÏµÊı */
 
-    uint16_t             uin_Pixels;               /* åƒç´  */
-    uint32_t             ul_IntegralTime;          /* ç§¯åˆ†æ—¶é—´ */
-    uint8_t              uc_PackNum;               /* å…‰è°±æ•°æ®åŒ…æ€»æ•° */
-    uint8_t              b_HighSpeed;              /* æ˜¯å¦æ˜¯é«˜é€ŸUSBæ¥å£ */
+    uint16_t             uin_Pixels;               /* ÏñËØ */
+    uint32_t             ul_IntegralTime;          /* »ı·ÖÊ±¼ä */
+    uint8_t              uc_PackNum;               /* °ü¼ÆÊı */
+    uint8_t              b_HighSpeed;              /* Usb½Ó¿ÚÀàĞÍ  */
 
 	USB4000_StateTypeDef e_State;
 }USB4000_HandleTypeDef;
@@ -70,10 +70,10 @@ USB4000_HandleTypeDef	st_Usb4000;
 void USBHSPESample(void* timer);
 
 SoftTimer_t st_USBHSampleTimer = {
-    FALSE,                  //å•æ¬¡æ¨¡å¼
-    1000,                   //ç¬¬ä¸€æ¬¡çš„å®šæ—¶æ—¶é—´
-    0,                      //å‘¨æœŸå®šæ—¶æ—¶é—´
-    &USBHSPESample          //å›è°ƒå‡½æ•°
+  FALSE,                  //µ¥´ÎÄ£Ê½
+  1000,                   //µÚÒ»´ÎµÄ¶¨Ê±Ê±¼ä
+  0,                      //ÖÜÆÚ¶¨Ê±Ê±¼ä
+  &USBHSPESample          //»Øµ÷º¯Êı
 };
 
 static BOOL b_SyncFlag = FALSE;
@@ -197,7 +197,7 @@ BOOL Mod_Usb4000Poll(void)
 	}
 
 	case USB4000_CONFIG:
-        res =  USBHSPESetTrigger(g_psSPEInstance,20,0);//Data Value = 0 ïƒ¨ Normal Mode         Data Value = 1 ïƒ¨ Software Trigger Mode
+        res =  USBHSPESetTrigger(g_psSPEInstance,20,0);//Data Value = 0 Normal Mode Data Value = 1 Software Trigger Mode
         if ( res != TRUE )
             break;
 
@@ -216,7 +216,7 @@ BOOL Mod_Usb4000Poll(void)
 	    if (b_SyncFlag == TRUE)
 	    {
 	        b_SyncFlag = FALSE;
-	        res =  USBHSPEGetSpectrum(g_psSPEInstance,25,st_Usb4000.ain_Spectrum);//é€šè®¯ä¸€å¼ å…‰è°±çº¦ä¸º22ms
+	        res =  USBHSPEGetSpectrum(g_psSPEInstance,25,st_Usb4000.ain_Spectrum);
 	        if ( res != TRUE )
 	        {
 	            USB4000_DBG("_F\r\n");

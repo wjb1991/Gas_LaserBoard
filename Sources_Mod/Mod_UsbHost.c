@@ -159,20 +159,20 @@ USBHCDEvents(void *pvData)
     switch(pEventInfo->ui32Event)
     {
         case USB_EVENT_CONNECTED:
-            USBHOST_DBG("USB_EVENT_CONNECTED\r\n");
+            USBHOST_DBG("USBHOST_DBG:   USB_EVENT_CONNECTED\r\n");
             Bsp_SoftTimerStop(&st_USBHTimeOut);
             break;
 
         case USB_EVENT_DISCONNECTED:
-            USBHOST_DBG("USB_EVENT_DISCONNECTED\r\n");
+            USBHOST_DBG("USBHOST_DBG:   USB_EVENT_DISCONNECTED\r\n");
             Bsp_SoftTimerStart(&st_USBHTimeOut);
             break;
         case USB_EVENT_UNKNOWN_CONNECTED:
-            USBHOST_DBG("USB_EVENT_UNKNOWN_CONNECTED\r\n");
+            USBHOST_DBG("USBHOST_DBG:   USB_EVENT_UNKNOWN_CONNECTED\r\n");
             break;
 
         case USB_EVENT_POWER_FAULT:
-            USBHOST_DBG("USB_EVENT_POWER_FAULT\r\n");
+            USBHOST_DBG("USBHOST_DBG:   USB_EVENT_POWER_FAULT\r\n");
             break;
 
         default:
@@ -183,6 +183,10 @@ USBHCDEvents(void *pvData)
 
 BOOL Mod_UsbHostInit(void)
 {
+    Bsp_UsbPow(eUsbPowOn);
+
+    Bsp_DelayMs(3000);
+
     //
     // Initialize USB GPIO
     //
@@ -233,6 +237,16 @@ BOOL Mod_UsbHostPoll(void)
 
 void USBHConnectTimeOut(void* timer)
 {
+/**/
+    USBHOST_DBG("USBHOST_DBG:   没有检测到USB设备 重启USB\r\n");
+
+    Bsp_UsbPow(eUsbPowOff);
+
+    Bsp_DelayMs(200);
+
     //USBHCDReset(0);
+    Bsp_UsbPow(eUsbPowOn);
+    Bsp_DelayMs(2000);
+    USBHOST_DBG("USBHOST_DBG:   重启USB完成\r\n");
 }
 

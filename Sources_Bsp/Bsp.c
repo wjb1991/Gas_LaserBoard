@@ -14,6 +14,9 @@
 
 void  Bsp_Init (void)
 {
+
+    Bsp_GpioInit();
+
     /* 定时器1 软件定时器 系统时钟定时器 */
     Bsp_Time1Init(1000);
     Bsp_Time1IntEnable();

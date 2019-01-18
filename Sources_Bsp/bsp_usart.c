@@ -599,9 +599,9 @@ void Bsp_UartPrintf(const char * Format,...)
 	/* scia 是 485接口*/
 	if(p == &COM1)
 	{
-        //Bsp_Rs485de(eRs485Trans);
+        Bsp_Rs485de(eRs485Trans);
 	}
-
+    Bsp_DelayUs(100);
 	INT16U i;
 	for(i = 0; i < strlen((const char*)auch_PrintfBuff) ;i++)
 	{
@@ -609,6 +609,15 @@ void Bsp_UartPrintf(const char * Format,...)
 	    Bsp_PutChar(p, auch_PrintfBuff[i]);
 	}
 	//Bsp_UartSendBlock(p,auch_PrintfBuff,strlen((const char*)auch_PrintfBuff));
+
+	Bsp_DelayUs(100);
+
+    /* scia 是 485接口*/
+    if(p == &COM1)
+    {
+        Bsp_Rs485de(eRs485Recv);
+    }
+
 }
 
 

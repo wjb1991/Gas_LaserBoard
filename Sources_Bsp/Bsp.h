@@ -60,6 +60,7 @@ extern  "C" {                                  /* See Note #1.                  
 #include  "Bsp_Converter.h"
 #include  "Bsp_SoftTimer.h"
 
+#include  "Bsp_Gpio.h"
 #include  "Bsp_Timer.h"
 #include  "Bsp_Usart.h"
 
@@ -75,7 +76,7 @@ extern  "C" {                                  /* See Note #1.                  
 #include  "bsp_i2c.h"
 #include  "bsp_at24c512.h"
 
-#include  "Bsp_Gpio.h"
+
 #include  "Bsp_Dma.h"
   
 #include  "Bsp_W25Qxx.h"
@@ -96,7 +97,7 @@ void Bsp_Init(void);
 
 #define	 Bsp_Printf		Bsp_UartPrintf
 
-//#define	TRACE_DBG 	    //Bsp_UartPrintf
+#define	 TRACE_DBG 	    Bsp_Printf
 
 #ifdef __cplusplus
 }                                              /* End of 'extern'al C lang linkage.                    */

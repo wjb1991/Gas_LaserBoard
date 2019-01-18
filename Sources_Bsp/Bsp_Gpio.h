@@ -1,51 +1,132 @@
-//==================================================================================================
-//| 文件名称 | Bsp_Gpio.h
-//|----------|--------------------------------------------------------------------------------------
-//| 文件描述 | 普通输入输出IO的初始化 外设的IO初始化在对应的外设的文件中 STM32版本
-//|----------|--------------------------------------------------------------------------------------
-//| 版权声明 |
-//|----------|--------------------------------------------------------------------------------------
-//|  版本    |  时间       |  作者     | 描述
-//|----------|-------------|-----------|------------------------------------------------------------
-//|  V1.0    | 2018.12.02  |  wjb      | 初版
-//==================================================================================================
+#ifndef __BSP_GPIO_H__
+#define	 __BSP_GPIO_H__
 
-#ifndef     __BSP_GPIO_H__
-#define     __BSP_GPIO_H__
+#include "Bsp.h"
 
-/* 只有当GpioId_e中的初始化顺序和表中顺序一样时才能使用快速搜索模式 */
-#define     DEF_USE_FAST_FIND_MODE               FALSE
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef enum {
-    e_IO_Relay0 = 0,
-    e_IO_Relay1,
-    e_IO_Relay2,
-    e_IO_Relay3,
-    e_IO_245OE,  
-    e_IO_245DIR, 
-    e_IO_Sync0,  
-    e_IO_Sync1,  
-    e_IO_Sync2,  
-    
-}GpioId_e;
+    eLedOff = 1, eLedOn =  0,
+} LedStatus_t;
 
+typedef enum {
+    eLaserPrOff = 0, eLaserPrOn =  1,
+} LaserPr_t;
 
-typedef struct {
-    void * vp_GpioPort;     /* 端口 */
-    INT16U  uin_GpioPin;    /* 引脚 */
-    BOOL  b_IsRising;       /* 边沿 */
-    TimeSample_t st_Ts;     /* 时间戳 */
-}GpioEvent_t;
+typedef enum {
+    eSofrtStartOff = 1, eSofrtStartOn =  0,
+} SoftStart_t;
 
+typedef enum {
+    eTecEnable = 1, eTecDisable =  0,
+} TecStatus_t;
 
-BOOL Bsp_GpioInit(void);
+typedef enum {
+    eRefSigIVSel = 1, eSenSigSel =  0,
+} SwapSig_t;
 
-void Bsp_GpioWirte(GpioId_e e_GpioId,BOOL b_State);
+typedef enum {
+    eEepromWpOff = 0, eEepromWpOn =  1,
+} EepromWp_t;
 
-BOOL Bsp_GpioReadOut(GpioId_e e_GpioId);
+typedef enum {
+    eRs485Trans = 1, eRs485Recv =  0,
+} Rs485de_t;
 
-BOOL Bsp_GpioReadIn(GpioId_e e_GpioId);
+typedef enum {
+    eUsbPowOff = 0, eUsbPowOn =  1,
+} UsbPow_t;
 
-__weak void Bsp_GpioEventHandle(GpioEvent_t* pst_Event);
+void Bsp_GpioInit(void);
+
+void Bsp_GpioEvent(INT32U ul_Pin, BOOL b_IsRising);
+
+//内联提升速度 
+
+inline void Bsp_RunLed(LedStatus_t status )
+{
+    GPIO_WritePin(64,(uint16_t)status);
+}
+
+inline void Bsp_AlarmLed(LedStatus_t status )
+{
+    GPIO_WritePin(63,(uint16_t)status);
+}
+
+inline void Bsp_LaserPR( LaserPr_t status )
+{
+	GPIO_WritePin(20,status);
+}
+
+inline void Bsp_SoftStart( SoftStart_t status )
+{
+	GPIO_WritePin(21,status);
+}
+
+inline void Bsp_Tec2Enable( TecStatus_t status )
+{
+	GPIO_WritePin(94,status);
+}
+
+inline void Bsp_Tec1Enable( TecStatus_t status )
+{
+	GPIO_WritePin(33,status);
+}
+
+inline void Bsp_SigSelect( SwapSig_t status )
+{
+	GPIO_WritePin(93,status);
+}
+
+inline void Bsp_Pga0A0(uint16_t bitVal)
+{
+	GPIO_WritePin(22,bitVal);
+}
+
+inline void Bsp_Pga0A1(uint16_t bitVal)
+{
+	GPIO_WritePin(23,bitVal);
+}
+
+inline void Bsp_Pga2A0(uint16_t bitVal)
+{
+	GPIO_WritePin(14,bitVal);
+}
+
+inline void Bsp_Pga2A1(uint16_t bitVal)
+{
+	GPIO_WritePin(15,bitVal);
+}
+
+inline void Bsp_WachDogIn(uint16_t bitVal)
+{
+	GPIO_WritePin(62,bitVal);
+}
+
+inline void Bsp_EepromWp(EepromWp_t status)
+{
+	GPIO_WritePin(30,status);
+}
+
+inline void Bsp_Rs485de(Rs485de_t status)
+{
+	GPIO_WritePin(7,status);
+}
+
+inline void Bsp_UsbPow(UsbPow_t status )
+{
+    GPIO_WritePin(16,(uint16_t)status);
+}
+
+inline BOOL Bsp_IAlarm(void)
+{
+	return (BOOL)GPIO_ReadPin(36);
+}
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif  /* __cplusplus */
 
 #endif
