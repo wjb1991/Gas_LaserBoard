@@ -15,7 +15,7 @@ void USBHConnectTimeOut(void* timer);
 SoftTimer_t st_USBHTimeOut = {
     FALSE,                  //单次模式
     5000,                   //第一次的定时时间
-    5000,                   //周期定时时间
+    11000,                   //周期定时时间
     &USBHConnectTimeOut     //回调函数
 };
 //*****************************************************************************
@@ -183,9 +183,14 @@ USBHCDEvents(void *pvData)
 
 BOOL Mod_UsbHostInit(void)
 {
+
+    Bsp_UsbPow(eUsbPowOff);
+
+    //Bsp_DelayMs(3000);
+
     Bsp_UsbPow(eUsbPowOn);
 
-    Bsp_DelayMs(3000);
+    //Bsp_DelayMs(5000);
 
     //
     // Initialize USB GPIO
@@ -238,15 +243,15 @@ BOOL Mod_UsbHostPoll(void)
 void USBHConnectTimeOut(void* timer)
 {
 /**/
-    USBHOST_DBG("USBHOST_DBG:   没有检测到USB设备 重启USB\r\n");
-
     Bsp_UsbPow(eUsbPowOff);
-
-    Bsp_DelayMs(200);
-
-    //USBHCDReset(0);
+    USBHOST_DBG("USBHOST_DBG:   没有检测到USB设备 重启USB\r\n");
+    Bsp_DelayMs(3000);
     Bsp_UsbPow(eUsbPowOn);
-    Bsp_DelayMs(2000);
+    USBHOST_DBG("USBHOST_DBG:   开启USB电源\r\n");
+
+    Bsp_DelayMs(3000);
     USBHOST_DBG("USBHOST_DBG:   重启USB完成\r\n");
+
+    USBHCDReset(0);
 }
 

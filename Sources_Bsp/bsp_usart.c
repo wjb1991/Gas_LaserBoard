@@ -322,7 +322,7 @@ interrupt void Bsp_ScidRecvIsr(void)
 
     UartHandle->SCIFFRX.bit.RXFFOVRCLR=1;   // Clear Overflow flag
     UartHandle->SCIFFRX.bit.RXFFINTCLR=1;   // Clear Interrupt flag
-	PieCtrlRegs.PIEACK.all = PIEACK_GROUP9;
+	PieCtrlRegs.PIEACK.all = PIEACK_GROUP8;
 }
 
 interrupt void Bsp_ScidSendIsr(void)
@@ -332,7 +332,7 @@ interrupt void Bsp_ScidSendIsr(void)
     USARTxSend_IRQHandler(&COM4);
 
     UartHandle->SCIFFTX.bit.TXFFINTCLR=1;  // Clear SCI Interrupt flag
-	PieCtrlRegs.PIEACK.all = PIEACK_GROUP9;
+	PieCtrlRegs.PIEACK.all = PIEACK_GROUP8;
 }
 //==================================================================================
 //| 函数名称 | Bsp_UartOpen
@@ -528,7 +528,7 @@ void HAL_UART_MspInit(struct SCI_REGS *huart)
     if(huart == &SciaRegs)
     {
         // SCIA GPIO 初始化
-#if 0
+#if 1
         GPIO_SetupPinMux(9, GPIO_MUX_CPU1, 6);
         GPIO_SetupPinOptions(9, GPIO_INPUT, GPIO_PUSHPULL);
         GPIO_SetupPinMux(8, GPIO_MUX_CPU1, 6);
@@ -551,7 +551,11 @@ void HAL_UART_MspInit(struct SCI_REGS *huart)
     }
     else if(huart == &ScicRegs)
     {
-
+        // SCIC GPIO 初始化
+        GPIO_SetupPinMux(13, GPIO_MUX_CPU1, 6);
+        GPIO_SetupPinOptions(13, GPIO_INPUT, GPIO_PUSHPULL);
+        GPIO_SetupPinMux(12, GPIO_MUX_CPU1, 6);
+        GPIO_SetupPinOptions(12, GPIO_OUTPUT, GPIO_ASYNC);
     }
     else if(huart == &ScidRegs)
     {

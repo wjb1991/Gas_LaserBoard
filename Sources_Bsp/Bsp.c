@@ -51,6 +51,7 @@ void  Bsp_Init (void)
     COM3.ul_Mode       = UART_MODE_TX_RX;
     Bsp_UartOpen(&COM3);
 
+
     //Bsp_SramSelfTest();
 }
 

@@ -4,7 +4,7 @@
 <stringAttribute key="com.ti.ccstudio.debug.debugModel.ATTR_PROGRAM.D:\Wangjiangbo\Documents\GitHub\__CCS\Gas_LaserBoard\Project\targetConfigs\TMS320F28377D.ccxml.Texas Instruments XDS100v3 USB Debug Probe/C28xx_CPU1" value="${build_artifact:Project}"/>
 <stringAttribute key="com.ti.ccstudio.debug.debugModel.ATTR_PROJECT.D:\Wangjiangbo\Documents\GitHub\__CCS\Gas_LaserBoard\Project\targetConfigs\TMS320F28377D.ccxml.Texas Instruments XDS100v3 USB Debug Probe/C28xx_CPU1" value="Project"/>
 <stringAttribute key="com.ti.ccstudio.debug.debugModel.ATTR_TARGET_CONFIG" value="${target_config_active_default:Project}"/>
-<stringAttribute key="com.ti.ccstudio.debug.debugModel.MRU_PROGRAM.D:\Wangjiangbo\Documents\GitHub\__CCS\Gas_LaserBoard\Project\targetConfigs\TMS320F28377D.ccxml.Texas Instruments XDS100v3 USB Debug Probe/C28xx_CPU1" value="D:/Wangjiangbo\Documents\GitHub\__CCS\Gas_LaserBoard\Project\Debug\Project.out"/>
+<stringAttribute key="com.ti.ccstudio.debug.debugModel.MRU_PROGRAM.D:\Wangjiangbo\Documents\GitHub\__CCS\Gas_LaserBoard\Project\targetConfigs\TMS320F28377D.ccxml.Texas Instruments XDS100v3 USB Debug Probe/C28xx_CPU1" value="D:/Wangjiangbo\Documents\GitHub\__CCS\Gas_LaserBoard\Project\Debug_Ram\Project.out"/>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
 <listEntry value="/Project"/>
 </listAttribute>

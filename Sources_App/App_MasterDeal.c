@@ -5,7 +5,6 @@
 BOOL App_StdbusMasterDealFram(StdbusFram_t* pst_Fram)
 {
     BOOL res = FALSE;
-    //OS_ERR os_err;
 
 
 #if 0
