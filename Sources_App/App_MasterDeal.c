@@ -1,11 +1,48 @@
 #include "App_Include.h"
 
 //static FP64 lf_Buff[3840] = {0};//临时
+typedef enum
+{
+    CMD_CHECK_CONNECT = 0x00,
+    CMD_CHECK_SPE_STATE = 0x40,
+
+
+}eLasterBoardCmd;
+
+
 
 BOOL App_StdbusMasterDealFram(StdbusFram_t* pst_Fram)
 {
     BOOL res = FALSE;
+    switch(pst_Fram->uch_Cmd)
+    {
+    case CMD_CHECK_CONNECT:
+//==================================================================================
+//                            心跳包 没有任何数据确定是否连接
+//==================================================================================
+        if(pst_Fram->uch_SubCmd == e_StdbusReadCmd)
+        {
+            //读命令
+            pst_Fram->uin_PayLoadLenth = 0;
+            res = TRUE;    //应答
+        }
+        break;
+    case CMD_CHECK_SPE_STATE:
+//==================================================================================
+//                            获取光谱仪状态
+//==================================================================================
+        if(pst_Fram->uch_SubCmd == e_StdbusReadCmd)
+        {
+            //读命令
+            pst_Fram->uin_PayLoadLenth = 1;
+            pst_Fram->puc_PayLoad[0] = (INT8U)st_Usb4000.e_State;
+            res = TRUE;    //应答
+        }
+        break;
 
+    default:
+        break;
+    }
 
 #if 0
     switch(pst_Fram->uch_Cmd)

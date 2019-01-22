@@ -1,112 +1,89 @@
-//==================================================================================================
-//| 文件名称 | Bsp_LT1867.c
-//|--------- |--------------------------------------------------------------------------------------
-//| 文件描述 | 板级LT1867驱动 STM32版本
-//|--------- |--------------------------------------------------------------------------------------
-//| 版权声明 | 
-//|----------|--------------------------------------------------------------------------------------
-//|  版本    |  时间       |  作者     | 描述
-//|--------- |-------------|-----------|------------------------------------------------------------
-//|  V1.0    | 2018.10.31  |  wjb      | 初版
-//==================================================================================================
-#include "Bsp.h"
+#include "bsp_ltc1867.h"
 
 typedef enum {
-    eLTC1867CH0 = 0x8400,
-    eLTC1867CH1 = 0xC400,
-    eLTC1867CH2 = 0x9400,
-    eLTC1867CH3 = 0xD400,
-    eLTC1867CH4 = 0xA400,
-    eLTC1867CH5 = 0xE400,
-    eLTC1867CH6 = 0xB400,
-    eLTC1867CH7 = 0xF400,
-}LTC1867CH_TYPE;
+    eLtc1867CH0 = 0x8400,
+    eLtc1867CH1 = 0xC400,
+    eLtc1867CH2 = 0x9400,
+    eLtc1867CH3 = 0xD400,
+    eLtc1867CH4 = 0xA400,
+    eLtc1867CH5 = 0xE400,
+    eLtc1867CH6 = 0xB400,
+    eLtc1867CH7 = 0xF400,
+}Ltc1867Channel_t;
 
-DEV_LTC1867 st_LTC1867A = {
-   &st_SPI1,
-   Bsp_Ltc1867CS0,
-};
-
-DEV_LTC1867 st_LTC1867B = {
-   &st_SPI2,
-   Bsp_Ltc1867CS1,
-};
-
-LTC1867CH_TYPE Bsp_Ltc1866Chnnel(INT16U uin_CH)
+void Bsp_Ltc1867Cs(INT8U status)
 {
-    switch (uin_CH)
+    GPIO_WritePin(27,(INT16U)status);
+}
+
+void Bsp_Ltc1867Init(void)
+{
+    GPIO_SetupPinMux(27, GPIO_MUX_CPU1, 0);
+    GPIO_SetupPinOptions(27, GPIO_OUTPUT, GPIO_PUSHPULL);
+
+    Bsp_Ltc1867Cs(1);
+}
+
+Ltc1867Channel_t Bsp_Ltc1866Chnnel(INT16U ch)
+{
+    switch (ch)
     {
     case 0:
-        return (eLTC1867CH0);
+        return (eLtc1867CH0);
     case 1:
-        return (eLTC1867CH1);
+        return (eLtc1867CH1);
     case 2:
-        return (eLTC1867CH2);
+        return (eLtc1867CH2);
     case 3:
-        return (eLTC1867CH3);
+        return (eLtc1867CH3);
     case 4:
-        return (eLTC1867CH4);
+        return (eLtc1867CH4);
     case 5:
-        return (eLTC1867CH5);
+        return (eLtc1867CH5);
     case 6:
-        return (eLTC1867CH6);
+        return (eLtc1867CH6);
     case 7:
-        return (eLTC1867CH7);
+        return (eLtc1867CH7);
     default:
-        return (eLTC1867CH0);
+        return (eLtc1867CH0);
     }
 }
 
-void Bsp_LTC1867Init(void* pv_Dev)
+INT16U Bsp_Ltc1867SampleOne(INT16U ch)
 {
-    DEV_LTC1867* pst_Ltc1867 = (DEV_LTC1867*)pv_Dev;
-    Bsp_SpiInit(pst_Ltc1867->pv_SpiHandle);
-    if(pst_Ltc1867->CS != NULL)
-        pst_Ltc1867->CS(1);
-}
+    INT16U msb = 0;
+    INT16U lsb = 0;
+    Ltc1867Channel_t chnnel;
+    Bsp_Ltc1867Cs(0);
 
-INT16U Bsp_LTC1867SampleOne(void* pv_Dev,INT16U uin_CH)
-{
-    DEV_LTC1867* pst_Ltc1867 = (DEV_LTC1867*)pv_Dev;
-    INT16U uin_Msb = 0;
-    INT16U uin_Lsb = 0;
-    LTC1867CH_TYPE Channel = Bsp_Ltc1866Chnnel(uin_CH);
-    
-    Bsp_IntDis(); 
-    
-    if(pst_Ltc1867->CS != NULL)
-        pst_Ltc1867->CS(0);
-    
-    Bsp_DelayUs(1);
-    uin_Msb = Bsp_SpiTransByteBlock(pst_Ltc1867->pv_SpiHandle, Channel>>8);
-    uin_Lsb = Bsp_SpiTransByteBlock(pst_Ltc1867->pv_SpiHandle, Channel&0xff);
-    Bsp_DelayUs(1);
-    
-    if(pst_Ltc1867->CS != NULL)
-        pst_Ltc1867->CS(1);
-    
+    chnnel = Bsp_Ltc1866Chnnel(ch);
+    Bsp_DelayUS(0.5);
+    Bsp_IntDis();
+    msb = Bsp_SpibWriteByte(chnnel >> 8);
+    lsb = Bsp_SpibWriteByte(chnnel & 0x00ff);
     Bsp_IntEn();
-    
-    Bsp_DelayUs(4);
-    
-    return ((uin_Msb << 8) | uin_Lsb);
+    Bsp_DelayUS(0.5);
+    Bsp_Ltc1867Cs(1);
+    Bsp_DelayUS(3.5);
+    return ((msb << 8) | lsb);
 }
 
-INT16U Bsp_LTC1867SampleAvg(void* pv_Dev,INT16U uin_CH,INT16U uin_Avg)
+INT16U Bsp_Ltc1867SampleAvg(INT16U ch,INT16U avg)
 {
-    INT32U ul_Sum = 0;
+    uint32_t sum = 0;
     INT16U i = 0;
-    Bsp_LTC1867SampleOne(pv_Dev,uin_CH);
+    Bsp_Ltc1867SampleOne(ch);
 
-    for(i = 0; i < uin_Avg; i++)
+    for(i = 0; i < avg; i++)
     {
-        ul_Sum += Bsp_LTC1867SampleOne(pv_Dev,uin_CH);
+        sum += Bsp_Ltc1867SampleOne(ch);
     }
-    ul_Sum /= uin_Avg;
-    return ul_Sum;
+    sum /= avg;
+    return sum;
 }
 
-FP64 Bsp_LTC1867HexToVolt(INT16U hex)
+
+FP64 Bsp_Ltc1867HexToVolt(INT16U hex)
 {
     return ( hex * 4.096 / 65535.0);
 }

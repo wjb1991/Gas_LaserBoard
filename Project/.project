@@ -86,14 +86,54 @@
 			<locationURI>PARENT-1-PROJECT_LOC/Sources_Bsp/Bsp.c</locationURI>
 		</link>
 		<link>
+			<name>Sources_Bsp/Bsp_AD5546.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Sources_Bsp/Bsp_AD5546.c</locationURI>
+		</link>
+		<link>
+			<name>Sources_Bsp/Bsp_AD5663.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Sources_Bsp/Bsp_AD5663.c</locationURI>
+		</link>
+		<link>
+			<name>Sources_Bsp/Bsp_AD7622.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Sources_Bsp/Bsp_AD7622.c</locationURI>
+		</link>
+		<link>
+			<name>Sources_Bsp/Bsp_AT24C512.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Sources_Bsp/Bsp_AT24C512.c</locationURI>
+		</link>
+		<link>
+			<name>Sources_Bsp/Bsp_Dma.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Sources_Bsp/Bsp_Dma.c</locationURI>
+		</link>
+		<link>
 			<name>Sources_Bsp/Bsp_Gpio.c</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/Sources_Bsp/Bsp_Gpio.c</locationURI>
 		</link>
 		<link>
+			<name>Sources_Bsp/Bsp_I2C.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Sources_Bsp/Bsp_I2C.c</locationURI>
+		</link>
+		<link>
 			<name>Sources_Bsp/Bsp_SoftTimer.c</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/Sources_Bsp/Bsp_SoftTimer.c</locationURI>
+		</link>
+		<link>
+			<name>Sources_Bsp/Bsp_Spi.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Sources_Bsp/Bsp_Spi.c</locationURI>
+		</link>
+		<link>
+			<name>Sources_Bsp/Bsp_Sram.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Sources_Bsp/Bsp_Sram.c</locationURI>
 		</link>
 		<link>
 			<name>Sources_Bsp/Bsp_Timer.c</name>

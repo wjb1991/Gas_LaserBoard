@@ -63,35 +63,35 @@ extern  "C" {                                  /* See Note #1.                  
 #include  "Bsp_Gpio.h"
 #include  "Bsp_Timer.h"
 #include  "Bsp_Usart.h"
-
-
-
-#if 0
-#include  "bsp_sram.h"
-#include  "bsp_led.h"
-
-#include  "bsp_clock.h"
-
-#include  "bsp_spi.h"
-#include  "bsp_i2c.h"
-#include  "bsp_at24c512.h"
-
-
 #include  "Bsp_Dma.h"
-  
-#include  "Bsp_W25Qxx.h"
-#include  "Bsp_LTC1867.h"
 
-/*__CMSIS_IAR_H__ 中有常用的宏定义 */
-  
+
+
+#include  "Bsp_Sram.h"
+#include  "Bsp_Spi.h"
+#include  "Bsp_I2c.h"
+
+
+#include  "Bsp_At24c512.h"
+#include  "Bsp_Ltc1867.h"
+
+
+#include  "Bsp_Ad5546.h"
+#include  "Bsp_Ad5663.h"
+#include  "Bsp_Ad7622.h"
+
+
 void Bsp_Init(void);
 
+#if 0
 void Bsp_Init(void);
 
 __STATIC_INLINE void Bsp_Nop(void){;}
-__STATIC_INLINE void Bsp_IntDis(void){ DINT }
-__STATIC_INLINE void Bsp_IntEn(void){ EINT }
 #endif
+
+__STATIC_INLINE void Bsp_IntDis(void){ DINT; }
+__STATIC_INLINE void Bsp_IntEn(void){ EINT; }
+
 
 void Bsp_Init(void);
 

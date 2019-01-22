@@ -12,7 +12,7 @@
 //==================================================================================================
 #include "App_Include.h"
 
-#define DEF_STDBUS_DBG_EN           FALSE
+#define DEF_STDBUS_DBG_EN           TRUE
 
 #if (DEF_STDBUS_DBG_EN == TRUE)
     #define STDBUS_DBG(...)             do {                            \
@@ -46,7 +46,7 @@ BOOL PostMsg(StdbusPort_t* pst_Port)
 {
 
 #ifndef  OS_SUPPORT
-    if(pst_Port == NULL || pst_Port->pv_Msg == NULL)
+    if(pst_Port == NULL)
         return FALSE;
 
     pst_Port->pv_Msg = (void*)TRUE;
@@ -54,6 +54,10 @@ BOOL PostMsg(StdbusPort_t* pst_Port)
 
 #else
     OS_ERR  os_err;
+
+    if(pst_Port == NULL || pst_Port->pv_Msg == NULL)
+        return FALSE;
+
     OSTaskQPost(pst_Port->pv_Msg,(void*)pst_Port->e_State,1,OS_OPT_POST_FIFO ,&os_err);
     if(os_err != OS_ERR_NONE)
     {

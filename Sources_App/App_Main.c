@@ -29,6 +29,7 @@ int main(void)
     // Step 4. Initialize the Device Peripherals:
     Bsp_Init();
 
+    Mod_StdbusInit(&st_StdbusHost,0x20);
     Mod_StdbusSlaveInit();
     Mod_StdbusMasterInit();
 

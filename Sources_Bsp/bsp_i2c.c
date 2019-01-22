@@ -1,44 +1,35 @@
 #include "Bsp.h"
 
-#define  BSP_EESCK_GPIO_PIN                      GPIO_PIN_1
-#define  BSP_EESCK_GPIO_PORT                     GPIOF
-#define  BSP_EESCK_GPIO_CLK_ENABLE()             __HAL_RCC_GPIOF_CLK_ENABLE(); 
-
-#define  BSP_EESDA_GPIO_PIN                      GPIO_PIN_0
-#define  BSP_EESDA_GPIO_PORT                     GPIOF
-#define  BSP_EESDA_GPIO_CLK_ENABLE()             __HAL_RCC_GPIOF_CLK_ENABLE(); 
-
 I2cHandle_t Bsp_At24c512;
 
 static void Bsp_E2pomSDAH(void) 
 {
-    HAL_GPIO_WritePin(BSP_EESDA_GPIO_PORT, BSP_EESDA_GPIO_PIN, (GPIO_PinState)1);
+    GPIO_WritePin(2,1);
 }
 
 static void Bsp_E2pomSDAL(void) 
 {
-    HAL_GPIO_WritePin(BSP_EESDA_GPIO_PORT, BSP_EESDA_GPIO_PIN, (GPIO_PinState)0);
+    GPIO_WritePin(2,0);
 }
 
-static void Bsp_E2pomSCKH(void) 
+static void Bsp_E2pomSCLH(void)
 {
-    HAL_GPIO_WritePin(BSP_EESCK_GPIO_PORT, BSP_EESCK_GPIO_PIN, (GPIO_PinState)1);
+    GPIO_WritePin(3,1);
 }
 
-static void Bsp_E2pomSCKL(void) 
+static void Bsp_E2pomSCLL(void)
 {
-    HAL_GPIO_WritePin(BSP_EESCK_GPIO_PORT, BSP_EESCK_GPIO_PIN, (GPIO_PinState)0);
+    GPIO_WritePin(3,0);
 }
 
-static uint8_t Bsp_E2pomSDAValue(void) 
+static INT8U Bsp_E2pomSDAValue(void)
 {
-    return (uint8_t)(HAL_GPIO_ReadPin(BSP_EESDA_GPIO_PORT, BSP_EESDA_GPIO_PIN));
+    return (INT8U)(GPIO_ReadPin(2));
 }
 
 
 void  Bsp_I2cInit(I2cHandle_t* pst_Dev)
 {
-    GPIO_InitTypeDef  gpio_init;
   
     if( pst_Dev == 0)
         return;
@@ -46,26 +37,18 @@ void  Bsp_I2cInit(I2cHandle_t* pst_Dev)
     if( pst_Dev == &Bsp_At24c512 )
     {
         /* IO初始化 */
-        BSP_EESDA_GPIO_CLK_ENABLE();
-        BSP_EESCK_GPIO_CLK_ENABLE();
-        
-        gpio_init.Pin   = BSP_EESCK_GPIO_PIN;
-        gpio_init.Mode  = GPIO_MODE_OUTPUT_OD;
-        gpio_init.Pull  = GPIO_PULLUP;
-        gpio_init.Speed = GPIO_SPEED_HIGH;
-        HAL_GPIO_Init(BSP_EESCK_GPIO_PORT, &gpio_init);
-
-        gpio_init.Pin   = BSP_EESDA_GPIO_PIN;
-        gpio_init.Mode  = GPIO_MODE_OUTPUT_OD;
-        gpio_init.Pull  = GPIO_PULLUP;
-        gpio_init.Speed = GPIO_SPEED_HIGH;
-        HAL_GPIO_Init(BSP_EESDA_GPIO_PORT, &gpio_init); 
+    	//scl
+    	GPIO_SetupPinMux(3, GPIO_MUX_CPU1, 0);
+    	GPIO_SetupPinOptions(3, GPIO_OUTPUT, GPIO_PULLUP);
+    	//sda
+    	GPIO_SetupPinMux(2, GPIO_MUX_CPU1, 0);
+    	GPIO_SetupPinOptions(2, GPIO_OUTPUT, GPIO_PULLUP);
         
         /* 注册IO操作函数 */
         pst_Dev->SDA_H = Bsp_E2pomSDAH;
         pst_Dev->SDA_L = Bsp_E2pomSDAL;
-        pst_Dev->SCK_H = Bsp_E2pomSCKH;
-        pst_Dev->SCK_L = Bsp_E2pomSCKL; 
+        pst_Dev->SCL_H = Bsp_E2pomSCLH;
+        pst_Dev->SCL_L = Bsp_E2pomSCLL;
         pst_Dev->SDA_Read = Bsp_E2pomSDAValue; 
         
         Bsp_I2cStop(pst_Dev);
@@ -84,13 +67,7 @@ void  Bsp_I2cInit(I2cHandle_t* pst_Dev)
 //==================================================================================================
 void Bsp_I2cDelay(void) 
 { 
-/*
-    uint16_t i=50;  
-    while (i)
-    {
-        i--;  
-    } */
-    Bsp_DelayUs(8);
+	Bsp_DelayUs(5);
 }
 
 //==================================================================================================
@@ -102,10 +79,10 @@ void Bsp_I2cDelay(void)
 //|----------|--------------------------------------------------------------------------------------       
 //| 返回参数 | 无
 //==================================================================================================
-uint8_t Bsp_I2cStart(I2cHandle_t* pst_Dev) 
+INT8U Bsp_I2cStart(I2cHandle_t* pst_Dev)
 { 
     (pst_Dev->SDA_H)(); 
-    (pst_Dev->SCK_H)(); 
+    (pst_Dev->SCL_H)();
     
     Bsp_I2cDelay();
     if ( (pst_Dev->SDA_Read)() == 0 )
@@ -117,7 +94,7 @@ uint8_t Bsp_I2cStart(I2cHandle_t* pst_Dev)
     if ( (pst_Dev->SDA_Read)() != 0 )
         return 0; //SDA线为高电平则总线出错,退出 
     
-    (pst_Dev->SCK_L)(); 
+    (pst_Dev->SCL_L)();
     Bsp_I2cDelay(); 
     return 1; 
 } 
@@ -133,11 +110,11 @@ uint8_t Bsp_I2cStart(I2cHandle_t* pst_Dev)
 //==================================================================================================
 void Bsp_I2cStop(I2cHandle_t* pst_Dev) 
 { 
-    (pst_Dev->SCK_L)(); 
+    (pst_Dev->SCL_L)();
     Bsp_I2cDelay(); 
     (pst_Dev->SDA_L)(); 
     Bsp_I2cDelay(); 
-    (pst_Dev->SCK_H)(); 
+    (pst_Dev->SCL_H)();
     Bsp_I2cDelay(); 
     (pst_Dev->SDA_H)();
     Bsp_I2cDelay(); 
@@ -154,13 +131,13 @@ void Bsp_I2cStop(I2cHandle_t* pst_Dev)
 //==================================================================================================
 void Bsp_I2cAck(I2cHandle_t* pst_Dev) 
 { 
-    (pst_Dev->SCK_L)(); 
+    (pst_Dev->SCL_L)();
     Bsp_I2cDelay(); 
     (pst_Dev->SDA_L)();
     Bsp_I2cDelay(); 
-    (pst_Dev->SCK_H)(); 
+    (pst_Dev->SCL_H)();
     Bsp_I2cDelay(); 
-    (pst_Dev->SCK_L)(); 
+    (pst_Dev->SCL_L)();
     Bsp_I2cDelay(); 
 } 
 
@@ -175,13 +152,13 @@ void Bsp_I2cAck(I2cHandle_t* pst_Dev)
 //==================================================================================================
 void Bsp_I2cNoAck(I2cHandle_t* pst_Dev) 
 { 
-    (pst_Dev->SCK_L)(); 
+    (pst_Dev->SCL_L)();
     Bsp_I2cDelay(); 
     (pst_Dev->SDA_H)();
     Bsp_I2cDelay(); 
-    (pst_Dev->SCK_H)(); 
+    (pst_Dev->SCL_H)();
     Bsp_I2cDelay(); 
-    (pst_Dev->SCK_L)(); 
+    (pst_Dev->SCL_L)();
     Bsp_I2cDelay(); 
 }
 
@@ -194,22 +171,22 @@ void Bsp_I2cNoAck(I2cHandle_t* pst_Dev)
 //|----------|--------------------------------------------------------------------------------------       
 //| 返回参数 | 无
 //==================================================================================================
-uint8_t Bsp_I2cWaitAck(I2cHandle_t* pst_Dev)  
+INT8U Bsp_I2cWaitAck(I2cHandle_t* pst_Dev)
 { 
-    (pst_Dev->SCK_L)();
+    (pst_Dev->SCL_L)();
     Bsp_I2cDelay(); 
     (pst_Dev->SDA_H)();
     Bsp_I2cDelay(); 
-    (pst_Dev->SCK_H)();
+    (pst_Dev->SCL_H)();
     Bsp_I2cDelay(); 
     if ((pst_Dev->SDA_Read)())
     {
-        (pst_Dev->SCK_L)();
+        (pst_Dev->SCL_L)();
         return 0; 
     }
     else
     {
-        (pst_Dev->SCK_L)();
+        (pst_Dev->SCL_L)();
         return 1;     
     }
 } 
@@ -223,12 +200,12 @@ uint8_t Bsp_I2cWaitAck(I2cHandle_t* pst_Dev)
 //|----------|--------------------------------------------------------------------------------------       
 //| 返回参数 | 无
 //==================================================================================================
-void Bsp_I2cSendByte(I2cHandle_t* pst_Dev,uint8_t SendByte)  
+void Bsp_I2cSendByte(I2cHandle_t* pst_Dev,INT8U SendByte)
 { 
-    uint8_t i = 8; 
+    INT8U i = 8;
     while (i--)
     {
-        (pst_Dev->SCK_L)();
+        (pst_Dev->SCL_L)();
         Bsp_I2cDelay(); 
         
         if ( SendByte & 0x80 )
@@ -239,10 +216,10 @@ void Bsp_I2cSendByte(I2cHandle_t* pst_Dev,uint8_t SendByte)
         SendByte<<=1;
         
         Bsp_I2cDelay(); 
-        (pst_Dev->SCK_H)();
+        (pst_Dev->SCL_H)();
         Bsp_I2cDelay(); 
     } 
-    (pst_Dev->SCK_L)();
+    (pst_Dev->SCL_L)();
 } 
 
 //==================================================================================================
@@ -254,25 +231,25 @@ void Bsp_I2cSendByte(I2cHandle_t* pst_Dev,uint8_t SendByte)
 //|----------|--------------------------------------------------------------------------------------       
 //| 返回参数 | 无
 //==================================================================================================
-uint8_t Bsp_I2cReceiveByte(I2cHandle_t* pst_Dev)  
+INT8U Bsp_I2cReceiveByte(I2cHandle_t* pst_Dev)
 {  
-    uint8_t i=8; 
-    uint8_t ReceiveByte=0; 
+    INT8U i=8;
+    INT8U ReceiveByte=0;
 
     (pst_Dev->SDA_H)();
     while (i--)
     {
         ReceiveByte<<=1;       
-        (pst_Dev->SCK_L)(); 
+        (pst_Dev->SCL_L)();
         Bsp_I2cDelay(); 
-        (pst_Dev->SCK_H)(); 
+        (pst_Dev->SCL_H)();
         Bsp_I2cDelay(); 
         if ((pst_Dev->SDA_Read)())
         {
             ReceiveByte|=0x01; 
         }
     } 
-    (pst_Dev->SCK_L)(); 
+    (pst_Dev->SCL_L)();
     return ReceiveByte; 
 } 
 #if 0
@@ -285,7 +262,7 @@ uint8_t Bsp_I2cReceiveByte(I2cHandle_t* pst_Dev)
 //|----------|--------------------------------------------------------------------------------------       
 //| 返回参数 | 无
 //==================================================================================================
-uint8_t I2C1_BufferWrite(I2cHandle_t* pst_Dev, uint8_t* pBuffer, uint16_t length,uint16_t WriteAddress, uint8_t DeviceAddress)
+INT8U I2C1_BufferWrite(I2cHandle_t* pst_Dev, INT8U* pBuffer, uint16_t length,uint16_t WriteAddress, INT8U DeviceAddress)
 {
     //关中断
 	__disable_irq();
@@ -305,10 +282,10 @@ uint8_t I2C1_BufferWrite(I2cHandle_t* pst_Dev, uint8_t* pBuffer, uint16_t length
 		return 0;
 	}
 
-	Bsp_I2cSendByte(pst_Dev,(uint8_t)(WriteAddress>>8));       //设置起始地址(高)
+	Bsp_I2cSendByte(pst_Dev,(INT8U)(WriteAddress>>8));       //设置起始地址(高)
     Bsp_I2cWaitAck(pst_Dev);
 	
-	Bsp_I2cSendByte(pst_Dev,(uint8_t)(WriteAddress));         //设置起始地址(低)
+	Bsp_I2cSendByte(pst_Dev,(INT8U)(WriteAddress));         //设置起始地址(低)
     Bsp_I2cWaitAck(pst_Dev);
 	
     while(length--)
@@ -336,10 +313,10 @@ uint8_t I2C1_BufferWrite(I2cHandle_t* pst_Dev, uint8_t* pBuffer, uint16_t length
 //|----------|--------------------------------------------------------------------------------------       
 //| 返回参数 | 无
 //==================================================================================================	
-void I2C1_PageWrite(I2cHandle_t* pst_Dev,uint8_t* pBuffer,uint16_t length,uint16_t WriteAddress,uint8_t DeviceAddress)
+void I2C1_PageWrite(I2cHandle_t* pst_Dev,INT8U* pBuffer,uint16_t length,uint16_t WriteAddress,INT8U DeviceAddress)
 {
 	/*
-    uint8_t NumOfPage = 0, NumOfSingle = 0, Addr = 0, count = 0;
+    INT8U NumOfPage = 0, NumOfSingle = 0, Addr = 0, count = 0;
     Addr  = WriteAddress % AT24C512_PGE_SZE;  //写入地址是开始页的第几位
     count = AT24C512_PGE_SZE - Addr;          //在开始页要写入的个数
     NumOfPage   =  length / AT24C512_PGE_SZE; //要写入的页数
@@ -412,7 +389,7 @@ void I2C1_PageWrite(I2cHandle_t* pst_Dev,uint8_t* pBuffer,uint16_t length,uint16
 //|----------|--------------------------------------------------------------------------------------       
 //| 返回参数 | 无
 //==================================================================================================	
-uint8_t I2C1_ReadByte(I2cHandle_t* pst_Dev,uint8_t* pBuffer,uint16_t length,uint16_t ReadAddress,uint8_t DeviceAddress)
+INT8U I2C1_ReadByte(I2cHandle_t* pst_Dev,INT8U* pBuffer,uint16_t length,uint16_t ReadAddress,INT8U DeviceAddress)
 {       
     
 	if (!Bsp_I2cStart(pst_Dev))
@@ -424,10 +401,10 @@ uint8_t I2C1_ReadByte(I2cHandle_t* pst_Dev,uint8_t* pBuffer,uint16_t length,uint
         Bsp_I2cStop(pst_Dev); 
 		return 0;
     }
-	Bsp_I2cSendByte(pst_Dev,(uint8_t)(ReadAddress>>8));   //设置数据地址(高)      
+	Bsp_I2cSendByte(pst_Dev,(INT8U)(ReadAddress>>8));   //设置数据地址(高)
     Bsp_I2cWaitAck(pst_Dev);
 	
-	Bsp_I2cSendByte(pst_Dev,(uint8_t)(ReadAddress));   //设置数据地址(低)      
+	Bsp_I2cSendByte(pst_Dev,(INT8U)(ReadAddress));   //设置数据地址(低)
     Bsp_I2cWaitAck(pst_Dev);
 
 	Bsp_I2cDelay();
