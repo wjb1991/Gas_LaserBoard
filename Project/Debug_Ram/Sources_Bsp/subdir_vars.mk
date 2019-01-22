@@ -11,6 +11,7 @@ D:/Wangjiangbo/Documents/GitHub/__CCS/Gas_LaserBoard/Sources_Bsp/Bsp_AD5546.c \
 D:/Wangjiangbo/Documents/GitHub/__CCS/Gas_LaserBoard/Sources_Bsp/Bsp_AD5663.c \
 D:/Wangjiangbo/Documents/GitHub/__CCS/Gas_LaserBoard/Sources_Bsp/Bsp_AD7622.c \
 D:/Wangjiangbo/Documents/GitHub/__CCS/Gas_LaserBoard/Sources_Bsp/Bsp_AT24C512.c \
+D:/Wangjiangbo/Documents/GitHub/__CCS/Gas_LaserBoard/Sources_Bsp/Bsp_Converter.c \
 D:/Wangjiangbo/Documents/GitHub/__CCS/Gas_LaserBoard/Sources_Bsp/Bsp_Dma.c \
 D:/Wangjiangbo/Documents/GitHub/__CCS/Gas_LaserBoard/Sources_Bsp/Bsp_Gpio.c \
 D:/Wangjiangbo/Documents/GitHub/__CCS/Gas_LaserBoard/Sources_Bsp/Bsp_I2C.c \
@@ -26,6 +27,7 @@ C_DEPS += \
 ./Sources_Bsp/Bsp_AD5663.d \
 ./Sources_Bsp/Bsp_AD7622.d \
 ./Sources_Bsp/Bsp_AT24C512.d \
+./Sources_Bsp/Bsp_Converter.d \
 ./Sources_Bsp/Bsp_Dma.d \
 ./Sources_Bsp/Bsp_Gpio.d \
 ./Sources_Bsp/Bsp_I2C.d \
@@ -41,6 +43,7 @@ OBJS += \
 ./Sources_Bsp/Bsp_AD5663.obj \
 ./Sources_Bsp/Bsp_AD7622.obj \
 ./Sources_Bsp/Bsp_AT24C512.obj \
+./Sources_Bsp/Bsp_Converter.obj \
 ./Sources_Bsp/Bsp_Dma.obj \
 ./Sources_Bsp/Bsp_Gpio.obj \
 ./Sources_Bsp/Bsp_I2C.obj \
@@ -56,6 +59,7 @@ OBJS__QUOTED += \
 "Sources_Bsp\Bsp_AD5663.obj" \
 "Sources_Bsp\Bsp_AD7622.obj" \
 "Sources_Bsp\Bsp_AT24C512.obj" \
+"Sources_Bsp\Bsp_Converter.obj" \
 "Sources_Bsp\Bsp_Dma.obj" \
 "Sources_Bsp\Bsp_Gpio.obj" \
 "Sources_Bsp\Bsp_I2C.obj" \
@@ -71,6 +75,7 @@ C_DEPS__QUOTED += \
 "Sources_Bsp\Bsp_AD5663.d" \
 "Sources_Bsp\Bsp_AD7622.d" \
 "Sources_Bsp\Bsp_AT24C512.d" \
+"Sources_Bsp\Bsp_Converter.d" \
 "Sources_Bsp\Bsp_Dma.d" \
 "Sources_Bsp\Bsp_Gpio.d" \
 "Sources_Bsp\Bsp_I2C.d" \
@@ -86,6 +91,7 @@ C_SRCS__QUOTED += \
 "D:/Wangjiangbo/Documents/GitHub/__CCS/Gas_LaserBoard/Sources_Bsp/Bsp_AD5663.c" \
 "D:/Wangjiangbo/Documents/GitHub/__CCS/Gas_LaserBoard/Sources_Bsp/Bsp_AD7622.c" \
 "D:/Wangjiangbo/Documents/GitHub/__CCS/Gas_LaserBoard/Sources_Bsp/Bsp_AT24C512.c" \
+"D:/Wangjiangbo/Documents/GitHub/__CCS/Gas_LaserBoard/Sources_Bsp/Bsp_Converter.c" \
 "D:/Wangjiangbo/Documents/GitHub/__CCS/Gas_LaserBoard/Sources_Bsp/Bsp_Dma.c" \
 "D:/Wangjiangbo/Documents/GitHub/__CCS/Gas_LaserBoard/Sources_Bsp/Bsp_Gpio.c" \
 "D:/Wangjiangbo/Documents/GitHub/__CCS/Gas_LaserBoard/Sources_Bsp/Bsp_I2C.c" \

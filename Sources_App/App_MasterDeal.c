@@ -1,42 +1,309 @@
 #include "App_Include.h"
 
-//static FP64 lf_Buff[3840] = {0};//临时
+#define DEF_MASTERDEAL_DBG_EN           TRUE
+
+#if (DEF_MASTERDEAL_DBG_EN == TRUE)
+    #define MASTERDEAL_DBG(...)        do {                            \
+                                            TRACE_DBG(__VA_ARGS__);    \
+                                        }while(0)
+#else
+    #define MASTERDEAL_DBG(...)
+#endif
+
+
+
 typedef enum
 {
-    CMD_CHECK_CONNECT = 0x00,
-    CMD_CHECK_SPE_STATE = 0x40,
-
-
+    CMD_R_CONNECT = 0x00,
+    CMD_R_SPE_STATE = 0x40,
+    CMD_R_SPE_SERIALNUM,
+    CMD_R_SPE_WLCCOEFF,
+    CMD_R_SPE_NLCCOEFF,
+    CMD_R_SPE_NLCORDER,
+    CMD_R_SPE_PIXELS,
+    CMD_RW_SPE_INTERGRALTIME,
+    CMD_RW_SPE_EDC,
+    CMD_RW_SPE_NLC,
+    CMD_RW_SPE_SCANAVG,
+    CMD_RW_SPE_BOXCAR,
+    CMD_R_SPE_SPECTRUM,
 }eLasterBoardCmd;
 
+typedef union {
 
+    INT16U auin_Buff[7296];
+    FP32   af_Buff[3648];
+}ComTemp_t;
+
+ComTemp_t un_Temp;
 
 BOOL App_StdbusMasterDealFram(StdbusFram_t* pst_Fram)
 {
+    INT32U i;
     BOOL res = FALSE;
     switch(pst_Fram->uch_Cmd)
     {
-    case CMD_CHECK_CONNECT:
 //==================================================================================
 //                            心跳包 没有任何数据确定是否连接
 //==================================================================================
+    case CMD_R_CONNECT:
         if(pst_Fram->uch_SubCmd == e_StdbusReadCmd)
         {
             //读命令
             pst_Fram->uin_PayLoadLenth = 0;
             res = TRUE;    //应答
+
+            MASTERDEAL_DBG(">>MASTERDEAL_DBG: 接收到心跳包\r\n");
         }
         break;
-    case CMD_CHECK_SPE_STATE:
 //==================================================================================
 //                            获取光谱仪状态
 //==================================================================================
+    case CMD_R_SPE_STATE:
         if(pst_Fram->uch_SubCmd == e_StdbusReadCmd)
         {
             //读命令
             pst_Fram->uin_PayLoadLenth = 1;
             pst_Fram->puc_PayLoad[0] = (INT8U)st_Usb4000.e_State;
             res = TRUE;    //应答
+
+            MASTERDEAL_DBG(">>MASTERDEAL_DBG: 获取光谱仪连接状态\r\n");
+        }
+        break;
+//==================================================================================
+//                            获取光谱仪序列号
+//==================================================================================
+    case CMD_R_SPE_SERIALNUM:
+        if(pst_Fram->uch_SubCmd == e_StdbusReadCmd)
+        {
+            //读命令
+            pst_Fram->uin_PayLoadLenth = strlen(st_Usb4000.auc_SerialNumber);
+            memcpy(&pst_Fram->puc_PayLoad[0],st_Usb4000.auc_SerialNumber,pst_Fram->uin_PayLoadLenth);
+            res = TRUE;    //应答
+
+            MASTERDEAL_DBG(">>MASTERDEAL_DBG: 获取光谱仪序列号 = %s\r\n", st_Usb4000.auc_SerialNumber);
+        }
+        break;
+//==================================================================================
+//                            获取光谱仪波长拟合因子
+//==================================================================================
+    case CMD_R_SPE_WLCCOEFF:
+        if(pst_Fram->uch_SubCmd == e_StdbusReadCmd)
+        {
+            //读命令
+            pst_Fram->uin_PayLoadLenth = 4*4;
+
+            Bsp_CnvFP32ToArr(&pst_Fram->puc_PayLoad[0], st_Usb4000.af_WlcCoeff[0], FALSE);
+            Bsp_CnvFP32ToArr(&pst_Fram->puc_PayLoad[4], st_Usb4000.af_WlcCoeff[1], FALSE);
+            Bsp_CnvFP32ToArr(&pst_Fram->puc_PayLoad[8], st_Usb4000.af_WlcCoeff[2], FALSE);
+            Bsp_CnvFP32ToArr(&pst_Fram->puc_PayLoad[12], st_Usb4000.af_WlcCoeff[3], FALSE);
+            res = TRUE;    //应答
+
+            MASTERDEAL_DBG(">>MASTERDEAL_DBG: 获取光谱仪波长拟合因子\r\n");
+            for( i = 0; i < 4 ;i++)
+                MASTERDEAL_DBG(">>MASTERDEAL_DBG: 拟合因子%d = %e\r\n", i, st_Usb4000.af_WlcCoeff[i]);
+        }
+        break;
+//==================================================================================
+//                            获取光谱仪非线性矫正因子
+//==================================================================================
+    case CMD_R_SPE_NLCCOEFF:
+        if(pst_Fram->uch_SubCmd == e_StdbusReadCmd)
+        {
+            //读命令
+            pst_Fram->uin_PayLoadLenth = 8*4;
+
+            Bsp_CnvFP32ToArr(&pst_Fram->puc_PayLoad[0], st_Usb4000.af_NlcCoeff[0], FALSE);
+            Bsp_CnvFP32ToArr(&pst_Fram->puc_PayLoad[4], st_Usb4000.af_NlcCoeff[1], FALSE);
+            Bsp_CnvFP32ToArr(&pst_Fram->puc_PayLoad[8], st_Usb4000.af_NlcCoeff[2], FALSE);
+            Bsp_CnvFP32ToArr(&pst_Fram->puc_PayLoad[12], st_Usb4000.af_NlcCoeff[3], FALSE);
+            Bsp_CnvFP32ToArr(&pst_Fram->puc_PayLoad[16], st_Usb4000.af_NlcCoeff[4], FALSE);
+            Bsp_CnvFP32ToArr(&pst_Fram->puc_PayLoad[20], st_Usb4000.af_NlcCoeff[5], FALSE);
+            Bsp_CnvFP32ToArr(&pst_Fram->puc_PayLoad[24], st_Usb4000.af_NlcCoeff[6], FALSE);
+            Bsp_CnvFP32ToArr(&pst_Fram->puc_PayLoad[28], st_Usb4000.af_NlcCoeff[7], FALSE);
+
+            res = TRUE;    //应答
+
+            MASTERDEAL_DBG(">>MASTERDEAL_DBG: 获取光谱仪非线性矫正因子\r\n");
+            for( i = 0; i < 8 ;i++)
+                MASTERDEAL_DBG(">>MASTERDEAL_DBG: 矫正因子%d = %e\r\n", i, st_Usb4000.af_NlcCoeff[i]);
+        }
+        break;
+//==================================================================================
+//                            获取光谱仪非线性矫正阶数
+//==================================================================================
+    case CMD_R_SPE_NLCORDER:
+        if(pst_Fram->uch_SubCmd == e_StdbusReadCmd)
+        {
+            //读命令
+            pst_Fram->uin_PayLoadLenth = 1;
+            pst_Fram->puc_PayLoad[0] = st_Usb4000.uch_NlcOrder;
+            res = TRUE;    //应答
+
+            MASTERDEAL_DBG(">>MASTERDEAL_DBG: 获取光谱仪拟合阶数 = %d\r\n",st_Usb4000.uch_NlcOrder);
+        }
+        break;
+//==================================================================================
+//                            获取光谱仪像素
+//==================================================================================
+    case CMD_R_SPE_PIXELS:
+        if(pst_Fram->uch_SubCmd == e_StdbusReadCmd)
+        {
+            //读命令
+            pst_Fram->uin_PayLoadLenth = 2;
+            Bsp_CnvINT16UToArr(&pst_Fram->puc_PayLoad[0],st_Usb4000.uin_Pixels,FALSE);
+            res = TRUE;    //应答
+
+            MASTERDEAL_DBG(">>MASTERDEAL_DBG: 获取光谱仪像素 = %d\\r\n",st_Usb4000.uin_Pixels);
+        }
+//==================================================================================
+//                            设置/获取光谱仪积分时间
+//==================================================================================
+    case CMD_RW_SPE_INTERGRALTIME:
+        if(pst_Fram->uch_SubCmd == e_StdbusReadCmd)
+        {
+            //读命令
+            pst_Fram->uin_PayLoadLenth = 4;
+            Bsp_CnvINT32UToArr(&pst_Fram->puc_PayLoad[0],st_Usb4000.ul_IntegralTime,FALSE);
+            res = TRUE;    //应答
+
+            MASTERDEAL_DBG(">>MASTERDEAL_DBG: 获取光谱仪积分时间 = %d\r\n",st_Usb4000.ul_IntegralTime);
+        }
+        else if(pst_Fram->uch_SubCmd == e_StdbusWriteCmd)
+        {
+            //写命令
+            if(pst_Fram->uin_PayLoadLenth == 4)
+                st_Usb4000.ul_IntegralTime = Bsp_CnvArrToINT32U(&pst_Fram->puc_PayLoad[0],FALSE);
+            res = TRUE;    //应答
+
+            MASTERDEAL_DBG(">>MASTERDEAL_DBG: 设置光谱仪积分时间  = %d\r\n",st_Usb4000.ul_IntegralTime);
+        }
+        break;
+//==================================================================================
+//                            设置/获取光谱仪暗噪声修正
+//==================================================================================
+    case CMD_RW_SPE_EDC:
+        if(pst_Fram->uch_SubCmd == e_StdbusReadCmd)
+        {
+            //读命令
+            pst_Fram->uin_PayLoadLenth = 1;
+            pst_Fram->puc_PayLoad[0] = st_Usb4000.b_EdcEnable;
+            res = TRUE;    //应答
+
+            MASTERDEAL_DBG(">>MASTERDEAL_DBG: 获取光谱仪暗噪声修正 = %d\r\n",st_Usb4000.b_EdcEnable);
+        }
+        else if(pst_Fram->uch_SubCmd == e_StdbusWriteCmd)
+        {
+            //写命令
+            if(pst_Fram->uin_PayLoadLenth == 1)
+                st_Usb4000.b_EdcEnable = pst_Fram->puc_PayLoad[0];
+            res = TRUE;    //应答
+
+            MASTERDEAL_DBG(">>MASTERDEAL_DBG: 设置光谱仪暗噪声修正  = %d\r\n",st_Usb4000.b_EdcEnable);
+        }
+        break;
+//==================================================================================
+//                            设置/获取光谱仪非线性修正
+//==================================================================================
+    case CMD_RW_SPE_NLC:
+        if(pst_Fram->uch_SubCmd == e_StdbusReadCmd)
+        {
+            //读命令
+            pst_Fram->uin_PayLoadLenth = 1;
+            pst_Fram->puc_PayLoad[0] = st_Usb4000.b_EdcEnable;
+            res = TRUE;    //应答
+
+            MASTERDEAL_DBG(">>MASTERDEAL_DBG: 获取光谱仪非线性修正 = %d\r\n",st_Usb4000.b_NlcEnable);
+        }
+        else if(pst_Fram->uch_SubCmd == e_StdbusWriteCmd)
+        {
+            //写命令
+            if(pst_Fram->uin_PayLoadLenth == 1)
+                st_Usb4000.b_EdcEnable = pst_Fram->puc_PayLoad[0];
+            res = TRUE;    //应答
+
+            MASTERDEAL_DBG(">>MASTERDEAL_DBG: 设置光谱仪非线性修正  = %d\r\n",st_Usb4000.b_NlcEnable);
+        }
+        break;
+//==================================================================================
+//                            设置/获取光谱仪扫描平均次数
+//==================================================================================
+    case CMD_RW_SPE_SCANAVG:
+        if(pst_Fram->uch_SubCmd == e_StdbusReadCmd)
+        {
+            //读命令
+            pst_Fram->uin_PayLoadLenth = 1;
+            pst_Fram->puc_PayLoad[0] = st_Usb4000.uch_ScansToAverage;
+            res = TRUE;    //应答
+
+            MASTERDEAL_DBG(">>MASTERDEAL_DBG: 获取光谱仪扫描平均次数 = %d\r\n",st_Usb4000.uch_ScansToAverage);
+        }
+        else if(pst_Fram->uch_SubCmd == e_StdbusWriteCmd)
+        {
+            //写命令
+            if(pst_Fram->uin_PayLoadLenth == 1)
+                st_Usb4000.uch_ScansToAverage = pst_Fram->puc_PayLoad[0];
+            res = TRUE;    //应答
+
+            MASTERDEAL_DBG(">>MASTERDEAL_DBG: 设置光谱仪扫描平均次数  = %d\r\n",st_Usb4000.uch_ScansToAverage);
+        }
+        break;
+//==================================================================================
+//                            设置/获取光谱仪滑动滤波
+//==================================================================================
+    case CMD_RW_SPE_BOXCAR:
+        if(pst_Fram->uch_SubCmd == e_StdbusReadCmd)
+        {
+            //读命令
+            pst_Fram->uin_PayLoadLenth = 1;
+            pst_Fram->puc_PayLoad[0] = st_Usb4000.uch_Boxcar;
+            res = TRUE;    //应答
+
+            MASTERDEAL_DBG(">>MASTERDEAL_DBG: 获取光谱仪滑动滤波 = %d\r\n",st_Usb4000.uch_Boxcar);
+        }
+        else if(pst_Fram->uch_SubCmd == e_StdbusWriteCmd)
+        {
+            //写命令
+            if(pst_Fram->uin_PayLoadLenth == 1)
+                st_Usb4000.uch_Boxcar = pst_Fram->puc_PayLoad[0];
+            res = TRUE;    //应答
+
+            MASTERDEAL_DBG(">>MASTERDEAL_DBG: 设置光谱仪扫滑动滤波  = %d\r\n",st_Usb4000.uch_Boxcar);
+        }
+        break;
+//==================================================================================
+//                            获取光谱仪光谱(原始光谱)
+//==================================================================================
+    case CMD_R_SPE_SPECTRUM:
+        if(pst_Fram->uch_SubCmd == e_StdbusReadCmd)
+        {
+            //读命令
+            if(pst_Fram->uin_PayLoadLenth == 0)
+            {
+                //加载光谱到内存
+                for(i = 0; i < st_Usb4000.uin_Pixels; i++)
+                    un_Temp.auin_Buff[i] = (INT16U)st_Usb4000.af_ProcessSpectrum[i];
+
+                //读取第一页返回数组长度
+                Bsp_CnvINT16UToArr(&pst_Fram->puc_PayLoad[0], st_Usb4000.uin_Pixels, FALSE);
+                pst_Fram->uin_PayLoadLenth = 2;
+                res = TRUE;    //应答
+
+                MASTERDEAL_DBG(">>MASTERDEAL_DBG: 加载光谱到内存\r\n");
+            }
+            else if(pst_Fram->uin_PayLoadLenth == 4)
+            {
+                //第一二个字节是ReadAddress 第二三个字节是ReadLenth
+                INT16U uin_Offset = Bsp_CnvArrToINT16U(&pst_Fram->puc_PayLoad[0], FALSE);
+                INT16U uin_Lenth = Bsp_CnvArrToINT16U(&pst_Fram->puc_PayLoad[2], FALSE);
+
+                pst_Fram->uin_PayLoadLenth = 4 + uin_Lenth * 2;
+                for(i = 0; i<uin_Lenth;i++)
+                {
+                    Bsp_CnvINT16UToArr(&pst_Fram->puc_PayLoad[i*2+4],un_Temp.auin_Buff[uin_Offset+i],FALSE);
+                }
+                res = TRUE;    //应答
+            }
         }
         break;
 

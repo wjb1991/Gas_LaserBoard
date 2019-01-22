@@ -39,6 +39,8 @@ PAGE 1 : /* Data Memory */
    //RAMLS4      	   : origin = 0x00A000, length = 0x000800
    RAMLS5          : origin = 0x00A800, length = 0x000800
 
+   RAMGS0      : origin = 0x00C000, length = 0x00B000
+/*
    RAMGS0      : origin = 0x00C000, length = 0x001000
    RAMGS1      : origin = 0x00D000, length = 0x001000
    RAMGS2      : origin = 0x00E000, length = 0x001000
@@ -51,6 +53,7 @@ PAGE 1 : /* Data Memory */
    RAMGS9      : origin = 0x015000, length = 0x001000
    RAMGS10     : origin = 0x016000, length = 0x001000
    RAMGS11     : origin = 0x017000, length = 0x001000
+*/
    RAMGS12     : origin = 0x018000, length = 0x001000     /* Only Available on F28379D, F28377D, F28375D devices. Remove line on other devices. */
    RAMGS13     : origin = 0x019000, length = 0x001000     /* Only Available on F28379D, F28377D, F28375D devices. Remove line on other devices. */
    RAMGS14     : origin = 0x01A000, length = 0x001000     /* Only Available on F28379D, F28377D, F28375D devices. Remove line on other devices. */

@@ -10,7 +10,7 @@ PAGE 0 :
 
    RESET           	: origin = 0x3FFFC0, length = 0x000002
 
-   RAMGS2      		: origin = 0x00F000, length = 0x0C000
+   RAMGS2      		: origin = 0x011000, length = 0x0A000
 
 PAGE 1 :
 
@@ -27,7 +27,7 @@ PAGE 1 :
    RAMLS5      : origin = 0x00A800, length = 0x000800
 
    RAMGS0      : origin = 0x00C000, length = 0x001000
-   RAMGS1      : origin = 0x00D000, length = 0x002000
+   RAMGS1      : origin = 0x00D000, length = 0x004000
    //RAMGS2      : origin = 0x00E000, length = 0x001000
    //RAMGS3      : origin = 0x00F000, length = 0x001000
    //RAMGS4      : origin = 0x010000, length = 0x001000
