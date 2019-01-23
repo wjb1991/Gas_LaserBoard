@@ -10,7 +10,7 @@ extern "C" {
 
 #define DEF_EXSRAM_STA_ADDR    (0x100000u)
 #define DEF_EXSRAM_END_ADDR    (0x17FFFFu)
-#define DEF_EXSRAM_SIZE        (0x080000u)	//512K Word
+#define DEF_EXSRAM_SIZE        (0x000100u)//(0x080000u)	//512K Word
 
 BOOL Bsp_SramSelfTest(void);
 void Bsp_SramInit(void);

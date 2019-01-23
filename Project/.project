@@ -71,6 +71,11 @@
 			<location>D:/Wangjiangbo/Documents/GitHub/__CCS/Gas_LaserBoard/F2837xD_headers/cmd/F2837xD_Headers_nonBIOS_cpu1.cmd</location>
 		</link>
 		<link>
+			<name>Sources_App/App_Device.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Sources_App/App_Device.c</locationURI>
+		</link>
+		<link>
 			<name>Sources_App/App_Main.c</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/Sources_App/App_Main.c</locationURI>

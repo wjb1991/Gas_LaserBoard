@@ -16,7 +16,7 @@ extern  "C" {                                  /* See Note #1.                  
 #include "Mod_StdbusMaster.h"
 #include "Mod_StdbusSlave.h"
 
-
+#include "App_Device.h"
 
 #ifdef __cplusplus
 }                                              /* End of 'extern'al C lang linkage.                    */

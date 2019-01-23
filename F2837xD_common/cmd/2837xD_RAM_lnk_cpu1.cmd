@@ -48,6 +48,7 @@ PAGE 1 :
 
    CANA_MSG_RAM     : origin = 0x049000, length = 0x000800
    CANB_MSG_RAM     : origin = 0x04B000, length = 0x000800
+   EXSRAM	  	    : origin = 0x100000, length = 0x080000
 }
 
 
@@ -65,9 +66,6 @@ SECTIONS
    .econst           : > RAMLS0_4,    PAGE = 1												//程序常量
    .esysmem          : > RAMLS5,    PAGE = 1												//程序堆
    Filter_RegsFile   : > RAMGS0,	   PAGE = 1
-
-   ramgs0            : > RAMGS0,    PAGE = 1
-   ramgs1            : > RAMGS1,    PAGE = 1
 
 #ifdef __TI_COMPILER_VERSION__
    #if __TI_COMPILER_VERSION__ >= 15009000
@@ -91,6 +89,8 @@ SECTIONS
         GETWRITEIDX :  TYPE = DSECT
         PUTREADIDX :   TYPE = DSECT
     }
+
+   Exsram            : > EXSRAM,     PAGE = 1
 
     /* The following section definition are for SDFM examples */
    //Filter1_RegsFile : > RAMGS1,	PAGE = 1, fill=0x1111

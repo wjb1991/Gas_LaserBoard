@@ -63,9 +63,9 @@ struct tUSBHSPEInstance
 
     uint32_t ui32EP6InPipe;
 
-    uint8_t     bMux;          //互斥锁
-    uint8_t     bSem;       //接受信号量
-    uint16_t    uiTimeCnt;    //超时计时
+    uint8_t     bMux;           //互斥锁
+    uint8_t     bSem;           //接受信号量
+    uint16_t    uiTimeCnt;      //超时计时
 };
 
 //*****************************************************************************

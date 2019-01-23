@@ -27,21 +27,7 @@ int main(void)
     InitPieVectTable();
 
     // Step 4. Initialize the Device Peripherals:
-    Bsp_Init();
-
-    Mod_StdbusInit(&st_StdbusHost,0x20);
-    Mod_StdbusSlaveInit();
-    Mod_StdbusMasterInit();
-
-    Mod_Usb4000Init();
-    Mod_UsbHostInit();
-
-    TRACE_DBG("==================================================================================\r\n");
-    TRACE_DBG("| 程序名称 | GAS_LASER                                                            \r\n");
-    TRACE_DBG("|----------|----------------------------------------------------------------------\r\n");
-    TRACE_DBG("| 程序版本 | Ver 0.01                                                             \r\n");
-    TRACE_DBG("==================================================================================\r\n");
-
+    App_DeviceInit();
 
     // Step 5. User specific code, enable interrupts:
 
@@ -52,10 +38,7 @@ int main(void)
     // Step 6. IDLE loop. Just sit and loop forever (optional):
     for(;;)
     {
+        App_DevicePoll();
 
-        Mod_UsbHostPoll();
-        Mod_Usb4000Poll();
-        Mod_StdbusSlavePoll();
-        Mod_StdbusMasterPoll();
     }
 }

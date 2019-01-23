@@ -18,10 +18,13 @@ BOOL Bsp_SramSelfTest(void)
 	for(i = 0; i < DEF_EXSRAM_SIZE; i++)
 	{
 		puin_addr[i] = (INT16U)(i % 65000);
+        TRACE_DBG("Ð´Èë puin_addr[%d] = 0x%x\r\n",i,(INT16U)(i % 65000));
 	}
 
 	for(i = 0; i < DEF_EXSRAM_SIZE; i++)
 	{
+
+        TRACE_DBG("¶ÁÈ¡ puin_addr[%d] = 0x%x\r\n",i,puin_addr[i]);
 		if (puin_addr[i] != (INT16U)(i % 65000))
 			return FALSE;
 	}
@@ -70,17 +73,17 @@ void Bsp_SramInit(void)
 														  // Interface
 								 EMIF_ASYNC_TA_4        | // Turn Around time
 														  // of 2 Emif Clock
-								 EMIF_ASYNC_RHOLD_8     | // Read Hold time
+								 EMIF_ASYNC_RHOLD_1     | // Read Hold time
 														  // of 1 Emif Clock
-								 EMIF_ASYNC_RSTROBE_32   | // Read Strobe time
+								 EMIF_ASYNC_RSTROBE_2   | // Read Strobe time
 														  // of 4 Emif Clock
-								 EMIF_ASYNC_RSETUP_8    | // Read Setup time
+								 EMIF_ASYNC_RSETUP_1    | // Read Setup time
 														  // of 1 Emif Clock
-								 EMIF_ASYNC_WHOLD_8     | // Write Hold time
+								 EMIF_ASYNC_WHOLD_1     | // Write Hold time
 														  // of 1 Emif Clock
-								 EMIF_ASYNC_WSTROBE_32   | // Write Strobe time
+								 EMIF_ASYNC_WSTROBE_2   | // Write Strobe time
 														  // of 1 Emif Clock
-								 EMIF_ASYNC_WSETUP_8    | // Write Setup time
+								 EMIF_ASYNC_WSETUP_1    | // Write Setup time
 														  // of 1 Emif Clock
 								 EMIF_ASYNC_EW_DISABLE  | // Extended Wait
 														  // Disable.

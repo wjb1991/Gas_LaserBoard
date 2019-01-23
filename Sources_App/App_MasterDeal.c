@@ -77,7 +77,7 @@ BOOL App_StdbusMasterDealFram(StdbusFram_t* pst_Fram)
         if(pst_Fram->uch_SubCmd == e_StdbusReadCmd)
         {
             //¶ÁÃüÁî
-            pst_Fram->uin_PayLoadLenth = strlen(st_Usb4000.auc_SerialNumber);
+            pst_Fram->uin_PayLoadLenth = strlen((const char*)st_Usb4000.auc_SerialNumber);
             memcpy(&pst_Fram->puc_PayLoad[0],st_Usb4000.auc_SerialNumber,pst_Fram->uin_PayLoadLenth);
             res = TRUE;    //Ó¦´ð
 

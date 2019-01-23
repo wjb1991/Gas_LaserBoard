@@ -11,7 +11,7 @@
 extern "C" {
 #endif
 
-FP64 Bsp_AD5546HexToVolt(INT16U hex);
+FP32 Bsp_AD5546HexToVolt(INT16U hex);
 
 INT16U Bsp_AD5546VoltToHex(FP64 volt);
 
