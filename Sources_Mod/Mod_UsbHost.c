@@ -242,16 +242,16 @@ BOOL Mod_UsbHostPoll(void)
 
 void USBHConnectTimeOut(void* timer)
 {
-/*
+
     Bsp_UsbPow(eUsbPowOff);
-    USBHOST_DBG("USBHOST_DBG:   没有检测到USB设备 重启USB\r\n");
-    Bsp_DelayMs(3000);
+    //USBHOST_DBG("USBHOST_DBG:   没有检测到USB设备 重启USB\r\n");
+    //Bsp_DelayMs(3000);
     Bsp_UsbPow(eUsbPowOn);
-    USBHOST_DBG("USBHOST_DBG:   开启USB电源\r\n");
+    //USBHOST_DBG("USBHOST_DBG:   开启USB电源\r\n");
 
-    Bsp_DelayMs(3000);
-    USBHOST_DBG("USBHOST_DBG:   重启USB完成\r\n");
+    //Bsp_DelayMs(3000);
+    //USBHOST_DBG("USBHOST_DBG:   重启USB完成\r\n");
 
-    USBHCDReset(0);*/
+    //USBHCDReset(0);
 }
 

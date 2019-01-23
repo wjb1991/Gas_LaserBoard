@@ -55,7 +55,7 @@ int main(void)
 
         Mod_UsbHostPoll();
         Mod_Usb4000Poll();
-        //Mod_StdbusSlavePoll();
-        //Mod_StdbusMasterPoll();
+        Mod_StdbusSlavePoll();
+        Mod_StdbusMasterPoll();
     }
 }
