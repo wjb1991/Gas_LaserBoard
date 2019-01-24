@@ -90,12 +90,13 @@ SECTIONS
    .cinit              : > FLASHB      PAGE = 0, ALIGN(4)
    .pinit              : > FLASHB,     PAGE = 0, ALIGN(4)
    .text               : >> FLASHB | FLASHC | FLASHD | FLASHE      PAGE = 0, ALIGN(4)
+   .cio                : > FLASHF,     PAGE = 0
    codestart           : > BEGIN       PAGE = 0, ALIGN(4)
 
    /* Allocate uninitalized data sections: */
-   .stack              : > RAMM1        			PAGE = 1
+   .stack              : > RAMD0        			PAGE = 0	//RAMM1
    .ebss               : >> RAMLS0_5 | RAMGS0       PAGE = 1
-   .esysmem            : > RAMLS0_5       			PAGE = 1
+   .esysmem             : > RAMD1       			PAGE = 1
 
    /* Initalized sections go in Flash */
    .econst             : >> FLASHF | FLASHG | FLASHH      PAGE = 0, ALIGN(4)
@@ -107,7 +108,7 @@ SECTIONS
 #ifdef __TI_COMPILER_VERSION__
 	#if __TI_COMPILER_VERSION__ >= 15009000
 	.TI.ramfunc : {} LOAD = FLASHD,
-						 RUN = RAMD0,
+						 RUN = RAMM0,
                          LOAD_START(_RamfuncsLoadStart),
                          LOAD_SIZE(_RamfuncsLoadSize),
                          LOAD_END(_RamfuncsLoadEnd),
@@ -117,7 +118,7 @@ SECTIONS
 						 PAGE = 0, ALIGN(4)
 	#else
    ramfuncs            : LOAD = FLASHD,
-                         RUN = RAMD0,
+                         RUN = RAMM0,
                          LOAD_START(_RamfuncsLoadStart),
                          LOAD_SIZE(_RamfuncsLoadSize),
                          LOAD_END(_RamfuncsLoadEnd),

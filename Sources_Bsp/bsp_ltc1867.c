@@ -1,4 +1,4 @@
-#include "bsp_ltc1867.h"
+#include "Bsp.h"
 
 typedef enum {
     eLtc1867CH0 = 0x8400,
@@ -57,14 +57,14 @@ INT16U Bsp_Ltc1867SampleOne(INT16U ch)
     Bsp_Ltc1867Cs(0);
 
     chnnel = Bsp_Ltc1866Chnnel(ch);
-    Bsp_DelayUS(0.5);
+    Bsp_DelayUs(0.5);
     Bsp_IntDis();
     msb = Bsp_SpibWriteByte(chnnel >> 8);
     lsb = Bsp_SpibWriteByte(chnnel & 0x00ff);
     Bsp_IntEn();
-    Bsp_DelayUS(0.5);
+    Bsp_DelayUs(0.5);
     Bsp_Ltc1867Cs(1);
-    Bsp_DelayUS(3.5);
+    Bsp_DelayUs(3.5);
     return ((msb << 8) | lsb);
 }
 

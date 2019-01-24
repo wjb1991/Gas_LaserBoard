@@ -64,6 +64,7 @@ extern  "C" {                                  /* See Note #1.                  
 #include  "Bsp_Timer.h"
 #include  "Bsp_Usart.h"
 #include  "Bsp_Dma.h"
+#include  "Bsp_Adc.h"
 
 
 
@@ -97,7 +98,7 @@ void Bsp_Init(void);
 
 #define	 Bsp_Printf		Bsp_UartPrintf
 
-#define	 TRACE_DBG 	    Bsp_Printf
+#define	 TRACE_DBG 	    Bsp_Printf//printf
 
 #ifdef __cplusplus
 }                                              /* End of 'extern'al C lang linkage.                    */

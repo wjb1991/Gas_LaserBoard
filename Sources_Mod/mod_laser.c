@@ -29,7 +29,7 @@ static DoubleBuff_t st_RecvDoubleBuff = {
 Laser_t    st_Laser = {
     eLaserOff,              /* 状态 */
     &st_ModWave,            /* 发送波形结构体 句柄 */
-    //&st_LaserTEC,           /* TEC句柄 */
+    &st_LaserTEC,           /* TEC句柄 */
 };
 
 static void Mod_RiseLevelInit(void* pv_Laser);
@@ -80,9 +80,11 @@ void Mod_LaserEnable(void* pv_Laser)
 
     Bsp_Time0Stop();
     Mod_RiseLevelInit(p);
-    
+
+    Mod_TecEnable(p->pst_Tec,10);
+
     TRACE_DBG("\r\n=========================激光器启动=========================\r\n");
-    
+
     TRACE_DBG("    >>关闭Mos管钳位\r\n");
     Bsp_LaserPR(eLaserPrOff);
   
@@ -112,13 +114,13 @@ void Mod_LaserDisable(void* pv_Laser)
     Bsp_Printf("\r\n=========================激光器关闭=========================\r\n");
     Bsp_Time0Stop();
     
-    Bsp_Printf("    >>设置直流偏置电压为 (100次分段):0.0V \r\n");
+    TRACE_DBG("    >>设置直流偏置电压为 (100次分段):0.0V \r\n");
     Mod_SetDcVolt(0.0);
 
-    Bsp_Printf("    >>关闭激光器电流源...\r\n");
+    TRACE_DBG("    >>关闭激光器电流源...\r\n");
     Bsp_SoftStart(eSofrtStartOff);
 
-    Bsp_Printf("    >>断开激光器保护继电器...\r\n");
+    TRACE_DBG("    >>断开激光器保护继电器...\r\n");
     Bsp_LaserPR(eLaserPrOn);
 }
 
@@ -178,13 +180,13 @@ void DMA_Handle1(void)
     static int j = 0;
     if(j ==0 )
     {
-    j = 1;
-    Bsp_AlarmLed(eLedOff);
+        j = 1;
+        Bsp_AlarmLed(eLedOff);
     }
     else
     {
-    j = 0;
-    Bsp_AlarmLed(eLedOn);
+        j = 0;
+        Bsp_AlarmLed(eLedOn);
     }
 }
 

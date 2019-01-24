@@ -36,7 +36,7 @@ volatile INT16U auin_RecvBuff[DEF_SAMPLEDOT_MAX] = {0};
 
 
 
-struct Wave_t    st_ModWave = {
+Wave_t    st_ModWave = {
     0.025,          /* 正弦波幅值 V */ 
     0.45,           /* 三角波抬升电压 V */
     0.512,          /* 直流偏置电压 V */ 
@@ -81,7 +81,7 @@ BOOL Mod_GenerateModWave(void * pv_Wave)
     FP64 f1 = 0.0,f2 = 0.0,f3 = 0.0, f = 0.0;
     FP64 fdt = 0.0,fpt = 0.0,fw = 0.0;    
     INT16U i;
-    struct Wave_t* p = pv_Wave;
+    Wave_t* p = pv_Wave;
     
     /* 计算采样周期 单位S 1/KHZ*1000 = 1/HZ = S */
     fdt = 1.0 / (p->f_SampleFreq*1000.0);
@@ -157,7 +157,7 @@ BOOL Mod_GenerateModWave(void * pv_Wave)
 //==================================================================================
 BOOL Mod_SetSinVpp(void * pv_Wave,FP32 f_SinVpp,BOOL b_WriteEPROM)
 {
-	struct Wave_t* p = pv_Wave;
+	Wave_t* p = pv_Wave;
     if( p != NULL)
     {
         if(f_SinVpp >= DEF_SINVPP_MIN && f_SinVpp <= DEF_SINVPP_MAX && 
@@ -191,7 +191,7 @@ BOOL Mod_SetSinVpp(void * pv_Wave,FP32 f_SinVpp,BOOL b_WriteEPROM)
 //==================================================================================
 BOOL Mod_SetTrgVpp(void * pv_Wave,FP32 f_TrgVpp,BOOL b_WriteEPROM)
 {
-	struct Wave_t* p = pv_Wave;
+	Wave_t* p = pv_Wave;
     if( p != NULL)
     {
         if(f_TrgVpp >= DEF_TRGVPP_MIN && f_TrgVpp <= DEF_TRGVPP_MAX &&
@@ -225,7 +225,7 @@ BOOL Mod_SetTrgVpp(void * pv_Wave,FP32 f_TrgVpp,BOOL b_WriteEPROM)
 //==================================================================================
 BOOL Mod_SetDcOffset(void * pv_Wave,FP32 f_DcOffset,BOOL b_WriteEPROM)
 {
-	struct Wave_t* p = pv_Wave;
+	Wave_t* p = pv_Wave;
     if( p != NULL)
     {
         if(f_DcOffset >= DEF_DCOFFSET_MIN && f_DcOffset <= DEF_DCOFFSET_MAX && 
@@ -259,7 +259,7 @@ BOOL Mod_SetDcOffset(void * pv_Wave,FP32 f_DcOffset,BOOL b_WriteEPROM)
 //==================================================================================
 BOOL Mod_SetSinFreq(void * pv_Wave,FP32 f_SinFreq,BOOL b_WriteEPROM)
 {
-	struct Wave_t* p = pv_Wave;
+	Wave_t* p = pv_Wave;
     if( p != NULL)
     {
         if(f_SinFreq >= DEF_SINFREQ_MIN && f_SinFreq <= DEF_SINFREQ_MAX)
@@ -292,7 +292,7 @@ BOOL Mod_SetSinFreq(void * pv_Wave,FP32 f_SinFreq,BOOL b_WriteEPROM)
 //==================================================================================
 BOOL Mod_SetSampleFreq(void * pv_Wave,FP32 f_SampleFreq,BOOL b_WriteEPROM)
 {
-	struct Wave_t* p = pv_Wave;
+	Wave_t* p = pv_Wave;
     if( p != NULL)
     {
         if(f_SampleFreq >= DEF_SAMPLEFREQ_MIN && f_SampleFreq <= DEF_SAMPLEFREQ_MAX)
@@ -325,7 +325,7 @@ BOOL Mod_SetSampleFreq(void * pv_Wave,FP32 f_SampleFreq,BOOL b_WriteEPROM)
 //==================================================================================
 BOOL Mod_SetSampleDot(void * pv_Wave,INT16U uin_SampleDot,BOOL b_WriteEPROM)
 {
-	struct Wave_t* p = pv_Wave;
+	Wave_t* p = pv_Wave;
     if( p != NULL)
     {
         if(uin_SampleDot >= DEF_SAMPLEDOT_MIN && uin_SampleDot <= DEF_SAMPLEDOT_MAX)

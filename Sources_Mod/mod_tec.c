@@ -7,11 +7,11 @@
 //|----------|----------------------------------------------------------------------
 //| 返回参数 | 无
 //==================================================================================
-#include "mod_tec.h"
+#include "App_Include.h"
 
 Tec_t st_LaserTEC = {
-    25.0,               /* 设置温度 */
-    1.25,               /* 温控电压 */
+    34.5,               /* 设置温度 */
+    0.986,              /* 温控电压 */
     25.0,               /* 反馈的实际温度 */
     &st_LaserTemper,    /* 温度句柄 */
     FALSE,              /* 开启状态 */
@@ -39,10 +39,10 @@ BOOL Mod_TecSetVolt(Tec_t* pst_Tec, FP32 f_CtrlVolt)
         pst_Tec->f_SetCtrlVolt = f_CtrlVolt;
         pst_Tec->f_SetTemper = Mod_CalTemper(pst_Tec->pst_Temper,pst_Tec->f_SetCtrlVolt);
 
-        if(SaveToEeprom((INT32U)&pst_Tec->f_SetCtrlVolt) != TRUE)
-            return FALSE;
+        //if(SaveToEeprom((INT32U)&pst_Tec->f_SetCtrlVolt) != TRUE)
+        //    return FALSE;
 
-        Bsp_Printf("    >>TEC温控电压设置为:%.4fV(%.4f℃)\r\n",pst_Tec->f_SetCtrlVolt,pst_Tec->f_SetTemper);
+        TRACE_DBG("    >>TEC温控电压设置为:%.4fV(%.4f℃)\r\n",pst_Tec->f_SetCtrlVolt,pst_Tec->f_SetTemper);
         Bsp_AD5663Set(eAD5563_CHB, Bsp_AD5663CHBVoltToHex(pst_Tec->f_SetCtrlVolt));
         return TRUE;
     }
@@ -64,43 +64,43 @@ BOOL Mod_TecSetVolt(Tec_t* pst_Tec, FP32 f_CtrlVolt)
 BOOL Mod_TecEnable(Tec_t* pst_Tec, INT16S uin_TimeOut)
 {
     INT16U  i = 0;
-    Bsp_Printf("\r\n===========================TEC启动==========================\r\n");
-    Bsp_Printf("    >>设置TEC温控电压\r\n");
+    TRACE_DBG("\r\n===========================TEC启动==========================\r\n");
+    TRACE_DBG("    >>设置TEC温控电压\r\n");
     Mod_TecSetVolt(pst_Tec,pst_Tec->f_SetCtrlVolt);
-    Bsp_Printf("    >>启动TEC\r\n");
+    TRACE_DBG("    >>启动TEC\r\n");
     pst_Tec->cb_TecOps(eTecEnable);
     
     if(uin_TimeOut == -1)
     {
-        Bsp_Printf("    >>TEC等待到达设定温度\r\n");
+        TRACE_DBG("    >>TEC等待到达设定温度\r\n");
         while(1)
         {
             Bsp_DelayMs(1000);
             pst_Tec->f_FbTemper = Mod_GetTemper(pst_Tec->pst_Temper);
-            Bsp_Printf("    >>第%u秒TEC温度:%.4f\r\n",i,pst_Tec->f_FbTemper);
+            TRACE_DBG("    >>第%u秒TEC温度:%.4f\r\n",i,pst_Tec->f_FbTemper);
             if(abs(pst_Tec->f_FbTemper - pst_Tec->f_SetTemper) <= 1.0)
             {
-                Bsp_Printf("    >>TEC到达设定温度\r\n");
+                TRACE_DBG("    >>TEC到达设定温度\r\n");
                 return TRUE;
             }
         }
     }
     else
     {
-        Bsp_Printf("    >>TEC等待到达设定温度\r\n");
+        TRACE_DBG("    >>TEC等待到达设定温度\r\n");
         for(i =0; i < uin_TimeOut; i++)
         {
             Bsp_DelayMs(1000);
             pst_Tec->f_FbTemper = Mod_GetTemper(pst_Tec->pst_Temper);
-            Bsp_Printf("    >>第%u秒TEC温度:%.4f\r\n",i,pst_Tec->f_FbTemper);
+            TRACE_DBG("    >>第%u秒TEC温度:%.4f\r\n",i,pst_Tec->f_FbTemper);
             /* 到达设定温度 */
             if(abs(pst_Tec->f_FbTemper - pst_Tec->f_SetTemper) <= 1.0)
             {
-                Bsp_Printf("    >>TEC到达设定温度\r\n");
+                TRACE_DBG("    >>TEC到达设定温度\r\n");
                 return TRUE;
             }
         }
-        Bsp_Printf("    >>TEC等待温度超时\r\n");        
+        TRACE_DBG("    >>TEC等待温度超时\r\n");
     }
 
     return FALSE;

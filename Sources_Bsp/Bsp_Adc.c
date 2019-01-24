@@ -20,7 +20,7 @@ void Bsp_AdcInit(void)
 	AdcbRegs.ADCCTL1.bit.ADCPWDNZ = 1;
 	AdccRegs.ADCCTL1.bit.ADCPWDNZ = 1;
 	//delay for 1ms to allow ADC time to power up
-	Bsp_DelayUS(1000);
+	Bsp_DelayUs(1000);
 
 	EDIS;
 }

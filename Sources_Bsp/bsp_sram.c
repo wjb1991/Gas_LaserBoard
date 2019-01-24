@@ -230,7 +230,7 @@ __STATIC_INLINE void HAL_SRAM_MspInit(void)
             GPIO_SetupPinOptions(i,0,0x31); // GPIO_ASYNC||GPIO_PULLUP
         }
     }
-
+/*
     for (i=28; i<=52; i++)
     {
         if ((i != 29) &&(i != 30) &&(i != 33) && (i != 42) && (i != 43))
@@ -245,7 +245,7 @@ __STATIC_INLINE void HAL_SRAM_MspInit(void)
         {
             GPIO_SetupPinOptions(i,0,0x31); // GPIO_ASYNC||GPIO_PULLUP
         }
-    }
+    }*/
 }
 
 

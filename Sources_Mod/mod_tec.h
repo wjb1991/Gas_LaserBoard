@@ -10,15 +10,12 @@
 #ifndef __MOD_TEC_H__
 #define __MOD_TEC_H__
 
-#include "mod_include.h"
 
 #define   DEF_TECVOLT_MAX   (2.0)
 #define   DEF_TECVOLT_MIN   (0.5)
 
 
-typedef struct __Temperature Temper_t;
-
-typedef struct __TEC {
+typedef struct {
     FP32        f_SetTemper;    /* 设置温度 */
     FP32        f_SetCtrlVolt;  /* 温控电压 */
     FP32        f_FbTemper;     /* 反馈的实际温度 */

@@ -20,6 +20,8 @@ void  Bsp_Init (void)
     Bsp_GpioInit();
     Bsp_SramInit();
     Bsp_SpibInit();       // init SPI
+    Bsp_AdcInit();
+
 
     Bsp_AD5546Init();   //²¢¿ÚDAC
     Bsp_AD5663Init();   //SPI DAC

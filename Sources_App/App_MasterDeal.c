@@ -46,7 +46,7 @@ ComTemp_t un_Temp;
 
 BOOL App_StdbusMasterDealFram(StdbusFram_t* pst_Fram)
 {
-    INT32U i;
+    INT16U i;
     BOOL res = FALSE;
     switch(pst_Fram->uch_Cmd)
     {

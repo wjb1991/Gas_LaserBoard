@@ -10,7 +10,6 @@
 #ifndef __MOD_TEMPERATURE_H__
 #define __MOD_TEMPERATURE_H__
 
-#include "mod_include.h"
 
 typedef struct __Temperature {
     const FP32* pf_Volt;            /* 拟合电压数据 */

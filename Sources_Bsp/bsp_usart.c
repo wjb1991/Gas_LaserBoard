@@ -15,6 +15,8 @@
 
 static INT8U    auch_RxBuff[4][DEF_UART_BUFF_SIZE] = {0};
 static INT8U 	auch_PrintfBuff[100] = {0};
+
+
 /**/
 Dev_SerialPort COM1 = {(const INT8S*)"COM1",                              //¶Ë¿ÚÃû
                         DEF_UART_CONFIG,                    //Ä¬ÈÏÅäÖÃ
@@ -632,6 +634,13 @@ int fputc(int ch, FILE *f)
     
     //while (!LL_USART_IsActiveFlag_TC(USART2)){}
     //LL_USART_ClearFlag_TC(USART2);
+    Dev_SerialPort* p = &COM1;
+    if(p == &COM1)
+    {
+        Bsp_Rs485de(eRs485Trans);
+    }
+    Bsp_PutChar(p, ch);
+
     return ch;
 }
 

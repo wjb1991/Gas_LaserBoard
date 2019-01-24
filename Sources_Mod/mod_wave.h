@@ -30,7 +30,7 @@
 
 #define		 DEF_WAVE_MAX		 (2)
 
-struct Wave_t {
+typedef struct {
     /* public */
     FP32    f_SinVpp;           /* 正弦波幅值 V */ 
     FP32    f_TrgVpp;           /* 三角波抬升电压 V */ 
@@ -57,9 +57,9 @@ struct Wave_t {
 
 
     volatile INT16U* puin_RecvBuff;      /* 接受波形 */
-};
+}Wave_t;
 
-extern struct Wave_t    st_ModWave;
+extern Wave_t    st_ModWave;
 
 extern BOOL Mod_GenerateModWave(void * pv_Wave);
 extern BOOL Mod_SetSinVpp(void * pv_Wave,FP32 f_SinVpp,BOOL b_WriteEPROM);
