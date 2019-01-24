@@ -351,6 +351,16 @@
 			<locationURI>PARENT-1-PROJECT_LOC/Sources_Mod/Mod_CRC16.c</locationURI>
 		</link>
 		<link>
+			<name>Sources_Mod/Mod_Doublebuff.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Sources_Mod/Mod_Doublebuff.c</locationURI>
+		</link>
+		<link>
+			<name>Sources_Mod/Mod_Laser.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Sources_Mod/Mod_Laser.c</locationURI>
+		</link>
+		<link>
 			<name>Sources_Mod/Mod_StdbusCode.c</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/Sources_Mod/Mod_StdbusCode.c</locationURI>
@@ -374,6 +384,11 @@
 			<name>Sources_Mod/Mod_UsbHost.c</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/Sources_Mod/Mod_USBHost.c</locationURI>
+		</link>
+		<link>
+			<name>Sources_Mod/Mod_Wave.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Sources_Mod/Mod_Wave.c</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>

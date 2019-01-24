@@ -7,6 +7,7 @@ extern  "C" {                                  /* See Note #1.                  
 
 #include "Bsp.h"
 
+#include "Mod_DoubleBuff.h"
 
 #include "Mod_Usb4000.h"
 #include "Mod_UsbHost.h"
@@ -15,6 +16,10 @@ extern  "C" {                                  /* See Note #1.                  
 #include "Mod_StdbusCode.h"
 #include "Mod_StdbusMaster.h"
 #include "Mod_StdbusSlave.h"
+
+#include "Mod_Wave.h"
+#include "Mod_Laser.h"
+
 
 #include "App_Device.h"
 

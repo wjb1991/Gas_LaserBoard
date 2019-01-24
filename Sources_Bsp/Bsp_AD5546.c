@@ -30,7 +30,7 @@ INT16U Bsp_AD5546VoltToHex(FP64 volt)
 	INT16U res = 0;
 	if(volt < 0)
 	{
-		res = (INT16U)((volt / DEF_AD5546_REF_VOLTA * 65535) * DEF_AD5546_SCALE);
+		res = (INT16U)((volt / DEF_AD5546_REF_VOLTA * 65535.0) * DEF_AD5546_SCALE);
 	}
 	else
 		res = 0;

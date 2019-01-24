@@ -7,13 +7,13 @@
 //|----------|----------------------------------------------------------------------
 //| 返回参数 | 无
 //==================================================================================
-#include "mod_laser.h"
+#include "App_Include.h"
 
-
+#if 0
 #ifdef __cplusplus
 #pragma DATA_SECTION("exsram")
 #else
-#pragma DATA_SECTION(auin_DoubleRecvBuff,"exsram");
+#pragma DATA_SECTION(auin_DoubleRecvBuff,"Exsram");
 #endif
 volatile INT16U auin_DoubleRecvBuff[2][DEF_SAMPLEDOT_MAX] = {0};    //
 
@@ -23,12 +23,13 @@ static DoubleBuff_t st_RecvDoubleBuff = {
     (void*)auin_DoubleRecvBuff[0],        /* 1接受缓冲区 乒乓切换 */
     (void*)auin_DoubleRecvBuff[1],        /* 处理缓冲区 乒乓切换 */
 };
+#endif
+
 
 Laser_t    st_Laser = {
     eLaserOff,              /* 状态 */
-    &st_Wave,               /* 发送波形结构体 句柄 */
-    &st_RecvDoubleBuff,
-    &st_LaserTEC,           /* TEC句柄 */
+    &st_ModWave,            /* 发送波形结构体 句柄 */
+    //&st_LaserTEC,           /* TEC句柄 */
 };
 
 static void Mod_RiseLevelInit(void* pv_Laser);
@@ -80,18 +81,18 @@ void Mod_LaserEnable(void* pv_Laser)
     Bsp_Time0Stop();
     Mod_RiseLevelInit(p);
     
-    Bsp_Printf("\r\n=========================激光器启动=========================\r\n");
+    TRACE_DBG("\r\n=========================激光器启动=========================\r\n");
     
-    Bsp_Printf("    >>关闭Mos管钳位\r\n");
+    TRACE_DBG("    >>关闭Mos管钳位\r\n");
     Bsp_LaserPR(eLaserPrOff);
   
-    Bsp_Printf("    >>软启动激光器电源\r\n");
+    TRACE_DBG("    >>软启动激光器电源\r\n");
     Bsp_SoftStart(eSofrtStartOn);
     
-    Bsp_Printf("    >>设置直流偏置电压(100次分段)\r\n");
+    TRACE_DBG("    >>设置直流偏置电压(100次分段)\r\n");
     Mod_SetDcVolt(p->pst_Wave->f_HwDcOffset);
 
-    Bsp_Printf("    >>启动定时器开启DMA输出\r\n");
+    TRACE_DBG("    >>启动定时器开启DMA输出\r\n");
     Bsp_Time0Start();
 }
 
@@ -203,25 +204,28 @@ void Mod_RiseLevelInit(void* pv_Laser)
     Laser_t* p = pv_Laser;
     //对应老程序TimeA
     p->e_State = eLaserRise;
-    Bsp_Dma1Init((void*)DEF_AD7622ADDR,
-         p->pst_DoubleRecvBuff->pv_UseBuff,         //接受到使用缓冲区
-         0,
-         1,
-         p->pst_Wave->uin_RiseDot);                 //先AD
 
-    Bsp_Dma2Init((void*)p->pst_Wave->puin_RiseBuff,
+    Bsp_Dma1Init((void*)p->pst_Wave->puin_RiseBuff,
         (void*)DEF_AD5546ADDR,
          1,
          0,
-         p->pst_Wave->uin_RiseDot);                        //后DA
+         p->pst_Wave->uin_RiseDot);                 //先DA
 
-    Bsp_Dma1HookRegister(&DMA_Handle1);
+    Bsp_Dma2Init((void*)DEF_AD7622ADDR,
+         (void*)p->pst_Wave->puin_RecvBuff,         //接受到使用缓冲区
+         0,
+         1,
+         p->pst_Wave->uin_RiseDot);                 //后AD
+
+
+    Bsp_Dma1HookRegister(&DMA_Handle);
     Bsp_Dma1IntEnable();
-    Bsp_Dma2HookRegister(&DMA_Handle);
-    Bsp_Dma2IntEnable();
 
+    Bsp_Dma2HookRegister(&DMA_Handle1);
+    Bsp_Dma2IntEnable();
     Bsp_Dma1Start();
     Bsp_Dma2Start();
+
 }
 
 //==================================================================================
@@ -237,25 +241,26 @@ void Mod_RiseLevelInit(void* pv_Laser)
 //==================================================================================
 void Mod_HigtLevelInit(void* pv_Laser)
 {
+    Bsp_Dma2Stop();                                 //关闭AD接受
+
     Laser_t* p = pv_Laser;
     //对应老程序TimeB
     p->e_State = eLaserHigh;
-    Bsp_Dma2Init((void*)&p->pst_Wave->puin_RiseBuff[p->pst_Wave->uin_RiseDot-1],      //最后一个点 维持低电平
+    Bsp_Dma1Init((void*)&p->pst_Wave->puin_RiseBuff[p->pst_Wave->uin_RiseDot-1],      //最后一个点 维持低电平
          (void*)DEF_AD5546ADDR,
          0,
          0,
          p->pst_Wave->uin_HigtDot);        //后DA
 
-    Bsp_Dma2HookRegister(&DMA_Handle);              //注册DMA2回调函数  
-    Bsp_Dma2IntEnable();                            //开启DMA2
+    Bsp_Dma1HookRegister(&DMA_Handle);             //注册DMA1回调函数
+    Bsp_Dma1IntEnable();                            //开启DMA1
 
-    Bsp_Dma1Stop();                                 //关闭AD接受
-    Bsp_Dma2Start();                                //开启DA
+    Bsp_Dma1Start();                                //开启DA
     
     /* 切换缓冲区 */
-    Mod_SwitchBuff(p->pst_DoubleRecvBuff);
+    //Mod_SwitchBuff(p->pst_DoubleRecvBuff);
     /*  发送到数据处理程序中 */
-    //p->pst_DoubleRecvBuff->pv_IdleBuff
+
 }
 //==================================================================================
 //| 函数名称 | Mod_FallLevelInit
@@ -273,17 +278,17 @@ void Mod_FallLevelInit(void* pv_Laser)
     Laser_t* p = pv_Laser;
     //对应老程序TimeC
     p->e_State = eLaserFall;
-    Bsp_Dma2Init((void*)p->pst_Wave->puin_FallBuff,
+    Bsp_Dma1Init((void*)p->pst_Wave->puin_FallBuff,
          (void*)DEF_AD5546ADDR,
          1,
          0,
          p->pst_Wave->uin_FallDot);        //后DA
 
-    Bsp_Dma2HookRegister(&DMA_Handle);              //注册DMA2回调函数  
-    Bsp_Dma2IntEnable();                            //开启DMA2
+    Bsp_Dma1HookRegister(&DMA_Handle);              //注册DMA2回调函数
+    Bsp_Dma1IntEnable();                            //开启DMA2
 
-    Bsp_Dma1Stop();                                 //关闭AD接受
-    Bsp_Dma2Start();                                //开启DA
+    Bsp_Dma1Start();                                //开启DA
+    Bsp_Dma2Stop();                                 //关闭AD接受
 }
 
 //==================================================================================
@@ -302,15 +307,15 @@ void Mod_LowLevelInit(void* pv_Laser)
     Laser_t* p = pv_Laser;
     //对应老程序TimeD
     p->e_State = eLaserLow;
-    Bsp_Dma2Init((void*)&p->pst_Wave->puin_RiseBuff[0],   //第一个点 维持低电平
+    Bsp_Dma1Init((void*)&p->pst_Wave->puin_RiseBuff[0],   //第一个点 维持低电平
          (void*)DEF_AD5546ADDR,
          0,
          0,
          p->pst_Wave->uin_LowDot);        //后DA
 
-    Bsp_Dma2HookRegister(&DMA_Handle);              //注册DMA2回调函数  
-    Bsp_Dma2IntEnable();                            //开启DMA2
+    Bsp_Dma1HookRegister(&DMA_Handle);              //注册DMA2回调函数
+    Bsp_Dma1IntEnable();                            //开启DMA2
 
-    Bsp_Dma1Stop();                                 //关闭AD接受
-    Bsp_Dma2Start();                                //开启DA
+    Bsp_Dma1Start();                                //开启DA
+    Bsp_Dma2Stop();                                 //关闭AD接受
 }

@@ -78,7 +78,7 @@ PAGE 1 : /* Data Memory */
 
    RAMGS0          : origin = 0x00C000, length = 0x010000	  // 全局RAM
 
-   EXSRAM	  	   : origin = 0x100000, length = 0x080000	  // 外扩RAM
+   EXSRAM	  	   : origin = 0x100000, length = 0x020000	  // 外扩RAM
 
    CPU2TOCPU1RAM   : origin = 0x03F800, length = 0x000400
    CPU1TOCPU2RAM   : origin = 0x03FC00, length = 0x000400

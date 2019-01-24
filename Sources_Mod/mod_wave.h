@@ -10,7 +10,7 @@
 #ifndef __MOD_WAVE_H__
 #define __MOD_WAVE_H__
 
-#include "mod_include.h"
+#include "App_Include.h"
 
 #define     DEF_SINVPP_MIN      (0.0)
 #define     DEF_SINVPP_MAX      (0.1)
@@ -21,14 +21,14 @@
 #define     DEF_SINFREQ_MIN     (1.0)
 #define     DEF_SINFREQ_MAX     (20.0)
 #define     DEF_SAMPLEFREQ_MIN  (100.0)
-#define     DEF_SAMPLEFREQ_MAX  (500.0)
+#define     DEF_SAMPLEFREQ_MAX  (750.0)
 #define     DEF_SAMPLEDOT_MIN   (1000)
-#define     DEF_SAMPLEDOT_MAX   (30000)
+#define     DEF_SAMPLEDOT_MAX   (20000)
 
-#define		DEF_FALLDOT_MIN		(400)
-#define		DEF_FALLDOT_MAX		(10000)
+#define		 DEF_FALLDOT_MIN	 (400)
+#define		 DEF_FALLDOT_MAX	 (500)
 
-#define		DEF_WAVE_MAX		(2)
+#define		 DEF_WAVE_MAX		 (2)
 
 struct Wave_t {
     /* public */
@@ -54,11 +54,14 @@ struct Wave_t {
     volatile INT16U* puin_FallBuff;      /* 下降区段的数据缓冲 */
     
     FP32    f_HwDcOffset;       /* 硬件直流偏置电压 */    
+
+
+    volatile INT16U* puin_RecvBuff;      /* 接受波形 */
 };
 
-extern struct Wave_t    st_Wave;
+extern struct Wave_t    st_ModWave;
 
-extern BOOL Mod_GenerateWave(void * pv_Wave);
+extern BOOL Mod_GenerateModWave(void * pv_Wave);
 extern BOOL Mod_SetSinVpp(void * pv_Wave,FP32 f_SinVpp,BOOL b_WriteEPROM);
 extern BOOL Mod_SetTrgVpp(void * pv_Wave,FP32 f_TrgVpp,BOOL b_WriteEPROM);
 extern BOOL Mod_SetDcOffset(void * pv_Wave,FP32 f_DcOffset,BOOL b_WriteEPROM);

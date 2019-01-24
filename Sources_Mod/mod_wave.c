@@ -7,35 +7,47 @@
 //|----------|----------------------------------------------------------------------
 //| 返回参数 | 无
 //==================================================================================
-#include "mod_wave.h"
+#include "App_Include.h"
 
+/*********************************
+ * 发送接受缓冲区 大数组定义
+ *********************************/
 
 #ifdef __cplusplus
-#pragma DATA_SECTION("exsram")
+#pragma DATA_SECTION("Exsram")
 #else
-#pragma DATA_SECTION(auin_RiseBuff,"exsram");
+//#pragma DATA_SECTION(auin_RiseBuff,"Exsram");
 #endif
 volatile INT16U auin_RiseBuff[DEF_SAMPLEDOT_MAX] = {0};	//
 
 #ifdef __cplusplus
-#pragma DATA_SECTION("exsram")
+#pragma DATA_SECTION("Exsram")
 #else
-#pragma DATA_SECTION(auin_FallBuff,"exsram");
+//#pragma DATA_SECTION(auin_FallBuff,"Exsram");
 #endif
-volatile INT16U auin_FallBuff[10000]={0};
+volatile INT16U auin_FallBuff[DEF_FALLDOT_MAX]={0};
 
-struct Wave_t    st_Wave = {
+#ifdef __cplusplus
+#pragma DATA_SECTION("Exsram")
+#else
+//#pragma DATA_SECTION(auin_RecvBuff,"Exsram");
+#endif
+volatile INT16U auin_RecvBuff[DEF_SAMPLEDOT_MAX] = {0};
+
+
+
+struct Wave_t    st_ModWave = {
     0.025,          /* 正弦波幅值 V */ 
-    0.45,          /* 三角波抬升电压 V */
+    0.45,           /* 三角波抬升电压 V */
     0.512,          /* 直流偏置电压 V */ 
     
     10.0,           /* 正弦波频率 KHZ */
-    200.0,          /* 采样频率 KHZ */
+    500.0,          /* 采样频率 KHZ */
     10000.0,        /* 采样点数 */
     
     0.0,            /* 上升沿持续时间 Ms*/    
-    10.0,           /* 高电平持续时间 Ms*/    
-    5.0,           /* 下降沿持续时间 Ms*/
+    4.0,            /* 高电平持续时间 Ms*/
+    1.0,            /* 下降沿持续时间 Ms*/
     10.0,           /* 低电平持续时间 Ms*/
     
     0.0,            /* 每个点的间隔时间 US*/
@@ -46,11 +58,13 @@ struct Wave_t    st_Wave = {
     auin_RiseBuff,  /* 上升区段的数据缓冲 */
     auin_FallBuff,  /* 下降区段的数据缓冲 */
     
-    0,              /* 硬件直流偏置电压 */    
+    0,              /* 硬件直流偏置电压 */
+
+    auin_RecvBuff,  /* 接受波形缓冲 */
 };
 
 //==================================================================================
-//| 函数名称 | Mod_GenerateWave
+//| 函数名称 | Mod_GenerateModWave
 //|----------|----------------------------------------------------------------------
 //| 函数功能 | 生成数据波形数据 
 //|----------|----------------------------------------------------------------------
@@ -60,7 +74,7 @@ struct Wave_t    st_Wave = {
 //|----------|----------------------------------------------------------------------
 //| 函数设计 | wjb
 //==================================================================================
-BOOL Mod_GenerateWave(void * pv_Wave)
+BOOL Mod_GenerateModWave(void * pv_Wave)
 {
     FP64 fmax = 0.0;
     FP64 mPI = 3.1415926535897932384626433832795;
@@ -153,8 +167,8 @@ BOOL Mod_SetSinVpp(void * pv_Wave,FP32 f_SinVpp,BOOL b_WriteEPROM)
             
             if(b_WriteEPROM == TRUE)
             {
-                if(SaveToEeprom((INT32U)&p->f_SinVpp) != TRUE)
-                    return FALSE;
+                //if(SaveToEeprom((INT32U)&p->f_SinVpp) != TRUE)
+                //    return FALSE;
             }
             return TRUE;
         }          
@@ -187,8 +201,8 @@ BOOL Mod_SetTrgVpp(void * pv_Wave,FP32 f_TrgVpp,BOOL b_WriteEPROM)
             
             if(b_WriteEPROM == TRUE)
             {
-                if(SaveToEeprom((INT32U)&p->f_TrgVpp) != TRUE)
-                    return FALSE;
+                //if(SaveToEeprom((INT32U)&p->f_TrgVpp) != TRUE)
+                //    return FALSE;
             }
             return TRUE;
         }          
@@ -221,8 +235,8 @@ BOOL Mod_SetDcOffset(void * pv_Wave,FP32 f_DcOffset,BOOL b_WriteEPROM)
             
             if(b_WriteEPROM == TRUE)
             {
-                if(SaveToEeprom((INT32U)&p->f_DcOffset) != TRUE)
-                    return FALSE;
+                //if(SaveToEeprom((INT32U)&p->f_DcOffset) != TRUE)
+                //    return FALSE;
             }
             return TRUE;
         }          
@@ -254,8 +268,8 @@ BOOL Mod_SetSinFreq(void * pv_Wave,FP32 f_SinFreq,BOOL b_WriteEPROM)
             
             if(b_WriteEPROM == TRUE)
             {
-                if(SaveToEeprom((INT32U)&p->f_SinFreq) != TRUE)
-                    return FALSE;
+                //if(SaveToEeprom((INT32U)&p->f_SinFreq) != TRUE)
+                //    return FALSE;
             }
             return TRUE;
         }          
@@ -287,8 +301,8 @@ BOOL Mod_SetSampleFreq(void * pv_Wave,FP32 f_SampleFreq,BOOL b_WriteEPROM)
             
             if(b_WriteEPROM == TRUE)
             {
-                if(SaveToEeprom((INT32U)&p->f_SampleFreq) != TRUE)
-                    return FALSE;
+                //if(SaveToEeprom((INT32U)&p->f_SampleFreq) != TRUE)
+                //    return FALSE;
             }
             return TRUE;
         }          
@@ -320,8 +334,8 @@ BOOL Mod_SetSampleDot(void * pv_Wave,INT16U uin_SampleDot,BOOL b_WriteEPROM)
             
             if(b_WriteEPROM == TRUE)
             {
-                if(SaveToEeprom((INT32U)&p->uin_SampleDot) != TRUE)
-                    return FALSE;
+                //if(SaveToEeprom((INT32U)&p->uin_SampleDot) != TRUE)
+                //    return FALSE;
             }
             return TRUE;
         }          

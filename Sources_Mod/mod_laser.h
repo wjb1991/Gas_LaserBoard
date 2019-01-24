@@ -10,7 +10,6 @@
 #ifndef __MOD_LASER_H__
 #define __MOD_LASER_H__
 
-#include "mod_include.h"
 
 typedef enum {
     eLaserOff,
@@ -31,13 +30,12 @@ typedef struct __TEC Tec_t;
 
 typedef struct __Laser {
     /* public */
-    eLaserState e_State;                /* 状态 */
+    eLaserState e_State;                    /* 状态 */
     
-    struct Wave_t* pst_Wave;            /* 发送波形结构体 句柄 */
+    struct Wave_t* pst_Wave;                /* 发送波形结构体 句柄 */
+
     
-    struct __DoubleBuff * pst_DoubleRecvBuff;
-    
-    Tec_t * pst_Tec;					  /* TEC句柄 */
+    //Tec_t * pst_Tec;					    /* TEC句柄 */
 }Laser_t;
 
 extern Laser_t    st_Laser;

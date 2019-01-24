@@ -29,12 +29,19 @@ typedef enum
     CMD_R_SPE_SPECTRUM,
 }eLasterBoardCmd;
 
+
 typedef union {
 
     INT16U auin_Buff[7296];
     FP32   af_Buff[3648];
 }ComTemp_t;
 
+
+#ifdef __cplusplus
+#pragma DATA_SECTION("Exsram")
+#else
+#pragma DATA_SECTION(un_Temp,"Exsram");
+#endif
 ComTemp_t un_Temp;
 
 BOOL App_StdbusMasterDealFram(StdbusFram_t* pst_Fram)

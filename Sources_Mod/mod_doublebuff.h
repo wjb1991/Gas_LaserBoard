@@ -10,7 +10,6 @@
 #ifndef __MOD_DOUBLEBUFF_H__
 #define __MOD_DOUBLEBUFF_H__
 
-#include "mod_include.h"
 
 typedef struct __DoubleBuff {
     BOOL    b_SwitchFlag;   /* 接受缓冲区切换标志  */
