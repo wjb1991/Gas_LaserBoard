@@ -15,8 +15,8 @@ BOOL Bsp_SramSelfTest(void)
     Bsp_IntDis();
 
     //关闭其他并口外设 防止总线冲突 非常重要
-    Bsp_AD5546Disable();
-    Bsp_AD7622Disable();
+   // Bsp_AD5546Disable();
+   //Bsp_AD7622Disable();
 
     for(i = 0; i < 0x080000; i++)       //清除RAM中的数据
         auin_ExsramSelfTest[i] = 0;
@@ -26,10 +26,10 @@ BOOL Bsp_SramSelfTest(void)
         volatile INT16U dat = (i%65000);
         volatile INT16U rdat;
         auin_ExsramSelfTest[i] = dat;
-        Bsp_DelayUs(1);
+        Bsp_DelayUs(5);
         rdat = 0;
         rdat = auin_ExsramSelfTest[i];
-        Bsp_DelayUs(1);
+        Bsp_DelayUs(5);
         if(rdat != dat)
         {
             TRACE_DBG("  >>ExsramSelfTest[%02X%04X]",(INT16U)(i/0x10000ul),(INT16U)(i%0x10000ul));
@@ -45,8 +45,8 @@ BOOL Bsp_SramSelfTest(void)
             //TRACE_DBG("  WDAT = %04X, RDAT = %04X, Success\r\n",dat,rdat);
 
     }
-    Bsp_AD5546Enable();
-    Bsp_AD7622Enable();
+    //Bsp_AD5546Enable();
+    //Bsp_AD7622Enable();
 
     Bsp_IntEn();
 
@@ -76,7 +76,6 @@ BOOL Bsp_SramSelfTest(void)
 			return FALSE;
 	}
 */
-
 }
 
 void Bsp_SramInit(void)
@@ -120,17 +119,17 @@ void Bsp_SramInit(void)
 														  // Interface
 								 EMIF_ASYNC_TA_4        | // Turn Around time
 														  // of 2 Emif Clock
-								 EMIF_ASYNC_RHOLD_2     | // Read Hold time
+								 EMIF_ASYNC_RHOLD_8     | // Read Hold time
 														  // of 1 Emif Clock
-								 EMIF_ASYNC_RSTROBE_8   | // Read Strobe time
+								 EMIF_ASYNC_RSTROBE_32   | // Read Strobe time
 														  // of 4 Emif Clock
-								 EMIF_ASYNC_RSETUP_2    | // Read Setup time
+								 EMIF_ASYNC_RSETUP_8    | // Read Setup time
 														  // of 1 Emif Clock
-								 EMIF_ASYNC_WHOLD_2     | // Write Hold time
+								 EMIF_ASYNC_WHOLD_1     | // Write Hold time
 														  // of 1 Emif Clock
-								 EMIF_ASYNC_WSTROBE_8   | // Write Strobe time
+								 EMIF_ASYNC_WSTROBE_32   | // Write Strobe time
 														  // of 1 Emif Clock
-								 EMIF_ASYNC_WSETUP_2    | // Write Setup time
+								 EMIF_ASYNC_WSETUP_8    | // Write Setup time
 														  // of 1 Emif Clock
 								 EMIF_ASYNC_EW_DISABLE  | // Extended Wait
 														  // Disable.
@@ -230,22 +229,6 @@ __STATIC_INLINE void HAL_SRAM_MspInit(void)
             GPIO_SetupPinOptions(i,0,0x31); // GPIO_ASYNC||GPIO_PULLUP
         }
     }
-/*
-    for (i=28; i<=52; i++)
-    {
-        if ((i != 29) &&(i != 30) &&(i != 33) && (i != 42) && (i != 43))
-        {
-            GPIO_SetupPinOptions(i,0,0x31); // GPIO_ASYNC||GPIO_PULLUP
-        }
-    }
-
-    for (i=86; i<=92; i++)
-    {
-        if ((i != 91))
-        {
-            GPIO_SetupPinOptions(i,0,0x31); // GPIO_ASYNC||GPIO_PULLUP
-        }
-    }*/
 }
 
 

@@ -15,6 +15,20 @@
 typedef enum
 {
     CMD_R_CONNECT = 0x00,
+
+    //红外相关命令
+    CMD_RW_IR_SINVPP = 0x20,
+    CMD_RW_IR_SINFREQ,
+    CMD_RW_IR_TRGVPP,
+    CMD_RW_IR_SAMPLEFREQ,
+    CMD_RW_IR_DCVOLT,
+    CMD_RW_IR_SINPHASE,
+    CMD_RW_IR_TECVOLAT = 0x26,
+
+    CMD_RW_SYS_LASER_TEMP = 0x2a,
+    CMD_RW_SYS_PCB_TEMP = 0x2c,
+
+    //紫外相关命令
     CMD_R_SPE_STATE = 0x40,
     CMD_R_SPE_SERIALNUM,
     CMD_R_SPE_WLCCOEFF,
@@ -27,20 +41,31 @@ typedef enum
     CMD_RW_SPE_SCANAVG,
     CMD_RW_SPE_BOXCAR,
     CMD_R_SPE_SPECTRUM,
+
+    //读取光谱相关
+    CMD_R_IR_ACWAVE = 0xC0,
+    CMD_R_IR_DCWAVE,
+    CMD_R_IR_RAW_SPECTRUM,      //原始吸收峰
+    CMD_R_IR_PROC_SPECTRUM,     //AC/DC吸收峰
+    CMD_R_IR_ZERO_SPECTRUM,     //调零 吸收峰
+    CMD_R_IR_GALIBGAS1_SPECTRUM,//标定气体1 吸收峰
+    CMD_R_IR_GALIBGAS2_SPECTRUM,//标定气体2 吸收峰
+    CMD_R_IR_BKG_SPECTRUM,      //背景 吸收峰
+    CMD_R_IR_DIFF_SPECTRUM,     //差分 吸收峰
 }eLasterBoardCmd;
 
 
 typedef union {
 
-    INT16U auin_Buff[7296];
-    FP32   af_Buff[3648];
+    INT16U auin_Buff[10000];
+    FP32   af_Buff[5000];
 }ComTemp_t;
 
 
 #ifdef __cplusplus
 #pragma DATA_SECTION("Exsram")
 #else
-#pragma DATA_SECTION(un_Temp,"Exsram");
+//#pragma DATA_SECTION(un_Temp,"Exsram");
 #endif
 ComTemp_t un_Temp;
 
@@ -50,6 +75,7 @@ BOOL App_StdbusMasterDealFram(StdbusFram_t* pst_Fram)
     BOOL res = FALSE;
     switch(pst_Fram->uch_Cmd)
     {
+#if TRUE //系统控制相关
 //==================================================================================
 //                            心跳包 没有任何数据确定是否连接
 //==================================================================================
@@ -63,6 +89,33 @@ BOOL App_StdbusMasterDealFram(StdbusFram_t* pst_Fram)
             MASTERDEAL_DBG(">>MASTERDEAL_DBG: 接收到心跳包\r\n");
         }
         break;
+//==================================================================================
+//                                  读取激光器温度
+//==================================================================================
+    case CMD_RW_SYS_LASER_TEMP:
+        if(pst_Fram->uch_SubCmd == e_StdbusReadCmd)
+        {
+            pst_Fram->uin_PayLoadLenth = 4;
+            Bsp_CnvFP32ToArr(&pst_Fram->puc_PayLoad[0],st_LaserTEC.f_FbTemper,FALSE);
+            res = TRUE;    //应答
+        }
+        break;
+//==================================================================================
+//                                  读取pcb温度
+//==================================================================================
+    case CMD_RW_SYS_PCB_TEMP:
+        if(pst_Fram->uch_SubCmd == e_StdbusReadCmd)
+        {
+            FP32 f_temp = Mod_GetTemper(&st_PcbTemper);
+
+            pst_Fram->uin_PayLoadLenth = 4;
+            Bsp_CnvFP32ToArr(&pst_Fram->puc_PayLoad[0],f_temp,FALSE);
+            res = TRUE;    //应答
+        }
+        break;
+#endif
+
+#if TRUE //紫外相关
 //==================================================================================
 //                            获取光谱仪状态
 //==================================================================================
@@ -313,6 +366,300 @@ BOOL App_StdbusMasterDealFram(StdbusFram_t* pst_Fram)
             }
         }
         break;
+#endif
+
+#if TRUE //红外相关
+//==================================================================================
+//                                  设置正弦波幅值
+//==================================================================================
+    case CMD_RW_IR_SINVPP:
+        if(pst_Fram->uch_SubCmd == e_StdbusWriteCmd)
+        {
+            if(pst_Fram->uin_PayLoadLenth == 4)
+            {
+                FP32 f_Temp = Bsp_CnvArrToFP32(&pst_Fram->puc_PayLoad[0],FALSE);
+
+                if (Mod_SetSinVpp(&st_ModWave,f_Temp,TRUE) == TRUE)
+                {
+                    //Mod_LaserDisable(&st_Laser);              /* 关闭激光器                 */
+                    //Mod_GenerateModWave(&st_ModWave);         /* 生成正弦波 填充数组        */
+                    //Mod_LaserEnable(&st_Laser);               /* 启动激光器                 */
+                    res = TRUE;    //应答
+                }
+            }
+        }
+        else if(pst_Fram->uch_SubCmd == e_StdbusReadCmd)
+        {
+            pst_Fram->uin_PayLoadLenth = 4;
+            Bsp_CnvFP32ToArr(&pst_Fram->puc_PayLoad[0],st_ModWave.f_SinVpp,FALSE);
+            res = TRUE;    //应答
+        }
+        break;
+//==================================================================================
+//                                  设置正弦波频率
+//==================================================================================
+    case CMD_RW_IR_SINFREQ:
+        if(pst_Fram->uch_SubCmd == e_StdbusWriteCmd)
+        {
+            if(pst_Fram->uin_PayLoadLenth == 4)
+            {
+                FP32 f_Temp = Bsp_CnvArrToFP32(&pst_Fram->puc_PayLoad[0],FALSE);
+
+                if (Mod_SetSinFreq(&st_ModWave,f_Temp,TRUE) == TRUE)
+                {
+
+#if 0
+                    st_DLia.f_PsdFreq = st_ModWave.f_SinFreq * 2;       /* 放大正弦波的二次谐波   */
+                    st_DLia.f_SampleFreq = st_ModWave.f_SampleFreq;     /* 采样频率    */
+                    Mod_DLiaInit(&st_DLia);                             /* 初始化锁相放大器             */
+
+                    Mod_LaserDisable(&st_Laser);                        /* 关闭激光器                 */
+                    Mod_GenerateModWave(&st_ModWave);                   /* 生成正弦波 填充数组        */
+                    Mod_LaserEnable(&st_Laser);                         /* 启动激光器                 */
+#endif
+
+                    res = TRUE;    //应答
+                }
+            }
+
+        }
+        else if(pst_Fram->uch_SubCmd == e_StdbusReadCmd)
+        {
+            pst_Fram->uin_PayLoadLenth = 4;
+            Bsp_CnvFP32ToArr(&pst_Fram->puc_PayLoad[0],st_ModWave.f_SinFreq,FALSE);
+            res = TRUE;    //应答
+        }
+        break;
+//==================================================================================
+//                                  设置三角波幅值
+//==================================================================================
+    case CMD_RW_IR_TRGVPP:
+        if(pst_Fram->uch_SubCmd == e_StdbusWriteCmd)
+        {
+            if(pst_Fram->uin_PayLoadLenth == 4)
+            {
+                FP32 f_Temp = Bsp_CnvArrToFP32(&pst_Fram->puc_PayLoad[0],FALSE);
+
+                if (Mod_SetTrgVpp(&st_ModWave,f_Temp,TRUE) == TRUE)
+                {
+#if 0
+                    Mod_LaserDisable(&st_Laser);       /* 关闭激光器                 */
+                    Mod_GenerateModWave(&st_ModWave);        /* 生成正弦波 填充数组        */
+                    Mod_LaserEnable(&st_Laser);        /* 启动激光器                 */
+#endif
+                    res = TRUE;    //应答
+                }
+            }
+
+        }
+        else if(pst_Fram->uch_SubCmd == e_StdbusReadCmd)
+        {
+            pst_Fram->uin_PayLoadLenth = 4;
+            Bsp_CnvFP32ToArr(&pst_Fram->puc_PayLoad[0],st_ModWave.f_TrgVpp,FALSE);
+            res = TRUE;    //应答
+        }
+        break;
+//==================================================================================
+//                                  设置采样频率
+//==================================================================================
+    case CMD_RW_IR_SAMPLEFREQ:
+        if(pst_Fram->uch_SubCmd == e_StdbusWriteCmd)
+        {
+            if(pst_Fram->uin_PayLoadLenth == 4)
+            {
+                FP32 f_Temp = Bsp_CnvArrToFP32(&pst_Fram->puc_PayLoad[0],FALSE);
+
+                if (Mod_SetSampleFreq(&st_ModWave,f_Temp,TRUE) == TRUE)
+                {
+
+#if 0
+                    st_DLia.f_PsdFreq = st_ModWave.f_SinFreq * 2;      /* 放大正弦波的二次谐波   */
+                    st_DLia.f_SampleFreq = st_ModWave.f_SampleFreq;    /* 采样频率    */
+                    Mod_DLiaInit(&st_DLia);                         /* 初始化锁相放大器             */
+
+                    Mod_LaserDisable(&st_Laser);       /* 关闭激光器                 */
+                    Mod_GenerateModWave(&st_ModWave);        /* 生成正弦波 填充数组        */
+                    Mod_LaserDisable(&st_Laser);       /* 关闭激光器                 */
+#endif
+
+                    res = TRUE;    //应答
+                }
+            }
+
+        }
+        else if(pst_Fram->uch_SubCmd == e_StdbusReadCmd)
+        {
+            pst_Fram->uin_PayLoadLenth = 4;
+            Bsp_CnvFP32ToArr(&pst_Fram->puc_PayLoad[0],st_ModWave.f_SampleFreq,FALSE);
+            res = TRUE;    //应答
+        }
+        break;
+//==================================================================================
+//                                  设置直流偏置
+//==================================================================================
+    case CMD_RW_IR_DCVOLT:
+        if(pst_Fram->uch_SubCmd == e_StdbusWriteCmd)
+        {
+            if(pst_Fram->uin_PayLoadLenth == 4)
+            {
+                FP32 f_Temp = Bsp_CnvArrToFP32(&pst_Fram->puc_PayLoad[0],FALSE);
+
+                if (Mod_SetDcOffset(&st_ModWave,f_Temp,TRUE) == TRUE)
+                {
+#if 0
+                    Mod_LaserDisable(&st_Laser);       /* 关闭激光器                 */
+                    Mod_GenerateModWave(&st_ModWave);        /* 生成正弦波 填充数组        */
+                    Mod_LaserEnable(&st_Laser);        /* 启动激光器                 */
+#endif
+                    res = TRUE;    //应答
+                }
+            }
+
+        }
+        else if(pst_Fram->uch_SubCmd == e_StdbusReadCmd)
+        {
+            pst_Fram->uin_PayLoadLenth = 4;
+            Bsp_CnvFP32ToArr(&pst_Fram->puc_PayLoad[0],st_ModWave.f_DcOffset,FALSE);
+            res = TRUE;    //应答
+        }
+        break;
+
+//==================================================================================
+//                                  设置正弦波相位
+//==================================================================================
+    case CMD_RW_IR_SINPHASE:
+        if(pst_Fram->uch_SubCmd == e_StdbusWriteCmd)
+        {
+            if(pst_Fram->uin_PayLoadLenth == 4)
+            {
+                FP32 f_Temp = Bsp_CnvArrToFP32(&pst_Fram->puc_PayLoad[0],FALSE);
+#if 0
+                if (Mod_DLiaSetPhase(&st_DLia,f_Temp,TRUE) == TRUE)
+                {
+                    res = TRUE;    //应答
+                }
+#endif
+            }
+
+        }
+        else if(pst_Fram->uch_SubCmd == e_StdbusReadCmd)
+        {
+            pst_Fram->uin_PayLoadLenth = 4;
+            //Bsp_CnvFP32ToArr(&pst_Fram->puc_PayLoad[0],st_DLia.f_PsdPhase,FALSE);
+            res = TRUE;    //应答
+        }
+        break;
+
+//==================================================================================
+//                                  设置TEC电压
+//==================================================================================
+    case CMD_RW_IR_TECVOLAT:
+        if(pst_Fram->uch_SubCmd == e_StdbusWriteCmd)
+        {
+            if(pst_Fram->uin_PayLoadLenth == 4)
+            {
+                FP32 f_Temp = Bsp_CnvArrToFP32(&pst_Fram->puc_PayLoad[0],FALSE);
+                if(Mod_TecSetVolt(&st_LaserTEC, f_Temp) == TRUE)
+                {
+                    res = TRUE;    //应答
+                }
+            }
+        }
+        else if(pst_Fram->uch_SubCmd == e_StdbusReadCmd)
+        {
+            pst_Fram->uin_PayLoadLenth = 4;
+            Bsp_CnvFP32ToArr(&pst_Fram->puc_PayLoad[0],st_LaserTEC.f_SetCtrlVolt,FALSE);
+            res = TRUE;    //应答
+        }
+        break;
+#if 0
+//==================================================================================
+//                                  设置波形平均次数
+//==================================================================================
+    case 0x27:
+        if(pst_Fram->uch_SubCmd == e_StdbusWriteCmd)
+        {
+            if(pst_Fram->uin_PayLoadLenth == 2)
+            {
+                INT16U uin_DataTemp;
+                uin_DataTemp = ((INT32U)pst_Fram->puc_PayLoad[1]<<8) + ((INT32U)pst_Fram->puc_PayLoad[0]);
+
+                if ((uin_DataTemp>=1)&&(uin_DataTemp<=9999))
+                {
+                    uin_SampleWaveTotalNum = uin_DataTemp;
+                    str_Sample.uin_WaveNum = 0;
+                    s_WriteOneIntToEeprom(uin_DataTemp,0xc8);
+                    uch_ThrowWaveEn = 1;//用于丢波形的功能开启  by guxiaohua
+                    uin_100usCount = 0;
+                    uin_1sCount = 0;
+                    s_ClrGlobalArray();  //s_DoubleGas_ClrGasConcenStruct();
+                    sprintf(buf,"浓度计算平均次数已被设置为: %u\r\n",uin_SampleWaveTotalNum);
+                    TRACE_DBG(buf);
+                }
+
+                res = TRUE;    //应答
+            }
+
+        }
+        else if(pst_Fram->uch_SubCmd == e_StdbusReadCmd)
+        {
+            //读命令是返回是否在调零
+            pst_Fram->uin_PayLoadLenth = 2;
+
+            INT16U j = uin_SampleWaveTotalNum;
+
+            pst_Fram->puc_PayLoad[1] = (INT8U)(j>>8);
+            pst_Fram->puc_PayLoad[0] = (INT8U)(j&0xff);
+
+            res = TRUE;    //应答
+        }
+        break;
+#endif
+#endif
+
+#if TRUE //读取光谱相关
+//==================================================================================
+//                                   获取传感器交流波形
+//==================================================================================
+    case CMD_R_IR_ACWAVE:
+        if(pst_Fram->uch_SubCmd == e_StdbusReadCmd)
+        {
+             //第一个字节是PageIndex  第二三个字节是ReadAddress 第四五个字节是ReadLenth
+            if(pst_Fram->uin_PayLoadLenth == 0)
+            {
+                //读取第一页返回数组长度
+                pst_Fram->uin_PayLoadLenth = 2;
+                Bsp_CnvINT16UToArr(&pst_Fram->puc_PayLoad[0],st_ModWave.uin_SampleDot,FALSE);
+                /* 加载光谱到 缓冲区 确保不会再传输一半中 更新光谱*/
+                Bsp_IntDis();
+                for(i = 0; i < st_ModWave.uin_SampleDot; i++)
+                {
+                    un_Temp.auin_Buff[i] = i;//st_ModWave.puin_RecvBuff[i];
+                }
+                Bsp_IntEn();
+
+                MASTERDEAL_DBG(">>MASTERDEAL_DBG: 加载传感器交流波形到缓冲区 %d个点\r\n",i);
+            }
+            else if(pst_Fram->uin_PayLoadLenth == 4)
+            {
+                uint16_t i = 0;
+                uint16_t uin_Offset = Bsp_CnvArrToINT16U(pst_Fram->puc_PayLoad,FALSE);
+                uint16_t uin_Lenth = Bsp_CnvArrToINT16U(pst_Fram->puc_PayLoad + 2,FALSE);
+
+                pst_Fram->uin_PayLoadLenth = 4 + uin_Lenth * 2;
+                for(i = 0; i<uin_Lenth;i++)
+                {
+                    INT16U j = un_Temp.auin_Buff[uin_Offset + i];
+
+                    Bsp_CnvINT16UToArr(&pst_Fram->puc_PayLoad[i * 2 + 4],j,FALSE);
+                }
+
+                MASTERDEAL_DBG(">>MASTERDEAL_DBG: 发送缓冲区数据 Offset = %d 长度 = %d \r\n",uin_Offset,i);
+            }
+            res = TRUE;    //应答
+        }
+        break;
+#endif
 
     default:
         break;
@@ -475,7 +822,7 @@ BOOL App_StdbusMasterDealFram(StdbusFram_t* pst_Fram)
 				{
 					Mod_MeasureDoDynamicMeasure(&st_Measure);
 				}
-				res = 1;    //应答
+				res = TRUE;    //应答
             }
         }
 
@@ -1110,7 +1457,7 @@ BOOL App_StdbusMasterDealFram(StdbusFram_t* pst_Fram)
 
 				pst_Fram->uin_PayLoadLenth = 2 + i * 4;
 
-				res = 1;    //应答
+				res = TRUE;    //应答
 			}
 		}
 		break;
@@ -1134,7 +1481,7 @@ BOOL App_StdbusMasterDealFram(StdbusFram_t* pst_Fram)
 
 				pst_Fram->uin_PayLoadLenth = 2 + i * 4;
 
-				res = 1;    //应答
+				res = TRUE;    //应答
 			}
 		}
 		break;
@@ -1196,7 +1543,7 @@ BOOL App_StdbusMasterDealFram(StdbusFram_t* pst_Fram)
 				pst_Fram->uin_PayLoadLenth = 8;
 				Bsp_CnvFP32ToArr(&pst_Fram->puc_PayLoad[0],(FP32)st_Measure.lf_NO,FALSE);
 				Bsp_CnvFP32ToArr(&pst_Fram->puc_PayLoad[4],(FP32)st_Measure.lf_HC,FALSE);
-				res = 1;    //应答
+				res = TRUE;    //应答
 			}
 		}
 		break;
@@ -1220,7 +1567,7 @@ BOOL App_StdbusMasterDealFram(StdbusFram_t* pst_Fram)
 
 				pst_Fram->uin_PayLoadLenth = 2 + i * 4;
 
-				res = 1;    //应答
+				res = TRUE;    //应答
 			}
 		}
 		break;     

@@ -23,7 +23,7 @@
 #define     DEF_SAMPLEFREQ_MIN  (100.0)
 #define     DEF_SAMPLEFREQ_MAX  (750.0)
 #define     DEF_SAMPLEDOT_MIN   (1000)
-#define     DEF_SAMPLEDOT_MAX   (20000)
+#define     DEF_SAMPLEDOT_MAX   (10000)
 
 #define		 DEF_FALLDOT_MIN	 (400)
 #define		 DEF_FALLDOT_MAX	 (500)

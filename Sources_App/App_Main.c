@@ -10,10 +10,11 @@ int main(void)
     // Step 2. Initialize GPIO:
     InitGpio();
 
-    InitCpuTimers();   // For this example, only initialize the Cpu Timers
+    InitCpuTimers();    // For this example, only initialize the Cpu Timers
 
     DMAInitialize();    //Initialize DMA
 
+    Emif1Initialize();   //Initialize EMIF1
     // Step 3. Clear all interrupts and initialize PIE vector table:Disable CPU interrupts
 
     // Initialize PIE control registers to their default state. The default state is all PIE interrupts disabled and flags are cleared.
@@ -39,6 +40,5 @@ int main(void)
     for(;;)
     {
         App_DevicePoll();
-
     }
 }

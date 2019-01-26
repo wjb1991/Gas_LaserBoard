@@ -2,7 +2,7 @@
 
 
 #define DEF_STDBUS_SLAVE_PORT  &COM3
-#define DEF_STDBUS_SLAVE_BUFF_LEN   100
+#define DEF_STDBUS_SLAVE_BUFF_LEN   1024
 #define DEF_STDBUS_SLAVE_DEV_LEN    10
 
 
@@ -64,7 +64,7 @@ static void Mod_ErrHandle(void * pv_dev)
 {
     Mod_StdbusRscPack(&st_StdbusSlave);                  //释放本端口的数据
     Bsp_UartClose(pv_dev);
-    Bsp_UartClose(pv_dev);
+    Bsp_UartOpen(pv_dev);
 }
 
 void Mod_StdbusSlaveInit(void)

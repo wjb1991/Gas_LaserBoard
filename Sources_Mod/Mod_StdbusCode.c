@@ -12,7 +12,7 @@
 //==================================================================================================
 #include "App_Include.h"
 
-#define DEF_STDBUS_DBG_EN           TRUE
+#define DEF_STDBUS_DBG_EN           FALSE
 
 #if (DEF_STDBUS_DBG_EN == TRUE)
     #define STDBUS_DBG(...)             do {                            \
@@ -318,6 +318,9 @@ void Mod_StdbusPortSendOneByte(StdbusPort_t * pst_Port)
             }
 
             pst_Port->uin_BuffIndex = 0;
+
+            //STDBUS_DBG(">>STDBUS DBG:   第一个发送[%04d] = 0x%02x\r\n",pst_Port->uin_BuffIndex,pst_Port->puc_Buff[pst_Port->uin_BuffIndex]);
+
             Bsp_UartSend(pst_Port->pv_Handle,
                         &pst_Port->puc_Buff[pst_Port->uin_BuffIndex++],
                         1);
@@ -337,6 +340,8 @@ void Mod_StdbusPortSendOneByte(StdbusPort_t * pst_Port)
             }
             pst_Port->uch_LastByte = uch_data;
 
+            //STDBUS_DBG(">>STDBUS DBG:   发送[%04d] = 0x%02x\r\n",pst_Port->uin_BuffIndex,pst_Port->puc_Buff[pst_Port->uin_BuffIndex]);
+
             Bsp_UartSend(pst_Port->pv_Handle,
                           &uch_data,
                           1);
@@ -345,6 +350,9 @@ void Mod_StdbusPortSendOneByte(StdbusPort_t * pst_Port)
         else if (pst_Port->uin_BuffIndex < pst_Port->uin_BuffLenth )
         {
             uch_data = pst_Port->puc_Buff[pst_Port->uin_BuffIndex++];
+
+            //STDBUS_DBG(">>STDBUS DBG:   最后发送[%04d] = 0x%02x\r\n",pst_Port->uin_BuffIndex,pst_Port->puc_Buff[pst_Port->uin_BuffIndex]);
+
             Bsp_UartSend(pst_Port->pv_Handle,
                           &uch_data,
                           1);
@@ -574,7 +582,7 @@ void Mod_StdbusMakePack(StdbusPort_t* pst_Port)
 
     Mod_GetCrc16Bit(pst_Port->puc_Buff + 1,i-1, &crc16);
     pst_Port->puc_Buff[i++] = (uint8_t)(crc16 >> 8);
-    pst_Port->puc_Buff[i++] = (uint8_t)(crc16 );
+    pst_Port->puc_Buff[i++] = (uint8_t)(crc16 &0x00ff);
 
     pst_Port->puc_Buff[i++] = 0x7d;
     pst_Port->uin_BuffLenth = i;
@@ -806,6 +814,13 @@ void Mod_StdbusDealPack(StdbusPort_t* pst_Port)
 void Mod_StdbusPortPoll(StdbusPort_t * pst_Port)
 {
     INT16U  uin_crc16 = 0xFFFF;
+    if(Bsp_UartCheckError((Dev_SerialPort*)pst_Port->pv_Handle) == TRUE)
+    {
+        Dev_SerialPort* p = pst_Port->pv_Handle;
+        p->cb_ErrHandle(p);
+    }
+
+
     StdbusState_e pv_Msg = (StdbusState_e)PendMsg(pst_Port);
     switch (pv_Msg)
     {

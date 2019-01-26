@@ -515,6 +515,13 @@ BOOL Bsp_UartSend(Dev_SerialPort *pst_Dev, INT8U* puch_Buff, INT16U uin_Len)
     return TRUE;
 }
 
+BOOL Bsp_UartCheckError(Dev_SerialPort *pst_Dev)
+{
+    struct SCI_REGS* UartHandle = pst_Dev->pv_UartHandle;
+    return UartHandle->SCIRXST.bit.RXERROR;
+}
+
+
 /**
   * @brief UART MSP Initialization
   *        This function configures the hardware resources used in this example:

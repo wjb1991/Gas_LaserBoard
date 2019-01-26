@@ -1,8 +1,8 @@
 #include "App_Include.h"
 
 Device_t st_Device = {
-    .e_State = e_DevInit,
-
+    e_DevInit,
+    {e_NoAlarm,e_NoAlarm,e_NoAlarm,e_NoAlarm,e_NoAlarm},
 };
 
 
@@ -37,17 +37,21 @@ BOOL App_DeviceSelfTest(void)
     FP32 f_Temp = 0;
     FP32 f_Aver = 0;
 
+    TRACE_DBG("\r\n=========================启动自测试=========================\r\n");
 
-    TRACE_DBG("\r\n=========================I/O初始化=========================\r\n");
+    TRACE_DBG("\r\nI/O初始化:\r\n");
     TRACE_DBG("  >>LD_PROTECT=1,开启激光器保护\n");
     TRACE_DBG("  >>LD_SOFTON=1,激光器软起动功能关闭\n");
     TRACE_DBG("  >>Tec1_EN=1,激光器TEC模块禁能\n");
     TRACE_DBG("  >>Tec2_EN=1,传感器TEC模块禁能\n");
 
     TRACE_DBG("\r\n=========================外部SRAM自检=========================\r\n");
-    //if(Bsp_SramSelfTest() == FALSE)
+    if(Bsp_SramSelfTest() == FALSE)
+    {
         TRACE_DBG("  >>外部SRAM 自检失败\n");
-    //else
+        App_AddOneAlarm(e_Fault_ExramRam);
+    }
+    else
         TRACE_DBG("  >>外部SRAM 自检成功\n");
 
     TRACE_DBG("\r\n=========================EEPROM自检=========================\r\n");
@@ -179,3 +183,50 @@ BOOL App_DevicePoll(void)
     return TRUE;
 
 }
+
+void App_AddOneAlarm(DevAlarmCode_t uch_AlarmCode)
+{
+    INT8U i;
+
+    /* 搜索这个报警码 是否存在 */
+    for(i = 0; i < 5; i++)
+    {
+        if (st_Device.ae_Alarm[i] == uch_AlarmCode)
+            return; //存在则不添加
+    }
+
+    /* 添加这个报警码 */
+    for(i = 0; i < 5; i++)
+    {
+        if (st_Device.ae_Alarm[i] == e_NoAlarm)
+        {
+            st_Device.ae_Alarm[i] = (DevAlarmCode_t)uch_AlarmCode;
+            return;
+        }
+    }
+
+    /* 如果是故障代码则会删除一个警告 */
+    if(uch_AlarmCode > e_FaultFlag)
+    {
+        for(i = 0; i < 5; i++)
+        {
+            if (st_Device.ae_Alarm[i] <= e_WarningFlag)
+            {
+                st_Device.ae_Alarm[i] = (DevAlarmCode_t)uch_AlarmCode;
+                return;
+            }
+        }
+    }
+}
+
+
+void App_ClrOneAlarm(DevAlarmCode_t uch_AlarmCode)
+{
+    INT8U i;
+    /* 搜索这个报警码 是否存在 */
+     for(i = 0; i < 5; i++)
+     {
+         st_Device.ae_Alarm[i] = e_NoAlarm;
+     }
+}
+

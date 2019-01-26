@@ -126,6 +126,8 @@ BOOL Bsp_UartSendBlock(Dev_SerialPort *pst_Dev, INT8U* puch_Buff, INT16U uin_Len
 //==================================================================================
 BOOL Bsp_UartSend(Dev_SerialPort *pst_Dev, INT8U* puch_Buff, INT16U uin_Len);
 
+BOOL Bsp_UartCheckError(Dev_SerialPort *pst_Dev);
+
 //==================================================================================
 //| º¯ÊýÃû³Æ | Bsp_Printf
 //|----------|----------------------------------------------------------------------
