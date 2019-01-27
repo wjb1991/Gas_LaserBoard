@@ -70,6 +70,9 @@ extern BOOL Mod_SetDcOffset(void * pv_Wave,FP32 f_DcOffset,BOOL b_WriteEPROM);
 extern BOOL Mod_SetSinFreq(void * pv_Wave,FP32 f_SinFreq,BOOL b_WriteEPROM);
 extern BOOL Mod_SetSampleFreq(void * pv_Wave,FP32 f_SampleFreq,BOOL b_WriteEPROM);
 extern BOOL Mod_SetSampleDot(void * pv_Wave,INT16U uin_SampleDot,BOOL b_WriteEPROM);
-
+extern BOOL Mod_SetRiseDots(void * pv_Wave,INT16U uin_Dots,BOOL b_WriteEPROM);
+extern BOOL Mod_SetHighDots(void * pv_Wave,INT16U uin_Dots,BOOL b_WriteEPROM);
+extern BOOL Mod_SetLowDots(void * pv_Wave,INT16U uin_Dots,BOOL b_WriteEPROM);
+extern BOOL Mod_SetFallDots(void * pv_Wave,INT16U uin_Dots,BOOL b_WriteEPROM);
 
 #endif

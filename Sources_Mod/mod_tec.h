@@ -26,7 +26,7 @@ typedef struct {
 
 extern Tec_t st_LaserTEC;
 
-BOOL Mod_TecSetVolt(Tec_t* pst_Tec, FP32 f_CtrlVolt);
+BOOL Mod_TecSetVolt(Tec_t* pst_Tec, FP32 f_CtrlVolt,BOOL b_WriteEPROM);
 BOOL Mod_TecEnable(Tec_t* pst_Tec, INT16S uin_TimeOut);
 
 #endif

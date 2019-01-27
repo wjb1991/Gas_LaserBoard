@@ -29,7 +29,7 @@ Tec_t st_LaserTEC = {
 //|----------|----------------------------------------------------------------------
 //| 函数设计 | wjb
 //==================================================================================
-BOOL Mod_TecSetVolt(Tec_t* pst_Tec, FP32 f_CtrlVolt)
+BOOL Mod_TecSetVolt(Tec_t* pst_Tec, FP32 f_CtrlVolt,BOOL b_WriteEPROM)
 {
     if(pst_Tec == NULL || pst_Tec->pst_Temper == NULL)
         return FALSE;
@@ -39,8 +39,9 @@ BOOL Mod_TecSetVolt(Tec_t* pst_Tec, FP32 f_CtrlVolt)
         pst_Tec->f_SetCtrlVolt = f_CtrlVolt;
         pst_Tec->f_SetTemper = Mod_CalTemper(pst_Tec->pst_Temper,pst_Tec->f_SetCtrlVolt);
 
-        //if(SaveToEeprom((INT32U)&pst_Tec->f_SetCtrlVolt) != TRUE)
-        //    return FALSE;
+        if(b_WriteEPROM == TRUE)
+            if(SaveToEeprom((INT32U)&pst_Tec->f_SetCtrlVolt) != TRUE)
+                return FALSE;
 
         TRACE_DBG("    >>TEC温控电压设置为:%.4fV(%.4f℃)\r\n",pst_Tec->f_SetCtrlVolt,pst_Tec->f_SetTemper);
         Bsp_AD5663Set(eAD5563_CHB, Bsp_AD5663CHBVoltToHex(pst_Tec->f_SetCtrlVolt));
@@ -66,7 +67,7 @@ BOOL Mod_TecEnable(Tec_t* pst_Tec, INT16S uin_TimeOut)
     INT16U  i = 0;
     TRACE_DBG("\r\n===========================TEC启动==========================\r\n");
     TRACE_DBG("    >>设置TEC温控电压\r\n");
-    Mod_TecSetVolt(pst_Tec,pst_Tec->f_SetCtrlVolt);
+    Mod_TecSetVolt(pst_Tec,pst_Tec->f_SetCtrlVolt,FALSE);
     TRACE_DBG("    >>启动TEC\r\n");
     pst_Tec->cb_TecOps(eTecEnable);
     

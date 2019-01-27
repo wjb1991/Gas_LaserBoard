@@ -27,6 +27,6 @@ BOOL Mod_DLiaInit(DLia_t* pst_DLia);
 
 BOOL Mod_DLiaCal(DLia_t* pst_DLia,INT16S* puin_InData, INT16U uin_InDataLen,FP32* pf_OutData,INT16U* puin_OutDataLen);
 
-BOOL Mod_DLiaSetPhase(DLia_t* pst_DLia,FP32 f_Phase);
+BOOL Mod_DLiaSetPhase(DLia_t* pst_DLia,FP32 f_Phase,BOOL b_WriteEPROM);
 
 #endif

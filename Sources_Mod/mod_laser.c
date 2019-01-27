@@ -302,10 +302,7 @@ void Mod_FallLevelInit(void* pv_Laser)
     Bsp_Dma1HookRegister(&DMA_Handle);            //注册DMA2回调函数
     Bsp_Dma1IntEnable();                           //开启DMA2
 
-    if(p->pst_Wave->b_GenerateWave == TRUE)
-        Bsp_Dma1Stop();                             //关闭DA
-    else
-        Bsp_Dma1Start();                            //开启DA
+    Bsp_Dma1Start();                                //开启DA
     Bsp_Dma2Stop();                                 //关闭AD接受
 }
 
@@ -334,6 +331,9 @@ void Mod_LowLevelInit(void* pv_Laser)
     Bsp_Dma1HookRegister(&DMA_Handle);              //注册DMA2回调函数
     Bsp_Dma1IntEnable();                            //开启DMA2
 
-    Bsp_Dma1Start();                                //开启DA
+    if(p->pst_Wave->b_GenerateWave == TRUE)
+        Bsp_Dma1Stop();                             //关闭DA
+    else
+        Bsp_Dma1Start();                            //开启DA
     Bsp_Dma2Stop();                                 //关闭AD接受
 }

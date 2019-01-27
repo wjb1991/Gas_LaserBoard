@@ -15,6 +15,9 @@
 typedef enum
 {
     CMD_R_CONNECT = 0x00,
+    CMD_RW_SYS_LASER_TEMP = 0x1a,
+    CMD_RW_SYS_PCB_TEMP = 0x1c,
+
 
     //红外相关命令
     CMD_RW_IR_SINVPP = 0x20,
@@ -25,8 +28,12 @@ typedef enum
     CMD_RW_IR_SINPHASE,
     CMD_RW_IR_TECVOLAT = 0x26,
 
-    CMD_RW_SYS_LASER_TEMP = 0x2a,
-    CMD_RW_SYS_PCB_TEMP = 0x2c,
+    CMD_RW_IR_RISEDOTS,
+    CMD_RW_IR_HIGHDOTS,
+    CMD_RW_IR_FALLDOTS,
+    CMD_RW_IR_LOWDOTS,
+
+
 
     //紫外相关命令
     CMD_R_SPE_STATE = 0x40,
@@ -41,6 +48,7 @@ typedef enum
     CMD_RW_SPE_SCANAVG,
     CMD_RW_SPE_BOXCAR,
     CMD_R_SPE_SPECTRUM,
+
 
     //读取光谱相关
     CMD_R_IR_ACWAVE = 0xC0,
@@ -83,8 +91,8 @@ BOOL App_StdbusMasterDealFram(StdbusFram_t* pst_Fram)
         if(pst_Fram->uch_SubCmd == e_StdbusReadCmd)
         {
             //读命令
-            pst_Fram->uin_PayLoadLenth = 0;
-            res = TRUE;    //应答
+            if(pst_Fram->uin_PayLoadLenth ==0)
+                res = TRUE;    //应答
 
             MASTERDEAL_DBG(">>MASTERDEAL_DBG: 接收到心跳包\r\n");
         }
@@ -501,7 +509,7 @@ BOOL App_StdbusMasterDealFram(StdbusFram_t* pst_Fram)
             {
                 FP32 f_Temp = Bsp_CnvArrToFP32(&pst_Fram->puc_PayLoad[0],FALSE);
 
-                if (Mod_DLiaSetPhase(&st_DLia,f_Temp) == TRUE)
+                if (Mod_DLiaSetPhase(&st_DLia,f_Temp,TRUE) == TRUE)
                 {
                     res = TRUE;    //应答
                 }
@@ -524,7 +532,7 @@ BOOL App_StdbusMasterDealFram(StdbusFram_t* pst_Fram)
             if(pst_Fram->uin_PayLoadLenth == 4)
             {
                 FP32 f_Temp = Bsp_CnvArrToFP32(&pst_Fram->puc_PayLoad[0],FALSE);
-                if(Mod_TecSetVolt(&st_LaserTEC, f_Temp) == TRUE)
+                if(Mod_TecSetVolt(&st_LaserTEC, f_Temp,TRUE) == TRUE)
                 {
                     res = TRUE;    //应答
                 }
@@ -537,6 +545,99 @@ BOOL App_StdbusMasterDealFram(StdbusFram_t* pst_Fram)
             res = TRUE;    //应答
         }
         break;
+
+
+//==================================================================================
+//                              设置调制波上升沿点数
+//==================================================================================
+    case CMD_RW_IR_RISEDOTS:
+        if(pst_Fram->uch_SubCmd == e_StdbusWriteCmd)
+        {
+            if(pst_Fram->uin_PayLoadLenth == 2)
+            {
+                INT16U uin_Temp = Bsp_CnvArrToINT16U(&pst_Fram->puc_PayLoad[0],FALSE);
+                if(Mod_SetRiseDots(&st_ModWave, uin_Temp,TRUE) == TRUE)
+                {
+                    res = TRUE;    //应答
+                }
+            }
+        }
+        else if(pst_Fram->uch_SubCmd == e_StdbusReadCmd)
+        {
+            pst_Fram->uin_PayLoadLenth = 2;
+            Bsp_CnvINT16UToArr(&pst_Fram->puc_PayLoad[0],st_ModWave.uin_RiseDot,FALSE);
+            res = TRUE;    //应答
+        }
+        break;
+
+//==================================================================================
+//                              设置调制波高电平点数
+//==================================================================================
+    case CMD_RW_IR_HIGHDOTS:
+        if(pst_Fram->uch_SubCmd == e_StdbusWriteCmd)
+        {
+            if(pst_Fram->uin_PayLoadLenth == 2)
+            {
+                INT16U uin_Temp = Bsp_CnvArrToINT16U(&pst_Fram->puc_PayLoad[0],FALSE);
+                if(Mod_SetHighDots(&st_ModWave, uin_Temp,TRUE) == TRUE)
+                {
+                    res = TRUE;    //应答
+                }
+            }
+        }
+        else if(pst_Fram->uch_SubCmd == e_StdbusReadCmd)
+        {
+            pst_Fram->uin_PayLoadLenth = 2;
+            Bsp_CnvINT16UToArr(&pst_Fram->puc_PayLoad[0],st_ModWave.uin_HigtDot,FALSE);
+            res = TRUE;    //应答
+        }
+        break;
+
+//==================================================================================
+//                              设置调制波下降沿点数
+//==================================================================================
+    case CMD_RW_IR_FALLDOTS:
+        if(pst_Fram->uch_SubCmd == e_StdbusWriteCmd)
+        {
+            if(pst_Fram->uin_PayLoadLenth == 2)
+            {
+                INT16U uin_Temp = Bsp_CnvArrToINT16U(&pst_Fram->puc_PayLoad[0],FALSE);
+                if(Mod_SetFallDots(&st_ModWave, uin_Temp,TRUE) == TRUE)
+                {
+                    res = TRUE;    //应答
+                }
+            }
+        }
+        else if(pst_Fram->uch_SubCmd == e_StdbusReadCmd)
+        {
+            pst_Fram->uin_PayLoadLenth = 2;
+            Bsp_CnvINT16UToArr(&pst_Fram->puc_PayLoad[0],st_ModWave.uin_FallDot,FALSE);
+            res = TRUE;    //应答
+        }
+        break;
+//==================================================================================
+//                              设置调制波下降沿点数
+//==================================================================================
+    case CMD_RW_IR_LOWDOTS:
+        if(pst_Fram->uch_SubCmd == e_StdbusWriteCmd)
+        {
+            if(pst_Fram->uin_PayLoadLenth == 2)
+            {
+                INT16U uin_Temp = Bsp_CnvArrToINT16U(&pst_Fram->puc_PayLoad[0],FALSE);
+                if(Mod_SetLowDots(&st_ModWave, uin_Temp,TRUE) == TRUE)
+                {
+                    res = TRUE;    //应答
+                }
+            }
+        }
+        else if(pst_Fram->uch_SubCmd == e_StdbusReadCmd)
+        {
+            pst_Fram->uin_PayLoadLenth = 2;
+            Bsp_CnvINT16UToArr(&pst_Fram->puc_PayLoad[0],st_ModWave.uin_LowDot,FALSE);
+            res = TRUE;    //应答
+        }
+        break;
+
 #if 0
 //==================================================================================
 //                                  设置波形平均次数
@@ -625,6 +726,8 @@ BOOL App_StdbusMasterDealFram(StdbusFram_t* pst_Fram)
         }
         break;
 #endif
+
+
 
     default:
         break;

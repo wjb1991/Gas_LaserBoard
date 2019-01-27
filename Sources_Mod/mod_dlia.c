@@ -10165,14 +10165,14 @@ BOOL Mod_DLiaGeneratePsdWave(DLia_t* pst_DLia)
 //|----------|--------------------------------------------------------------------------------------
 //| º¯ÊýÉè¼Æ |
 //==================================================================================================
-BOOL Mod_DLiaSetPhase(DLia_t* pst_DLia,FP32 f_Phase)
+BOOL Mod_DLiaSetPhase(DLia_t* pst_DLia,FP32 f_Phase,BOOL b_WriteEPROM)
 {
 	if(f_Phase >= 0.0 && f_Phase < 360)
 	{
 		pst_DLia->f_PsdPhase = f_Phase;
-
-		if(SaveToEeprom((INT32U)&pst_DLia->f_PsdPhase) != TRUE)
-			return FALSE;
+        if(b_WriteEPROM == TRUE)
+            if(SaveToEeprom((INT32U)&pst_DLia->f_PsdPhase) != TRUE)
+                return FALSE;
 
         return TRUE;
 	}
