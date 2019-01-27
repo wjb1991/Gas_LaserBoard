@@ -21,11 +21,15 @@ extern  "C" {                                  /* See Note #1.                  
 #include "Mod_Tec.h"
 #include "Mod_Wave.h"
 #include "Mod_Laser.h"
+#include "Mod_DLia.h"
+
 
 #include "Pub_Nihe.h"
 
 
 #include "App_Device.h"
+#include "App_Save.h"
+
 
 #ifdef __cplusplus
 }                                              /* End of 'extern'al C lang linkage.                    */

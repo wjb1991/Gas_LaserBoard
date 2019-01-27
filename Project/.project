@@ -81,6 +81,11 @@
 			<locationURI>PARENT-1-PROJECT_LOC/Sources_App/App_Device.c</locationURI>
 		</link>
 		<link>
+			<name>Sources_App/App_DeviceSelfTest.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Sources_App/App_DeviceSelfTest.c</locationURI>
+		</link>
+		<link>
 			<name>Sources_App/App_Main.c</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/Sources_App/App_Main.c</locationURI>
@@ -89,6 +94,11 @@
 			<name>Sources_App/App_MasterDeal.c</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/Sources_App/App_MasterDeal.c</locationURI>
+		</link>
+		<link>
+			<name>Sources_App/App_Save.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Sources_App/App_Save.c</locationURI>
 		</link>
 		<link>
 			<name>Sources_Bsp/Bsp.c</name>
@@ -364,6 +374,11 @@
 			<name>Sources_Mod/Mod_CRC16.c</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/Sources_Mod/Mod_CRC16.c</locationURI>
+		</link>
+		<link>
+			<name>Sources_Mod/Mod_DLia.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Sources_Mod/Mod_DLia.c</locationURI>
 		</link>
 		<link>
 			<name>Sources_Mod/Mod_Doublebuff.c</name>

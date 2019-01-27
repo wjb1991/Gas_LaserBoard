@@ -26,7 +26,7 @@
 #define     DEF_SAMPLEDOT_MAX   (10000)
 
 #define		 DEF_FALLDOT_MIN	 (400)
-#define		 DEF_FALLDOT_MAX	 (500)
+#define		 DEF_FALLDOT_MAX	 (1000)
 
 #define		 DEF_WAVE_MAX		 (2)
 
@@ -57,6 +57,8 @@ typedef struct {
 
 
     volatile INT16U* puin_RecvBuff;      /* 接受波形 */
+
+    BOOL    b_GenerateWave;     /* 重新生成波形 */
 }Wave_t;
 
 extern Wave_t    st_ModWave;

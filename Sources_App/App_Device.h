@@ -5,7 +5,7 @@ typedef enum {
     e_DevInit = 0xAA,
     e_DevSelfTest,
     e_DevStart,
-    e_DevWork,
+    e_DevRun,
     e_DevError,
 }DeviceState_t;
 
@@ -35,6 +35,8 @@ extern Device_t st_Device;
 BOOL App_DeviceInit(void);
 
 BOOL App_DevicePoll(void);
+
+BOOL App_DeviceSelfTest(void);
 
 void App_AddOneAlarm(DevAlarmCode_t uch_AlarmCode);
 

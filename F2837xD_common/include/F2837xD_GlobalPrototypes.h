@@ -315,6 +315,32 @@ extern Uint16 RamfuncsRunStart;
 extern Uint16 RamfuncsRunEnd;
 extern Uint16 RamfuncsRunSize;
 
+// 自己添加的函数声明
+extern void Emif1Initialize(void);
+extern void Emif2Initialize(void);
+extern void ASync_wait_config(Uint16 inst, Uint16 wait_count, Uint16 wait_polarity);
+extern void ASync_cs2_config(Uint16 inst, Uint16 async_mem_data_width,
+                      Uint16 turn_around_time, Uint16 r_hold_time,
+                      Uint16 r_strobe_time, Uint16 r_setup, Uint16 w_hold,
+                      Uint16 w_strobe, Uint16 w_setup, Uint16 extend_wait,
+                      Uint16 strobe_sel);
+extern void ASync_cs3_config(Uint16 inst, Uint16 async_mem_data_width,
+                      Uint16 turn_around_time, Uint16 r_hold_time,
+                      Uint16 r_strobe_time, Uint16 r_setup, Uint16 w_hold,
+                      Uint16 w_strobe, Uint16 w_setup, Uint16 extend_wait,
+                      Uint16 strobe_sel);
+extern void ASync_cs4_config(Uint16 inst, Uint16 async_mem_data_width,
+                      Uint16 turn_around_time, Uint16 r_hold_time,
+                      Uint16 r_strobe_time, Uint16 r_setup, Uint16 w_hold,
+                      Uint16 w_strobe, Uint16 w_setup, Uint16 extend_wait,
+                      Uint16 strobe_sel);
+extern void setup_emif1_pinmux_async_16bit(Uint16 cpu_sel);
+extern void setup_emif1_pinmux_async_32bit(Uint16 cpu_sel);
+extern void setup_emif2_pinmux_async_16bit(Uint16 cpu_sel);
+extern void setup_emif1_pinmux_sdram_16bit(Uint16 cpu_sel);
+extern void setup_emif2_pinmux_sdram_16bit(Uint16 cpu_sel);
+extern void setup_emif1_pinmux_sdram_32bit(Uint16 cpu_sel);
+
 #ifdef __cplusplus
 }
 #endif /* extern "C" */

@@ -1,32 +1,45 @@
 #include "Bsp.h"
 
 
-INT8U Bsp_At24c512Read(INT8U *pBuffer,uint16_t uin_Addr, uint16_t uin_Size)
+uint8_t Bsp_At24c512Read(uint8_t *pBuffer,uint16_t uin_Addr, uint16_t uin_Size)
 {
+    //关中断
+	Bsp_IntDis();
+  
     /* 发送开始位 */
 	if (!Bsp_I2cStart(&Bsp_At24c512))                   
-	    return 0;
+	{
+	    //开中断
+	    Bsp_IntEn();
+		return 0;
+	}
     
     /* 发送设备地址 写命令 */
     Bsp_I2cSendByte(&Bsp_At24c512,AT24C512_ADDR);
 	if (!Bsp_I2cWaitAck(&Bsp_At24c512))
     {
         Bsp_I2cStop(&Bsp_At24c512); 
+	    //开中断
+        Bsp_IntEn();
 		return 0;
     }
     
     /* 发送内存地址 */
-	Bsp_I2cSendByte(&Bsp_At24c512,(INT8U)(uin_Addr>>8));   //设置数据地址(高)
+	Bsp_I2cSendByte(&Bsp_At24c512,(uint8_t)(uin_Addr>>8));   //设置数据地址(高)      
     Bsp_I2cWaitAck(&Bsp_At24c512);
 	
-	Bsp_I2cSendByte(&Bsp_At24c512,(INT8U)(uin_Addr));   //设置数据地址(低)
+	Bsp_I2cSendByte(&Bsp_At24c512,(uint8_t)(uin_Addr));   //设置数据地址(低)      
     Bsp_I2cWaitAck(&Bsp_At24c512);
 
 	Bsp_I2cDelay();
 	
     /* 发送开始位 */
     if (!Bsp_I2cStart(&Bsp_At24c512))
-	    return 0;
+	{
+	    //开中断
+	    Bsp_IntEn();
+		return 0;
+	}
     
     /* 发送设备地址 读命令 */
 	Bsp_I2cSendByte(&Bsp_At24c512,AT24C512_ADDR|0x01);   //设置读地址      
@@ -44,14 +57,17 @@ INT8U Bsp_At24c512Read(INT8U *pBuffer,uint16_t uin_Addr, uint16_t uin_Size)
         uin_Size--;
     }
     Bsp_I2cStop(&Bsp_At24c512);
+    //开中断
+    Bsp_IntEn();
 
     return 1;
 }
 
 
-INT8U Bsp_At24c512Write(INT8U *pBuffer,uint16_t uin_Addr, uint16_t uin_Size)
+uint8_t Bsp_At24c512Write(uint8_t *pBuffer,uint16_t uin_Addr, uint16_t uin_Size)
 {
-	Bsp_IntDis();
+    //关中断
+    Bsp_IntDis();
     
     /* 发送开始位 */
 	if(!Bsp_I2cStart(&Bsp_At24c512))
@@ -67,15 +83,15 @@ INT8U Bsp_At24c512Write(INT8U *pBuffer,uint16_t uin_Addr, uint16_t uin_Size)
 	{
 		Bsp_I2cStop(&Bsp_At24c512); 
 		//开中断
-	    Bsp_IntEn();
+		Bsp_IntEn();
 		return 0;
 	}
     
     /* 发送内存地址 */
-    Bsp_I2cSendByte(&Bsp_At24c512,(INT8U)(uin_Addr>>8));       //设置起始地址(高)
+    Bsp_I2cSendByte(&Bsp_At24c512,(uint8_t)(uin_Addr>>8));       //设置起始地址(高)
     Bsp_I2cWaitAck(&Bsp_At24c512);
 	
-	Bsp_I2cSendByte(&Bsp_At24c512,(INT8U)(uin_Addr));         //设置起始地址(低)
+	Bsp_I2cSendByte(&Bsp_At24c512,(uint8_t)(uin_Addr));         //设置起始地址(低)
     Bsp_I2cWaitAck(&Bsp_At24c512);
     
     /* 写入数据 */
@@ -86,11 +102,10 @@ INT8U Bsp_At24c512Write(INT8U *pBuffer,uint16_t uin_Addr, uint16_t uin_Size)
       pBuffer++;
     }
     Bsp_I2cStop(&Bsp_At24c512);
-
-	Bsp_IntEn();
-
-	Bsp_DelayMs(15);
-
+    
+	//开中断
+    Bsp_IntEn();
+    Bsp_DelayMs(15);
     return 1;   
 }
 //==================================================================================================
@@ -116,21 +131,21 @@ void Bsp_At24c512Init(void)
 //|----------|--------------------------------------------------------------------------------------       
 //| 返回参数 | 无
 //==================================================================================================
-INT8U Bsp_At24c512SelfTest(void)
+uint8_t Bsp_At24c512SelfTest(void) 
 {
 	uint16_t i;
-	INT8U Test[10];
-	INT8U Check[10];
+	uint8_t Test[10];
+	uint8_t Check[10];
     
     //自检EEPROM
 	for(i=0; i<10;i++) 
 	{
-		Test[i] = (INT8U)i+5;
+		Test[i] = (uint8_t)i+5;
 	}
 
-	Bsp_At24c512Write(Test,0x0,8);
+	Bsp_At24c512Write(Test,0x0,10);
 
-	Bsp_At24c512Read(Check,0x0,8);
+	Bsp_At24c512Read(Check,0x0,10);
 
 	for(i=0;i<10;i++)
 	{
@@ -142,7 +157,7 @@ INT8U Bsp_At24c512SelfTest(void)
 
 	if( i<10 ) 
 	{
-	    return 0;
+	    return FALSE;
 	} 
-	return 1;
+	return TRUE;
 } 

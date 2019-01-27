@@ -37,6 +37,7 @@ static void Mod_HigtLevelInit(void* pv_Laser);
 static void Mod_FallLevelInit(void* pv_Laser);
 static void Mod_LowLevelInit(void* pv_Laser);
 
+
 //==================================================================================
 //| 函数名称 | Mod_SetDcVolt
 //|----------|----------------------------------------------------------------------
@@ -122,6 +123,18 @@ void Mod_LaserDisable(void* pv_Laser)
 
     TRACE_DBG("    >>断开激光器保护继电器...\r\n");
     Bsp_LaserPR(eLaserPrOn);
+}
+
+
+void Mod_LaserPoll(void* pv_Laser)
+{
+    Laser_t* p = pv_Laser;
+    if(p->pst_Wave->b_GenerateWave == TRUE)
+    {
+        Mod_LaserDisable(&st_Laser);                        /* 关闭激光器                 */
+        Mod_GenerateModWave(&st_ModWave);                 /* 生成正弦波 填充数组        */
+        Mod_LaserEnable(&st_Laser);                         /* 启动激光器                 */
+    }
 }
 
 //==================================================================================
@@ -286,10 +299,13 @@ void Mod_FallLevelInit(void* pv_Laser)
          0,
          p->pst_Wave->uin_FallDot);        //后DA
 
-    Bsp_Dma1HookRegister(&DMA_Handle);              //注册DMA2回调函数
-    Bsp_Dma1IntEnable();                            //开启DMA2
+    Bsp_Dma1HookRegister(&DMA_Handle);            //注册DMA2回调函数
+    Bsp_Dma1IntEnable();                           //开启DMA2
 
-    Bsp_Dma1Start();                                //开启DA
+    if(p->pst_Wave->b_GenerateWave == TRUE)
+        Bsp_Dma1Stop();                             //关闭DA
+    else
+        Bsp_Dma1Start();                            //开启DA
     Bsp_Dma2Stop();                                 //关闭AD接受
 }
 

@@ -61,6 +61,7 @@ void  Bsp_Init (void)
     COM3.ul_Mode       = UART_MODE_TX_RX;
     Bsp_UartOpen(&COM3);
 
+    Bsp_At24c512Init();
 
     Bsp_Pga2A0(1);
     Bsp_Pga2A1(1);

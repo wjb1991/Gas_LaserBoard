@@ -22,17 +22,18 @@ typedef enum {
 
 typedef struct __Laser {
     /* public */
-    eLaserState e_State;                    /* 状态 */
+    volatile eLaserState e_State;                    /* 状态 */
     
-    Wave_t* pst_Wave;                /* 发送波形结构体 句柄 */
+    Wave_t* pst_Wave;                       /* 发送波形结构体 句柄 */
 
-    
     Tec_t * pst_Tec;					    /* TEC句柄 */
+
 }Laser_t;
 
 extern Laser_t    st_Laser;
 
 extern void Mod_LaserEnable(void* pv_Laser);
 extern void Mod_LaserDisable(void* pv_Laser);
+extern void Mod_LaserPoll(void* pv_Laser);
 
 #endif

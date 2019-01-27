@@ -381,9 +381,6 @@ BOOL App_StdbusMasterDealFram(StdbusFram_t* pst_Fram)
 
                 if (Mod_SetSinVpp(&st_ModWave,f_Temp,TRUE) == TRUE)
                 {
-                    //Mod_LaserDisable(&st_Laser);              /* 关闭激光器                 */
-                    //Mod_GenerateModWave(&st_ModWave);         /* 生成正弦波 填充数组        */
-                    //Mod_LaserEnable(&st_Laser);               /* 启动激光器                 */
                     res = TRUE;    //应答
                 }
             }
@@ -407,17 +404,7 @@ BOOL App_StdbusMasterDealFram(StdbusFram_t* pst_Fram)
 
                 if (Mod_SetSinFreq(&st_ModWave,f_Temp,TRUE) == TRUE)
                 {
-
-#if 0
                     st_DLia.f_PsdFreq = st_ModWave.f_SinFreq * 2;       /* 放大正弦波的二次谐波   */
-                    st_DLia.f_SampleFreq = st_ModWave.f_SampleFreq;     /* 采样频率    */
-                    Mod_DLiaInit(&st_DLia);                             /* 初始化锁相放大器             */
-
-                    Mod_LaserDisable(&st_Laser);                        /* 关闭激光器                 */
-                    Mod_GenerateModWave(&st_ModWave);                   /* 生成正弦波 填充数组        */
-                    Mod_LaserEnable(&st_Laser);                         /* 启动激光器                 */
-#endif
-
                     res = TRUE;    //应答
                 }
             }
@@ -442,11 +429,6 @@ BOOL App_StdbusMasterDealFram(StdbusFram_t* pst_Fram)
 
                 if (Mod_SetTrgVpp(&st_ModWave,f_Temp,TRUE) == TRUE)
                 {
-#if 0
-                    Mod_LaserDisable(&st_Laser);       /* 关闭激光器                 */
-                    Mod_GenerateModWave(&st_ModWave);        /* 生成正弦波 填充数组        */
-                    Mod_LaserEnable(&st_Laser);        /* 启动激光器                 */
-#endif
                     res = TRUE;    //应答
                 }
             }
@@ -471,17 +453,7 @@ BOOL App_StdbusMasterDealFram(StdbusFram_t* pst_Fram)
 
                 if (Mod_SetSampleFreq(&st_ModWave,f_Temp,TRUE) == TRUE)
                 {
-
-#if 0
-                    st_DLia.f_PsdFreq = st_ModWave.f_SinFreq * 2;      /* 放大正弦波的二次谐波   */
                     st_DLia.f_SampleFreq = st_ModWave.f_SampleFreq;    /* 采样频率    */
-                    Mod_DLiaInit(&st_DLia);                         /* 初始化锁相放大器             */
-
-                    Mod_LaserDisable(&st_Laser);       /* 关闭激光器                 */
-                    Mod_GenerateModWave(&st_ModWave);        /* 生成正弦波 填充数组        */
-                    Mod_LaserDisable(&st_Laser);       /* 关闭激光器                 */
-#endif
-
                     res = TRUE;    //应答
                 }
             }
@@ -506,11 +478,6 @@ BOOL App_StdbusMasterDealFram(StdbusFram_t* pst_Fram)
 
                 if (Mod_SetDcOffset(&st_ModWave,f_Temp,TRUE) == TRUE)
                 {
-#if 0
-                    Mod_LaserDisable(&st_Laser);       /* 关闭激光器                 */
-                    Mod_GenerateModWave(&st_ModWave);        /* 生成正弦波 填充数组        */
-                    Mod_LaserEnable(&st_Laser);        /* 启动激光器                 */
-#endif
                     res = TRUE;    //应答
                 }
             }
@@ -533,14 +500,12 @@ BOOL App_StdbusMasterDealFram(StdbusFram_t* pst_Fram)
             if(pst_Fram->uin_PayLoadLenth == 4)
             {
                 FP32 f_Temp = Bsp_CnvArrToFP32(&pst_Fram->puc_PayLoad[0],FALSE);
-#if 0
-                if (Mod_DLiaSetPhase(&st_DLia,f_Temp,TRUE) == TRUE)
+
+                if (Mod_DLiaSetPhase(&st_DLia,f_Temp) == TRUE)
                 {
                     res = TRUE;    //应答
                 }
-#endif
             }
-
         }
         else if(pst_Fram->uch_SubCmd == e_StdbusReadCmd)
         {

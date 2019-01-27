@@ -52,9 +52,9 @@ Wave_t    st_ModWave = {
     
     0.0,            /* 每个点的间隔时间 US*/
     0,              /* 上升区段的数据缓冲长度 */
-    0,              /* 高电平时的数据缓冲长度 */
-    0,              /* 下降区段的数据缓冲长度 */
-    0,              /* 低电平时的数据缓冲长度 */
+    2000,           /* 高电平时的数据缓冲长度 */
+    1000,           /* 下降区段的数据缓冲长度 */
+    7000,           /* 低电平时的数据缓冲长度 */
     auin_RiseBuff,  /* 上升区段的数据缓冲 */
     auin_FallBuff,  /* 下降区段的数据缓冲 */
     
@@ -92,14 +92,20 @@ BOOL Mod_GenerateModWave(void * pv_Wave)
     fw = p->f_SinFreq * 1000;
    
 
-    /* 计算各个过程时间和点数 */
+    /* 计算各个过程时间和点数 
     p->f_Interval = fpt;
     p->uin_RiseDot = p->uin_SampleDot;
     p->uin_HigtDot = p->f_HigtTime * 1000 /  fpt;
     p->uin_FallDot = p->f_FallTime * 1000 /  fpt;
     p->uin_LowDot  = p->f_LowTime * 1000 / fpt;
-    p->f_RiseTime = p->uin_SampleDot * p->f_Interval / 1000;
+    p->f_RiseTime = p->uin_SampleDot * p->f_Interval / 1000;*/
     
+    /* 计算各个过程时间和点数 通过点数算时间 所有点数可配置 */
+    p->uin_RiseDot = p->uin_SampleDot;
+    p->f_RiseTime = p->uin_RiseDot * p->f_Interval / 1000;
+    p->f_HigtTime = p->uin_HigtDot * p->f_Interval / 1000;
+    p->f_FallTime = p->uin_FallDot * p->f_Interval / 1000;
+    p->f_LowTime = p->uin_LowDot * p->f_Interval / 1000;
 
     /* 记录一个最大值 */
 	for(i = 0; i < p->uin_RiseDot; i++)		        //默认10000点 协议可更改
@@ -139,6 +145,7 @@ BOOL Mod_GenerateModWave(void * pv_Wave)
         p->puin_FallBuff[i] = f + f1; 
 	}
 
+	p->b_GenerateWave = FALSE;
 	return TRUE;
 }
 
@@ -167,9 +174,10 @@ BOOL Mod_SetSinVpp(void * pv_Wave,FP32 f_SinVpp,BOOL b_WriteEPROM)
             
             if(b_WriteEPROM == TRUE)
             {
-                //if(SaveToEeprom((INT32U)&p->f_SinVpp) != TRUE)
-                //    return FALSE;
+                if(SaveToEeprom((INT32U)&p->f_SinVpp) != TRUE)
+                    return FALSE;
             }
+            p->b_GenerateWave = TRUE;
             return TRUE;
         }          
     }
@@ -201,9 +209,10 @@ BOOL Mod_SetTrgVpp(void * pv_Wave,FP32 f_TrgVpp,BOOL b_WriteEPROM)
             
             if(b_WriteEPROM == TRUE)
             {
-                //if(SaveToEeprom((INT32U)&p->f_TrgVpp) != TRUE)
-                //    return FALSE;
+                if(SaveToEeprom((INT32U)&p->f_TrgVpp) != TRUE)
+                    return FALSE;
             }
+            p->b_GenerateWave = TRUE;
             return TRUE;
         }          
     }
@@ -235,9 +244,10 @@ BOOL Mod_SetDcOffset(void * pv_Wave,FP32 f_DcOffset,BOOL b_WriteEPROM)
             
             if(b_WriteEPROM == TRUE)
             {
-                //if(SaveToEeprom((INT32U)&p->f_DcOffset) != TRUE)
-                //    return FALSE;
+                if(SaveToEeprom((INT32U)&p->f_DcOffset) != TRUE)
+                    return FALSE;
             }
+            p->b_GenerateWave = TRUE;
             return TRUE;
         }          
     }
@@ -268,9 +278,10 @@ BOOL Mod_SetSinFreq(void * pv_Wave,FP32 f_SinFreq,BOOL b_WriteEPROM)
             
             if(b_WriteEPROM == TRUE)
             {
-                //if(SaveToEeprom((INT32U)&p->f_SinFreq) != TRUE)
-                //    return FALSE;
+                if(SaveToEeprom((INT32U)&p->f_SinFreq) != TRUE)
+                    return FALSE;
             }
+            p->b_GenerateWave = TRUE;
             return TRUE;
         }          
     }
@@ -301,9 +312,10 @@ BOOL Mod_SetSampleFreq(void * pv_Wave,FP32 f_SampleFreq,BOOL b_WriteEPROM)
             
             if(b_WriteEPROM == TRUE)
             {
-                //if(SaveToEeprom((INT32U)&p->f_SampleFreq) != TRUE)
-                //    return FALSE;
+                if(SaveToEeprom((INT32U)&p->f_SampleFreq) != TRUE)
+                    return FALSE;
             }
+            p->b_GenerateWave = TRUE;
             return TRUE;
         }          
     }
@@ -334,9 +346,10 @@ BOOL Mod_SetSampleDot(void * pv_Wave,INT16U uin_SampleDot,BOOL b_WriteEPROM)
             
             if(b_WriteEPROM == TRUE)
             {
-                //if(SaveToEeprom((INT32U)&p->uin_SampleDot) != TRUE)
-                //    return FALSE;
+                if(SaveToEeprom((INT32U)&p->uin_SampleDot) != TRUE)
+                    return FALSE;
             }
+            p->b_GenerateWave = TRUE;
             return TRUE;
         }          
     }

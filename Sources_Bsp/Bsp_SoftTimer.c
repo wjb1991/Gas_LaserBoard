@@ -96,6 +96,7 @@ void Bsp_DelayUs(INT32U us)
 
 void Bsp_DelayMs(INT32U ms)
 {
-    while(ms--)
+    volatile INT32U _ms = ms;
+    while(_ms--)
         Bsp_DelayUs(1000);
 }

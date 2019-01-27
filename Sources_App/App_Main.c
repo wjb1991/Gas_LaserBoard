@@ -14,7 +14,7 @@ int main(void)
 
     DMAInitialize();    //Initialize DMA
 
-    Emif1Initialize();   //Initialize EMIF1
+    Emif1Initialize();  //Initialize EMIF1
     // Step 3. Clear all interrupts and initialize PIE vector table:Disable CPU interrupts
 
     // Initialize PIE control registers to their default state. The default state is all PIE interrupts disabled and flags are cleared.
