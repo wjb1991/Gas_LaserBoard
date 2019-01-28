@@ -26,6 +26,7 @@ void  Bsp_Init (void)
     Bsp_AD5546Init();   //并口DAC
     Bsp_AD5663Init();   //SPI DAC
     Bsp_AD7622Init();   //并口ADC
+    Bsp_Ltc1867Init();  //SPI ADC
 
     /* 定时器1 软件定时器 系统时钟定时器 */
     Bsp_Time1Init(1000);

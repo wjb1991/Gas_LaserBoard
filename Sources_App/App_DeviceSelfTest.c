@@ -107,6 +107,17 @@ BOOL App_DeviceSelfTest(void)
         while(1);
     }
     TRACE_DBG("\r\n=========================PCB温度自检==========================\r\n");
+    for(i=1; i<=10 ;i++)
+    {
+        f_Temp = Mod_GetTemper(&st_PcbTemper);
+        f_Aver += f_Temp;
+        TRACE_DBG("  >>第%02d次采样值:%.4f\n",i,f_Temp);
+        Bsp_DelayMs(100);
+    }
+    f_Aver = f_Aver/10;
+    TRACE_DBG("  >>平均采样值:%.4f\n",f_Aver);
+
+    Mod_GetTemper(&st_PcbTemper);
     TRACE_DBG("\r\n========================激光器温度自检========================\r\n");
     TRACE_DBG("\r\n========================传感器温度自检========================\r\n");
 

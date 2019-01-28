@@ -26,10 +26,10 @@ BOOL Bsp_SramSelfTest(void)
         volatile INT16U dat = (i%65000);
         volatile INT16U rdat;
         auin_ExsramSelfTest[i] = dat;
-        Bsp_DelayUs(5);
+        //Bsp_DelayUs(1);
         rdat = 0;
         rdat = auin_ExsramSelfTest[i];
-        Bsp_DelayUs(5);
+        //Bsp_DelayUs(1);
         if(rdat != dat)
         {
             TRACE_DBG("  >>ExsramSelfTest[%02X%04X]",(INT16U)(i/0x10000ul),(INT16U)(i%0x10000ul));
@@ -121,13 +121,13 @@ void Bsp_SramInit(void)
 														  // of 2 Emif Clock
 								 EMIF_ASYNC_RHOLD_8     | // Read Hold time
 														  // of 1 Emif Clock
-								 EMIF_ASYNC_RSTROBE_32   | // Read Strobe time
+								 EMIF_ASYNC_RSTROBE_16   | // Read Strobe time
 														  // of 4 Emif Clock
 								 EMIF_ASYNC_RSETUP_8    | // Read Setup time
 														  // of 1 Emif Clock
-								 EMIF_ASYNC_WHOLD_1     | // Write Hold time
+								 EMIF_ASYNC_WHOLD_8     | // Write Hold time
 														  // of 1 Emif Clock
-								 EMIF_ASYNC_WSTROBE_32   | // Write Strobe time
+								 EMIF_ASYNC_WSTROBE_16   | // Write Strobe time
 														  // of 1 Emif Clock
 								 EMIF_ASYNC_WSETUP_8    | // Write Setup time
 														  // of 1 Emif Clock

@@ -33,6 +33,19 @@ BOOL App_DeviceInit(void)
 
 BOOL App_DeviceStart(void)
 {
+/*
+    Bsp_AD5546Disable();
+    Bsp_AD7622Disable();
+    while(1)
+    {
+
+        Mod_UsbHostPoll();                  //USB主机接口处理
+        Mod_Usb4000Poll();                  //光谱仪处理
+        Mod_StdbusSlavePoll();              //通讯处理
+        Mod_StdbusMasterPoll();             //通讯处理
+        Mod_LaserPoll(&st_Laser);            //重新配置生成数组
+    }
+*/
     Mod_GenerateModWave(&st_ModWave);               //生成调制波数组
 
     st_DLia.f_PsdFreq = st_ModWave.f_SinFreq * 2;      // 放大正弦波的二次谐波
@@ -82,6 +95,9 @@ BOOL App_DevicrRun(void)
         FP32    pf_Res[200];
 
 
+
+        Bsp_RunLed(eLedOn);
+
         for(i = 0; i < st_Laser.pst_Wave->uin_SampleDot;i++)
         {
             //st_Laser.pst_Wave->puin_RecvBuff[i] -= 32768UL;
@@ -93,6 +109,8 @@ BOOL App_DevicrRun(void)
                      st_Laser.pst_Wave->uin_SampleDot,
                      pf_Res,
                      &uin_ResLen);
+
+        Bsp_RunLed(eLedOff);
 
         //打印吸收峰
         //for(i = 0; i < uin_ResLen; i++)
