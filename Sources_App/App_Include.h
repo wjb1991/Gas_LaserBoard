@@ -22,7 +22,8 @@ extern  "C" {                                  /* See Note #1.                  
 #include "Mod_Wave.h"
 #include "Mod_Laser.h"
 #include "Mod_DLia.h"
-
+#include "Mod_Transmission.h"
+#include "Mod_IRSpectrum.h"
 
 #include "Pub_Nihe.h"
 

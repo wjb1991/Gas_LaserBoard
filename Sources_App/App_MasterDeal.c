@@ -61,6 +61,7 @@ typedef enum
     CMD_RW_SPE_BOXCAR,
     CMD_R_SPE_SPECTRUM,
 
+    //新添加的命令
     CMD_RW_IR_RISEDOTS = 0xF0,
     CMD_RW_IR_HIGHDOTS,
     CMD_RW_IR_FALLDOTS,
@@ -81,7 +82,7 @@ typedef union {
 #ifdef __cplusplus
 #pragma DATA_SECTION("Exsram")
 #else
-//#pragma DATA_SECTION(un_Temp,"Exsram");
+#pragma DATA_SECTION(un_Temp,"Exsram");
 #endif
 ComTemp_t un_Temp;
 
@@ -526,7 +527,7 @@ BOOL App_StdbusMasterDealFram(StdbusFram_t* pst_Fram)
         else if(pst_Fram->uch_SubCmd == e_StdbusReadCmd)
         {
             pst_Fram->uin_PayLoadLenth = 4;
-            //Bsp_CnvFP32ToArr(&pst_Fram->puc_PayLoad[0],st_DLia.f_PsdPhase,FALSE);
+            Bsp_CnvFP32ToArr(&pst_Fram->puc_PayLoad[0],st_DLia.f_PsdPhase,FALSE);
             res = TRUE;    //应答
         }
         break;
@@ -553,6 +554,50 @@ BOOL App_StdbusMasterDealFram(StdbusFram_t* pst_Fram)
             res = TRUE;    //应答
         }
         break;
+
+//==================================================================================
+//                                  设置扫描平局次数
+//==================================================================================
+    case CMD_RW_IR_SCANAVG:
+        if(pst_Fram->uch_SubCmd == e_StdbusWriteCmd)
+        {
+            if(pst_Fram->uin_PayLoadLenth == 2)
+            {
+                st_IrSpectrum.uch_ScanAvg = Bsp_CnvArrToINT16U(&pst_Fram->puc_PayLoad[0],FALSE);
+                res = TRUE;    //应答
+            }
+        }
+        else if(pst_Fram->uch_SubCmd == e_StdbusReadCmd)
+        {
+            pst_Fram->uin_PayLoadLenth = 2;
+            Bsp_CnvINT16UToArr(&pst_Fram->puc_PayLoad[0],st_IrSpectrum.uch_ScanAvg,FALSE);
+            res = TRUE;    //应答
+        }
+        break;
+
+//==================================================================================
+//                              设置透过率计算系数
+//==================================================================================
+    case CMD_RW_IR_TRANSCOEFF:
+        if(pst_Fram->uch_SubCmd == e_StdbusWriteCmd)
+        {
+            if(pst_Fram->uin_PayLoadLenth == 4)
+            {
+                st_Trans.f_TransK = Bsp_CnvArrToFP32(&pst_Fram->puc_PayLoad[0],FALSE);
+
+                res = TRUE;    //应答
+            }
+        }
+        else if(pst_Fram->uch_SubCmd == e_StdbusReadCmd)
+        {
+            pst_Fram->uin_PayLoadLenth = 4;
+            Bsp_CnvFP32ToArr(&pst_Fram->puc_PayLoad[0],st_Trans.f_TransK ,FALSE);
+            res = TRUE;    //应答
+        }
+        break;
+
+
+
 
 
 //==================================================================================
@@ -646,50 +691,13 @@ BOOL App_StdbusMasterDealFram(StdbusFram_t* pst_Fram)
         }
         break;
 
-#if 0
-//==================================================================================
-//                                  设置波形平均次数
-//==================================================================================
-    case 0x27:
-        if(pst_Fram->uch_SubCmd == e_StdbusWriteCmd)
-        {
-            if(pst_Fram->uin_PayLoadLenth == 2)
-            {
-                INT16U uin_DataTemp;
-                uin_DataTemp = ((INT32U)pst_Fram->puc_PayLoad[1]<<8) + ((INT32U)pst_Fram->puc_PayLoad[0]);
-
-                if ((uin_DataTemp>=1)&&(uin_DataTemp<=9999))
-                {
-                    uin_SampleWaveTotalNum = uin_DataTemp;
-                    str_Sample.uin_WaveNum = 0;
-                    s_WriteOneIntToEeprom(uin_DataTemp,0xc8);
-                    uch_ThrowWaveEn = 1;//用于丢波形的功能开启  by guxiaohua
-                    uin_100usCount = 0;
-                    uin_1sCount = 0;
-                    s_ClrGlobalArray();  //s_DoubleGas_ClrGasConcenStruct();
-                    sprintf(buf,"浓度计算平均次数已被设置为: %u\r\n",uin_SampleWaveTotalNum);
-                    TRACE_DBG(buf);
-                }
-
-                res = TRUE;    //应答
-            }
-
-        }
-        else if(pst_Fram->uch_SubCmd == e_StdbusReadCmd)
-        {
-            //读命令是返回是否在调零
-            pst_Fram->uin_PayLoadLenth = 2;
-
-            INT16U j = uin_SampleWaveTotalNum;
-
-            pst_Fram->puc_PayLoad[1] = (INT8U)(j>>8);
-            pst_Fram->puc_PayLoad[0] = (INT8U)(j&0xff);
-
-            res = TRUE;    //应答
-        }
-        break;
 #endif
-#endif
+
+
+
+
+
+
 
 #if TRUE //读取光谱相关
 //==================================================================================
@@ -708,7 +716,7 @@ BOOL App_StdbusMasterDealFram(StdbusFram_t* pst_Fram)
                 Bsp_IntDis();
                 for(i = 0; i < st_ModWave.uin_SampleDot; i++)
                 {
-                    un_Temp.auin_Buff[i] = i;//st_ModWave.puin_RecvBuff[i];
+                    un_Temp.auin_Buff[i] = aui_TestSenseRecvBuff[i];//st_ModWave.puin_RecvBuff[i];
                 }
                 Bsp_IntEn();
 
@@ -733,9 +741,46 @@ BOOL App_StdbusMasterDealFram(StdbusFram_t* pst_Fram)
             res = TRUE;    //应答
         }
         break;
+//==================================================================================
+//                                   获取原始吸收峰波形
+//==================================================================================
+    case CMD_R_IR_RAW_SPECTRUM:
+        if(pst_Fram->uch_SubCmd == e_StdbusReadCmd)
+        {
+             //第一个字节是PageIndex  第二三个字节是ReadAddress 第四五个字节是ReadLenth
+            if(pst_Fram->uin_PayLoadLenth == 0)
+            {
+                //读取第一页返回数组长度
+                pst_Fram->uin_PayLoadLenth = 2;
+                Bsp_CnvINT16UToArr(&pst_Fram->puc_PayLoad[0],st_IrSpectrum.uin_SpectrumLen,FALSE);
+                /* 加载光谱到 缓冲区 确保不会再传输一半中 更新光谱*/
+                Bsp_IntDis();
+                for(i = 0; i < st_IrSpectrum.uin_SpectrumLen; i++)
+                {
+                    un_Temp.af_Buff[i] = st_IrSpectrum.af_ProceSpectrum[i];//st_ModWave.puin_RecvBuff[i];
+                }
+                Bsp_IntEn();
+
+                MASTERDEAL_DBG(">>MASTERDEAL_DBG: 加载原始吸收峰波形到缓冲区 %d个点\r\n",i);
+            }
+            else if(pst_Fram->uin_PayLoadLenth == 4)
+            {
+                uint16_t i = 0;
+                uint16_t uin_Offset = Bsp_CnvArrToINT16U(pst_Fram->puc_PayLoad,FALSE);
+                uint16_t uin_Lenth = Bsp_CnvArrToINT16U(pst_Fram->puc_PayLoad + 2,FALSE);
+
+                pst_Fram->uin_PayLoadLenth = 4 + uin_Lenth * 4;
+                for(i = 0; i<uin_Lenth;i++)
+                {
+                    Bsp_CnvFP32ToArr(&pst_Fram->puc_PayLoad[i * 4 + 4],un_Temp.af_Buff[uin_Offset + i],FALSE);
+                }
+
+                MASTERDEAL_DBG(">>MASTERDEAL_DBG: 发送缓冲区数据 Offset = %d 长度 = %d \r\n",uin_Offset,i);
+            }
+            res = TRUE;    //应答
+        }
+        break;
 #endif
-
-
 
     default:
         break;

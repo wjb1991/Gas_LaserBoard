@@ -119,13 +119,13 @@ void Bsp_SramInit(void)
 														  // Interface
 								 EMIF_ASYNC_TA_4        | // Turn Around time
 														  // of 2 Emif Clock
-								 EMIF_ASYNC_RHOLD_8     | // Read Hold time
+								 EMIF_ASYNC_RHOLD_2     | // Read Hold time
 														  // of 1 Emif Clock
 								 EMIF_ASYNC_RSTROBE_16   | // Read Strobe time
 														  // of 4 Emif Clock
 								 EMIF_ASYNC_RSETUP_8    | // Read Setup time
 														  // of 1 Emif Clock
-								 EMIF_ASYNC_WHOLD_8     | // Write Hold time
+								 EMIF_ASYNC_WHOLD_2     | // Write Hold time
 														  // of 1 Emif Clock
 								 EMIF_ASYNC_WSTROBE_16   | // Write Strobe time
 														  // of 1 Emif Clock

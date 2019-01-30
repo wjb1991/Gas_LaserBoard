@@ -76,9 +76,8 @@ BOOL App_DevicrRun(void)
         Mod_StdbusMasterPoll();             //通讯处理
     }
     //采集透过率高点
-
-
-
+    Bsp_DelayUs(1);
+    Mod_TransSmapleHigh();
 //==================================================================================
 //                                  等待进入下降沿
 //==================================================================================
@@ -88,35 +87,9 @@ BOOL App_DevicrRun(void)
 //==================================================================================
     while(st_Laser.e_State != eLaserLow){}
     //采集透过率高点
-
-    {
-        INT16U  i;
-        INT16U  uin_ResLen;
-        FP32    pf_Res[200];
-
-
-
-        Bsp_RunLed(eLedOn);
-
-        for(i = 0; i < st_Laser.pst_Wave->uin_SampleDot;i++)
-        {
-            //st_Laser.pst_Wave->puin_RecvBuff[i] -= 32768UL;
-            st_Laser.pst_Wave->puin_RecvBuff[i] = aui_TestSenseRecvBuff[i] - 32768UL;
-        }
-
-        Mod_DLiaCal(&st_DLia,
-                     (INT16S*)st_Laser.pst_Wave->puin_RecvBuff,
-                     st_Laser.pst_Wave->uin_SampleDot,
-                     pf_Res,
-                     &uin_ResLen);
-
-        Bsp_RunLed(eLedOff);
-
-        //打印吸收峰
-        //for(i = 0; i < uin_ResLen; i++)
-        //    TRACE_DBG("pf_Res[%04d] = %.6f\r\n",i,pf_Res[i]);
-
-    }
+    Bsp_DelayUs(1);
+    Mod_TransSmapleLow();
+    Mod_IRSpectrumPoll(&st_IrSpectrum);
 
 
 

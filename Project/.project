@@ -386,6 +386,11 @@
 			<locationURI>PARENT-1-PROJECT_LOC/Sources_Mod/Mod_Doublebuff.c</locationURI>
 		</link>
 		<link>
+			<name>Sources_Mod/Mod_IRSpectrum.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Sources_Mod/Mod_IRSpectrum.c</locationURI>
+		</link>
+		<link>
 			<name>Sources_Mod/Mod_Laser.c</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/Sources_Mod/Mod_Laser.c</locationURI>
@@ -414,6 +419,11 @@
 			<name>Sources_Mod/Mod_Temperature.c</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/Sources_Mod/Mod_Temperature.c</locationURI>
+		</link>
+		<link>
+			<name>Sources_Mod/Mod_Transmission.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Sources_Mod/Mod_Transmission.c</locationURI>
 		</link>
 		<link>
 			<name>Sources_Mod/Mod_Usb4000.c</name>

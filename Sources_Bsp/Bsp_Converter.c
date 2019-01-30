@@ -51,12 +51,12 @@ void Bsp_CnvINT16UToArr(INT8U *puc_Arr,INT16U uin_Data,BOOL b_Rev)
     INT16U i = uin_Data;
     if(b_Rev == FALSE)
     {
-        puc_Arr[1] = (INT8U)(i>>8);
+        puc_Arr[1] = (INT8U)(i>>8)&0xff;
         puc_Arr[0] = (INT8U)(i&0xff);
     }
     else
     {
-    	puc_Arr[0] = (INT8U)(i>>8);
+    	puc_Arr[0] = (INT8U)(i>>8)&0xff;
         puc_Arr[1] = (INT8U)(i&0xff);
     }
 }
@@ -82,16 +82,16 @@ void Bsp_CnvINT32UToArr(INT8U *puc_Arr,INT32U ul_Data,BOOL b_Rev)
     INT32U i = ul_Data;
     if(b_Rev == FALSE)
     {
-        puc_Arr[3] = (INT8U)(i>>24);
-        puc_Arr[2] = (INT8U)(i>>16);
-        puc_Arr[1] = (INT8U)(i>>8);
+        puc_Arr[3] = (INT8U)(i>>24)&0xff;
+        puc_Arr[2] = (INT8U)(i>>16)&0xff;
+        puc_Arr[1] = (INT8U)(i>>8)&0xff;
         puc_Arr[0] = (INT8U)(i&0xff);
     }
     else
     {
-        puc_Arr[0] = (INT8U)(i>>24);
-        puc_Arr[1] = (INT8U)(i>>16);
-        puc_Arr[2] = (INT8U)(i>>8);
+        puc_Arr[0] = (INT8U)(i>>24)&0xff;
+        puc_Arr[1] = (INT8U)(i>>16)&0xff;
+        puc_Arr[2] = (INT8U)(i>>8)&0xff;
         puc_Arr[3] = (INT8U)(i&0xff);
     }
 }
@@ -119,16 +119,16 @@ void Bsp_CnvFP32ToArr(INT8U* puc_Arr, FP32 f_Data,BOOL b_Rev)
     INT32U i = *((INT32U*)&f_Data);
     if(b_Rev == FALSE)
     {
-        puc_Arr[3] = (INT8U)(i>>24);
-        puc_Arr[2] = (INT8U)(i>>16);
-        puc_Arr[1] = (INT8U)(i>>8);
+        puc_Arr[3] = (INT8U)(i>>24)&0xff;
+        puc_Arr[2] = (INT8U)(i>>16)&0xff;
+        puc_Arr[1] = (INT8U)(i>>8)&0xff;
         puc_Arr[0] = (INT8U)(i&0xff);
     }
     else
     {
-        puc_Arr[0] = (INT8U)(i>>24);
-        puc_Arr[1] = (INT8U)(i>>16);
-        puc_Arr[2] = (INT8U)(i>>8);
+        puc_Arr[0] = (INT8U)(i>>24)&0xff;
+        puc_Arr[1] = (INT8U)(i>>16)&0xff;
+        puc_Arr[2] = (INT8U)(i>>8)&0xff;
         puc_Arr[3] = (INT8U)(i&0xff);   
     }
 }
@@ -160,24 +160,24 @@ void Bsp_CnvFP64ToArr(INT8U* puc_Arr, FP64 lf_Data,BOOL b_Rev)
     INT64U i = *((INT64U*)&lf_Data);
     if(b_Rev == FALSE)
     {
-        puc_Arr[7] = (INT8U)(i>>56);
-        puc_Arr[6] = (INT8U)(i>>48);
-        puc_Arr[5] = (INT8U)(i>>40);
-        puc_Arr[4] = (INT8U)(i>>32);
-        puc_Arr[3] = (INT8U)(i>>24);
-        puc_Arr[2] = (INT8U)(i>>16);
-        puc_Arr[1] = (INT8U)(i>>8);
+        puc_Arr[7] = (INT8U)(i>>56)&0xff;
+        puc_Arr[6] = (INT8U)(i>>48)&0xff;
+        puc_Arr[5] = (INT8U)(i>>40)&0xff;
+        puc_Arr[4] = (INT8U)(i>>32)&0xff;
+        puc_Arr[3] = (INT8U)(i>>24)&0xff;
+        puc_Arr[2] = (INT8U)(i>>16)&0xff;
+        puc_Arr[1] = (INT8U)(i>>8)&0xff;
         puc_Arr[0] = (INT8U)(i&0xff);
     }
     else
     {
-        puc_Arr[0] = (INT8U)(i>>56);
-        puc_Arr[1] = (INT8U)(i>>48);
-        puc_Arr[2] = (INT8U)(i>>40);
-        puc_Arr[3] = (INT8U)(i>>32);
-        puc_Arr[4] = (INT8U)(i>>24);
-        puc_Arr[5] = (INT8U)(i>>16);
-        puc_Arr[6] = (INT8U)(i>>8);
+        puc_Arr[0] = (INT8U)(i>>56)&0xff;
+        puc_Arr[1] = (INT8U)(i>>48)&0xff;
+        puc_Arr[2] = (INT8U)(i>>40)&0xff;
+        puc_Arr[3] = (INT8U)(i>>32)&0xff;
+        puc_Arr[4] = (INT8U)(i>>24)&0xff;
+        puc_Arr[5] = (INT8U)(i>>16)&0xff;
+        puc_Arr[6] = (INT8U)(i>>8)&0xff;
         puc_Arr[7] = (INT8U)(i&0xff);
     }
 }
