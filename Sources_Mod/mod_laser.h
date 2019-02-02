@@ -28,6 +28,8 @@ typedef struct __Laser {
 
     Tec_t * pst_Tec;					    /* TEC¾ä±ú */
 
+    FP32    f_Curr;                         /* ¼¤¹âÆ÷µçÁ÷ */
+
 }Laser_t;
 
 extern Laser_t    st_Laser;

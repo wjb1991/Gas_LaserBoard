@@ -18,10 +18,10 @@
 volatile INT16U auin_DoubleRecvBuff[2][DEF_SAMPLEDOT_MAX] = {0};    //
 
 static DoubleBuff_t st_RecvDoubleBuff = {
-    FALSE,                          /* 接受缓冲区切换标志  */
-    DEF_SAMPLEDOT_MAX,              /* 接受缓冲区长度      */
-    (void*)auin_DoubleRecvBuff[0],        /* 1接受缓冲区 乒乓切换 */
-    (void*)auin_DoubleRecvBuff[1],        /* 处理缓冲区 乒乓切换 */
+    FALSE,                                  /* 接受缓冲区切换标志  */
+    DEF_SAMPLEDOT_MAX,                      /* 接受缓冲区长度      */
+    (void*)auin_DoubleRecvBuff[0],         /* 1接受缓冲区 乒乓切换 */
+    (void*)auin_DoubleRecvBuff[1],         /* 处理缓冲区 乒乓切换 */
 };
 #endif
 
@@ -49,9 +49,10 @@ static void Mod_LowLevelInit(void* pv_Laser);
 //|----------|----------------------------------------------------------------------
 //| 函数设计 | wjb
 //==================================================================================
-void Mod_SetDcVolt(FP32 f_DcVolt)
+void Mod_SetDcVolt(FP32 f_DcVolt,FP32 f_AcVolt)
 {
     static FP32 f_NowDcVolt = 0.0;
+    static FP32 f_NowAcVolt = 0.0;
     INT16U    i,uin_Hex;
     FP32 f_Add;
     for(i = 1;i <= 100;i++)
@@ -59,11 +60,27 @@ void Mod_SetDcVolt(FP32 f_DcVolt)
         f_Add = (f_DcVolt - f_NowDcVolt) / 100.0 * i;
         uin_Hex  = Bsp_AD5663CHAVoltToHex(f_NowDcVolt + f_Add);
         Bsp_AD5663Set(eAD5663_CHA,uin_Hex);
+
+        f_Add = (f_AcVolt - f_NowAcVolt) / 100.0 * i;
+        uin_Hex  = Bsp_AD5546VoltToHex(f_NowAcVolt + f_Add);
+        Bsp_AD5546Set(uin_Hex);
+
         Bsp_DelayMs(2);
     }
     f_NowDcVolt = f_DcVolt;
+    f_NowAcVolt = f_AcVolt;
 }
 
+FP32 Mod_LaserGetCurr(void* pv_Laser)
+{
+    Laser_t* p = pv_Laser;
+    INT16U uin_Temp;
+    FP32   f_Temp;
+    uin_Temp = Bsp_Ltc1867SampleAvg(eLaserCurr,20);
+    f_Temp = Bsp_Ltc1867HexToVolt(uin_Temp);
+    p->f_Curr = f_Temp*1000 /1.5 /10;            //1.5是电压放大倍数 10是采样电阻
+    return p->f_Curr;
+}
 //==================================================================================
 //| 函数名称 | Mod_LaserEnable
 //|----------|----------------------------------------------------------------------
@@ -77,13 +94,13 @@ void Mod_SetDcVolt(FP32 f_DcVolt)
 //==================================================================================
 void Mod_LaserEnable(void* pv_Laser)
 {
+    INT16U i;
+
     Laser_t* p = pv_Laser;
 
     Bsp_Time0Stop();
-    Mod_RiseLevelInit(p);
 
-    Mod_TecEnable(p->pst_Tec,10);
-
+    Mod_TecEnable(p->pst_Tec,20);
     TRACE_DBG("\r\n=========================激光器启动=========================\r\n");
 
     TRACE_DBG("    >>关闭Mos管钳位\r\n");
@@ -93,9 +110,18 @@ void Mod_LaserEnable(void* pv_Laser)
     Bsp_SoftStart(eSofrtStartOn);
     
     TRACE_DBG("    >>设置直流偏置电压(100次分段)\r\n");
-    Mod_SetDcVolt(p->pst_Wave->f_HwDcOffset);
+    Mod_SetDcVolt(p->pst_Wave->f_HwDcOffset,p->pst_Wave->f_HwAcOffset);
+
+    TRACE_DBG("    >>打印10s激光器电流\r\n");
+    for(i = 1; i <= 10 ; i++)
+    {
+        FP32 f_Curr = Mod_LaserGetCurr(p);
+        TRACE_DBG("    >>第%02u秒激光器电流:%.4f(mA)\r\n",i,f_Curr);
+        Bsp_DelayMs(1000);
+    }
 
     TRACE_DBG("    >>启动定时器开启DMA输出\r\n");
+    Mod_RiseLevelInit(p);
     Bsp_Time0Start();
 }
 
@@ -116,7 +142,7 @@ void Mod_LaserDisable(void* pv_Laser)
     Bsp_Time0Stop();
     
     TRACE_DBG("    >>设置直流偏置电压为 (100次分段):0.0V \r\n");
-    Mod_SetDcVolt(0.0);
+    Mod_SetDcVolt(0.0,0.0);
 
     TRACE_DBG("    >>关闭激光器电流源...\r\n");
     Bsp_SoftStart(eSofrtStartOff);
@@ -134,6 +160,21 @@ void Mod_LaserPoll(void* pv_Laser)
         Mod_LaserDisable(&st_Laser);                        /* 关闭激光器                 */
         Mod_GenerateModWave(&st_ModWave);                 /* 生成正弦波 填充数组        */
         Mod_LaserEnable(&st_Laser);                         /* 启动激光器                 */
+    }
+    else
+    {
+        if(p->e_State == eLaserLow)
+        {
+            while(st_Laser.e_State == eLaserLow){}
+            Bsp_Time0Start();
+            //  <<在此处开启USB读取一张光谱
+        }
+        else if(p->e_State == eLaserRise)
+        {
+            Bsp_Time0Start();
+            //  <<在此处开启USB读取一张光谱
+            TRACE_DBG("    >>低电平时间处理超时\r\n");
+        }
     }
 }
 
@@ -169,7 +210,7 @@ void DMA_Handle(void)
     /* 低电平结束 初始化上升沿 */
     case eLaserLow:
         Mod_RiseLevelInit(&st_Laser);
-        break;
+        return; //低电平结束后不开启定时器
     default:
         Mod_RiseLevelInit(&st_Laser);
         break;
@@ -331,9 +372,6 @@ void Mod_LowLevelInit(void* pv_Laser)
     Bsp_Dma1HookRegister(&DMA_Handle);              //注册DMA2回调函数
     Bsp_Dma1IntEnable();                            //开启DMA2
 
-    if(p->pst_Wave->b_GenerateWave == TRUE)
-        Bsp_Dma1Stop();                             //关闭DA
-    else
-        Bsp_Dma1Start();                            //开启DA
+    Bsp_Dma1Start();                                //开启DA
     Bsp_Dma2Stop();                                 //关闭AD接受
 }

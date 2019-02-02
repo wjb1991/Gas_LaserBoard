@@ -14,8 +14,8 @@ BOOL App_DeviceInit(void)
     Mod_StdbusSlaveInit();
     Mod_StdbusMasterInit();
 
-    Mod_Usb4000Init();
-    Mod_UsbHostInit();
+    //Mod_Usb4000Init();
+    //Mod_UsbHostInit();
     Mod_TemperInit(&st_LaserTemper);
     Mod_TemperInit(&st_PcbTemper);
 
@@ -33,19 +33,6 @@ BOOL App_DeviceInit(void)
 
 BOOL App_DeviceStart(void)
 {
-/*
-    Bsp_AD5546Disable();
-    Bsp_AD7622Disable();
-    while(1)
-    {
-
-        Mod_UsbHostPoll();                  //USB主机接口处理
-        Mod_Usb4000Poll();                  //光谱仪处理
-        Mod_StdbusSlavePoll();              //通讯处理
-        Mod_StdbusMasterPoll();             //通讯处理
-        Mod_LaserPoll(&st_Laser);            //重新配置生成数组
-    }
-*/
     Mod_GenerateModWave(&st_ModWave);               //生成调制波数组
 
     st_DLia.f_PsdFreq = st_ModWave.f_SinFreq * 2;      // 放大正弦波的二次谐波
@@ -56,48 +43,71 @@ BOOL App_DeviceStart(void)
     return TRUE;
 }
 
-
-BOOL App_DevicrRun(void)
+BOOL App_DevicrRun1(void)
 {
-//==================================================================================
-//                                  等待进入上升沿
-//==================================================================================
-   while(st_Laser.e_State != eLaserRise){}
-   //需要在此 让USB4000开始采集一张光谱
+    while(st_Laser.e_State != eLaserLow){
 
-
-//==================================================================================
-//                                  等待进入高电平
-//==================================================================================
-    while(st_Laser.e_State != eLaserHigh){
-        Mod_UsbHostPoll();                  //USB主机接口处理
-        Mod_Usb4000Poll();                  //光谱仪处理
+        /* 一下处理 对实时性要求低 */
         Mod_StdbusSlavePoll();              //通讯处理
         Mod_StdbusMasterPoll();             //通讯处理
     }
+    Mod_IRSpectrumPoll(&st_IrSpectrum);  //吸收峰计算完成后 接受缓冲区就已经被释放了
+
+    Mod_LaserPoll(&st_Laser);             //重新配置生成数组 必须在通讯协议之前调用
+    Bsp_Time0Start();
+    return TRUE;
+}
+
+
+BOOL App_DevicrRun(void)
+{
+    INT16U i;
+//==================================================================================
+//                                  等待进入高电平
+//==================================================================================
+    while(st_Laser.e_State != eLaserHigh){}
     //采集透过率高点
     Bsp_DelayUs(1);
-    Mod_TransSmapleHigh();
-//==================================================================================
-//                                  等待进入下降沿
-//==================================================================================
-    while(st_Laser.e_State != eLaserFall){}
+    Mod_TransSmapleHigh();                  //3MS左右的样子
+
 //==================================================================================
 //                                  等待进入低电平
 //==================================================================================
     while(st_Laser.e_State != eLaserLow){}
     //采集透过率高点
     Bsp_DelayUs(1);
-    Mod_TransSmapleLow();
-    Mod_IRSpectrumPoll(&st_IrSpectrum);
+    Mod_TransSmapleLow();                   //3MS左右的样子
+
+    Bsp_RunLed(eLedOn);
+
+    for(i = 0; i < st_Laser.pst_Wave->uin_SampleDot;i++)
+    {
+        st_Laser.pst_Wave->puin_RecvBuff[i] -= 32768UL;
+        //st_Laser.pst_Wave->puin_RecvBuff[i] = aui_TestSenseRecvBuff[i] - 32768UL;       //使用调试数组计算
+    }
+
+    /* 调用锁相放大器 计算出吸收峰 吸收峰计算完成后 接受缓冲区就已经被释放了 */
+    Mod_DLiaCal(&st_DLia,
+                 (INT16S*)st_Laser.pst_Wave->puin_RecvBuff,
+                 st_Laser.pst_Wave->uin_SampleDot,
+                 st_IrSpectrum.af_RawSpectrum,
+                 &st_IrSpectrum.uin_SpectrumLen);
+    Bsp_RunLed(eLedOff);
 
 
 
-    Mod_UsbHostPoll();                  //USB主机接口处理
-    Mod_Usb4000Poll();                  //光谱仪处理
-    Mod_StdbusSlavePoll();              //通讯处理
-    Mod_StdbusMasterPoll();             //通讯处理
-    Mod_LaserPoll(&st_Laser);            //重新配置生成数组
+    /* 一下处理 对实时性要求低 即使到上升沿处执行也没有影响 */
+    Mod_StdbusSlavePoll();                  //通讯处理
+    Mod_StdbusMasterPoll();                 //通讯处理
+
+    Mod_LaserPoll(&st_Laser);
+
+    Mod_IRSpectrumPoll(&st_IrSpectrum);     //吸收峰计算完成后 接受缓冲区就已经被释放了
+
+
+    //Mod_UsbHostPoll();                  //USB主机接口处理
+    //Mod_Usb4000Poll();                  //光谱仪处理
+
 
     return TRUE;
 }

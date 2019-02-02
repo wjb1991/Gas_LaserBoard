@@ -25,7 +25,7 @@ void Bsp_AD5546Set(INT16U  data)
 	Bsp_IntEn();
 }
 
-INT16U Bsp_AD5546VoltToHex(FP64 volt)
+INT16U Bsp_AD5546VoltToHex(FP32 volt)
 {
 	INT16U res = 0;
 	if(volt < 0)
@@ -39,7 +39,7 @@ INT16U Bsp_AD5546VoltToHex(FP64 volt)
 
 FP32 Bsp_AD5546HexToVolt(INT16U hex)
 {
-	return((INT16U)((hex / 65535 * DEF_AD5546_REF_VOLTA) / DEF_AD5546_SCALE));
+	return(((FP32)hex) / 65535.0 * DEF_AD5546_REF_VOLTA / DEF_AD5546_SCALE);
 }
 
 void Bsp_AD5546Init(void)

@@ -21,8 +21,6 @@ START_ADD+0x4000 + 0x18, (uint32_t)(&st_ModWave.uin_HigtDot),   KIND_INT16U,1,  
 START_ADD+0x4000 + 0x1c, (uint32_t)(&st_ModWave.uin_FallDot),   KIND_INT16U,1,  LIMIT_RANGE,  DEF_FALLDOT_MIN,      DEF_FALLDOT_MAX,    1000,
 START_ADD+0x4000 + 0x20, (uint32_t)(&st_ModWave.uin_LowDot),    KIND_INT16U,1,  LIMIT_RANGE,  DEF_SAMPLEDOT_MIN,    DEF_SAMPLEDOT_MAX,  7000,
 START_ADD+0x4000 + 0x24, (uint32_t)(&st_LaserTEC.f_SetCtrlVolt),KIND_FP32,  1,  LIMIT_RANGE,  DEF_TECVOLT_MIN,	    DEF_TECVOLT_MAX, 	0.986,
-
-
 START_ADD+0x4000 + 0x28, (uint32_t)(&st_DLia.f_PsdPhase),       KIND_FP32,  1,  LIMIT_RANGE,  	  0, 					360, 		  0,
 
 

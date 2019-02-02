@@ -64,6 +64,7 @@ BOOL Mod_TecSetVolt(Tec_t* pst_Tec, FP32 f_CtrlVolt,BOOL b_WriteEPROM)
 //==================================================================================
 BOOL Mod_TecEnable(Tec_t* pst_Tec, INT16S uin_TimeOut)
 {
+    INT16U  uin_SuccessCnt = 0;
     INT16U  i = 0;
     TRACE_DBG("\r\n===========================TEC启动==========================\r\n");
     TRACE_DBG("    >>设置TEC温控电压\r\n");
@@ -78,27 +79,44 @@ BOOL Mod_TecEnable(Tec_t* pst_Tec, INT16S uin_TimeOut)
         {
             Bsp_DelayMs(1000);
             pst_Tec->f_FbTemper = Mod_GetTemper(pst_Tec->pst_Temper);
-            TRACE_DBG("    >>第%u秒TEC温度:%.4f\r\n",i,pst_Tec->f_FbTemper);
+            TRACE_DBG("    >>第%02u秒TEC温度:%.4f\r\n",i,pst_Tec->f_FbTemper);
             if(abs(pst_Tec->f_FbTemper - pst_Tec->f_SetTemper) <= 1.0)
             {
-                TRACE_DBG("    >>TEC到达设定温度\r\n");
+                if(++uin_SuccessCnt >= 5 )
+                {
+                    TRACE_DBG("    >>TEC到达设定温度\r\n");
+                    return TRUE;
+                }
                 return TRUE;
+            }
+            else
+            {
+
+                uin_SuccessCnt = 0;
             }
         }
     }
     else
     {
         TRACE_DBG("    >>TEC等待到达设定温度\r\n");
-        for(i =0; i < uin_TimeOut; i++)
+        for(i = 1; i <= uin_TimeOut; i++)
         {
             Bsp_DelayMs(1000);
             pst_Tec->f_FbTemper = Mod_GetTemper(pst_Tec->pst_Temper);
-            TRACE_DBG("    >>第%u秒TEC温度:%.4f\r\n",i,pst_Tec->f_FbTemper);
+            TRACE_DBG("    >>第%02u秒TEC温度:%.4f\r\n",i,pst_Tec->f_FbTemper);
             /* 到达设定温度 */
             if(abs(pst_Tec->f_FbTemper - pst_Tec->f_SetTemper) <= 1.0)
             {
-                TRACE_DBG("    >>TEC到达设定温度\r\n");
-                return TRUE;
+                if(++uin_SuccessCnt >= 5 )
+                {
+                    TRACE_DBG("    >>TEC到达设定温度\r\n");
+                    return TRUE;
+                }
+            }
+            else
+            {
+
+                uin_SuccessCnt = 0;
             }
         }
         TRACE_DBG("    >>TEC等待温度超时\r\n");

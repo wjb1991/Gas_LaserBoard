@@ -10017,7 +10017,7 @@ const INT16U aui_TestSenseRecvBuff[10000] = {
 
 //%低通 400k_200_9000_1_100
 int BL3 = 141;
-const FP32 B3[141] = {
+FP32 B3[141] = {
     4.510488361e-005,3.151876808e-005,4.228337275e-005,5.528879046e-005,7.08219668e-005,
     8.919350512e-005,0.0001107181306,0.0001357314613,0.0001645696757,0.0001975935302,
     0.0002351665607,0.0002776763286,0.0003255035263,0.0003790357732,0.0004386477231,
@@ -10050,7 +10050,7 @@ const FP32 B3[141] = {
 };
 //%低通 40k_10_500_1_100
 int BL4 = 253;
-const FP32 B4[253] = {
+FP32 B4[253] = {
     3.873295645e-005,1.505172077e-005,1.793723641e-005,2.116442738e-005,2.475648216e-005,
     2.874549318e-005,3.315357753e-005,3.801618732e-005,4.335475023e-005,4.920347419e-005,
     5.55862207e-005,6.25395478e-005,7.00904784e-005,7.827912486e-005,8.713448915e-005,
@@ -10190,6 +10190,7 @@ BOOL Mod_DLiaSetPhase(DLia_t* pst_DLia,FP32 f_Phase,BOOL b_WriteEPROM)
 //|----------|-------------------------------------------------------------------------------------- 
 //| 函数设计 | 
 //==================================================================================================
+#pragma CODE_SECTION(Mod_DLiaCal, ".TI.ramfunc");       //加载到Ram当中去运行 看情况使用
 BOOL Mod_DLiaCal(DLia_t* pst_DLia,INT16S* puin_InData, INT16U uin_InDataLen,FP32* pf_OutData,INT16U* puin_OutDataLen)
 {
     INT16U i;
@@ -10212,8 +10213,8 @@ BOOL Mod_DLiaCal(DLia_t* pst_DLia,INT16S* puin_InData, INT16U uin_InDataLen,FP32
        得到 VPP*[Cos(+-Phase)]/2 当两个信号相位相同时或接近是 Phase ~= 0   
        得到 VPP*[Cos(0)]/2 = VPP/2
     */
-    Mod_FIRFilter(pst_DLia->pf_Buff, uin_InDataLen, B3, BL3, 1, 5);				//
-    Mod_FIRFilter(pst_DLia->pf_Buff, uin_InDataLen/5, B4, BL4, 1, 10);			//
+    Mod_FIRFilter(pst_DLia->pf_Buff, uin_InDataLen, B3, BL3, 1, 10);				//
+    Mod_FIRFilter(pst_DLia->pf_Buff, uin_InDataLen/10, B4, BL4, 1, 5);			//
 
     /* 复制数据到输出数组 */
     if(pf_OutData != NULL)

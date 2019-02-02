@@ -59,6 +59,7 @@ Wave_t    st_ModWave = {
     auin_FallBuff,  /* 下降区段的数据缓冲 */
     
     0,              /* 硬件直流偏置电压 */
+    0,              /* 硬件直流偏置的交流分量 */
 
     auin_RecvBuff,  /* 接受波形缓冲 */
 };
@@ -136,6 +137,10 @@ BOOL Mod_GenerateModWave(void * pv_Wave)
         //喂狗
 	}
     
+    /* 并口DAC输出的直流分量 */
+    p->f_HwAcOffset = Bsp_AD5546HexToVolt(p->puin_RiseBuff[0]);
+
+
     /* 下降区的400个点 后续是否可调? */
 	f1 = p->puin_RiseBuff[p->uin_RiseDot-1];               //最后一个点
 	f2 = p->puin_RiseBuff[0];                              //最开始的点

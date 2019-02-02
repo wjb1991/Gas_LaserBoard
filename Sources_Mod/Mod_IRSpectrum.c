@@ -14,20 +14,6 @@ BOOL Mod_IRSpectrumPoll(IrSpectrum_t* pst_Spe)
 {
     INT16U  i;
 
-    for(i = 0; i < st_Laser.pst_Wave->uin_SampleDot;i++)
-    {
-        //st_Laser.pst_Wave->puin_RecvBuff[i] -= 32768UL;
-        st_Laser.pst_Wave->puin_RecvBuff[i] = aui_TestSenseRecvBuff[i] - 32768UL;       //使用调试数组计算
-    }
-
-    /* 调用锁相放大器 计算出吸收峰 */
-    Mod_DLiaCal(&st_DLia,
-                 (INT16S*)st_Laser.pst_Wave->puin_RecvBuff,
-                 st_Laser.pst_Wave->uin_SampleDot,
-                 pst_Spe->af_RawSpectrum,
-                 &pst_Spe->uin_SpectrumLen);
-                 
-
     if(++pst_Spe->uch_ScanCnt >= pst_Spe->uch_ScanAvg)
     {
         pst_Spe->uch_ScanCnt = 0;

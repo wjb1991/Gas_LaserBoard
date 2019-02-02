@@ -54,11 +54,11 @@ typedef struct {
     volatile INT16U* puin_FallBuff;      /* 下降区段的数据缓冲 */
     
     FP32    f_HwDcOffset;       /* 硬件直流偏置电压 */    
-
+    FP32    f_HwAcOffset;       /* 硬件直流偏置的交流分量 */
 
     volatile INT16U* puin_RecvBuff;      /* 接受波形 */
 
-    BOOL    b_GenerateWave;     /* 重新生成波形 */
+    volatile BOOL    b_GenerateWave;     /* 重新生成波形 */
 }Wave_t;
 
 extern Wave_t    st_ModWave;

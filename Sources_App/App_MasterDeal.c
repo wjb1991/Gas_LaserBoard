@@ -33,17 +33,15 @@ typedef enum
 
 
     //读取光谱相关
-    CMD_R_IR_ACWAVE = 0xC0,
+    CMD_R_IR_PROC_SPECTRUM = 0x3B,      //AC/DC吸收峰
+    CMD_R_IR_ZERO_SPECTRUM,             //调零 吸收峰
+    CMD_R_IR_GALIBGAS1_SPECTRUM,        //标定气体1 吸收峰
+    CMD_R_IR_GALIBGAS2_SPECTRUM,        //标定气体2 吸收峰
     CMD_R_IR_DCWAVE,
+    CMD_R_IR_ACWAVE = 0x40,
     CMD_R_IR_RAW_SPECTRUM,      //原始吸收峰
-    CMD_R_IR_PROC_SPECTRUM,     //AC/DC吸收峰
-    CMD_R_IR_ZERO_SPECTRUM,     //调零 吸收峰
-    CMD_R_IR_GALIBGAS1_SPECTRUM,//标定气体1 吸收峰
-    CMD_R_IR_GALIBGAS2_SPECTRUM,//标定气体2 吸收峰
     CMD_R_IR_BKG_SPECTRUM,      //背景 吸收峰
     CMD_R_IR_DIFF_SPECTRUM,     //差分 吸收峰
-
-
 
 
 
@@ -66,7 +64,6 @@ typedef enum
     CMD_RW_IR_HIGHDOTS,
     CMD_RW_IR_FALLDOTS,
     CMD_RW_IR_LOWDOTS,
-
 
 
 }eLasterBoardCmd;

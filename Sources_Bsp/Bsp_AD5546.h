@@ -13,7 +13,7 @@ extern "C" {
 
 FP32 Bsp_AD5546HexToVolt(INT16U hex);
 
-INT16U Bsp_AD5546VoltToHex(FP64 volt);
+INT16U Bsp_AD5546VoltToHex(FP32 volt);
 
 void Bsp_AD5546Disable(void);
 
