@@ -43,22 +43,6 @@ BOOL App_DeviceStart(void)
     return TRUE;
 }
 
-BOOL App_DevicrRun1(void)
-{
-    while(st_Laser.e_State != eLaserLow){
-
-        /* 一下处理 对实时性要求低 */
-        Mod_StdbusSlavePoll();              //通讯处理
-        Mod_StdbusMasterPoll();             //通讯处理
-    }
-    Mod_IRSpectrumPoll(&st_IrSpectrum);  //吸收峰计算完成后 接受缓冲区就已经被释放了
-
-    Mod_LaserPoll(&st_Laser);             //重新配置生成数组 必须在通讯协议之前调用
-    Bsp_Time0Start();
-    return TRUE;
-}
-
-
 BOOL App_DevicrRun(void)
 {
     INT16U i;
@@ -79,30 +63,15 @@ BOOL App_DevicrRun(void)
     Mod_TransSmapleLow();                   //3MS左右的样子
 
     Bsp_RunLed(eLedOn);
-
-    for(i = 0; i < st_Laser.pst_Wave->uin_SampleDot;i++)
-    {
-        st_Laser.pst_Wave->puin_RecvBuff[i] -= 32768UL;
-        //st_Laser.pst_Wave->puin_RecvBuff[i] = aui_TestSenseRecvBuff[i] - 32768UL;       //使用调试数组计算
-    }
-
-    /* 调用锁相放大器 计算出吸收峰 吸收峰计算完成后 接受缓冲区就已经被释放了 */
-    Mod_DLiaCal(&st_DLia,
-                 (INT16S*)st_Laser.pst_Wave->puin_RecvBuff,
-                 st_Laser.pst_Wave->uin_SampleDot,
-                 st_IrSpectrum.af_RawSpectrum,
-                 &st_IrSpectrum.uin_SpectrumLen);
+    Mod_SpectrumProcForIr(&st_IrSpectrum);     //吸收峰计算完成后 接受缓冲区就已经被释放了
     Bsp_RunLed(eLedOff);
 
-
-
-    /* 一下处理 对实时性要求低 即使到上升沿处执行也没有影响 */
     Mod_StdbusSlavePoll();                  //通讯处理
     Mod_StdbusMasterPoll();                 //通讯处理
 
     Mod_LaserPoll(&st_Laser);
 
-    Mod_IRSpectrumPoll(&st_IrSpectrum);     //吸收峰计算完成后 接受缓冲区就已经被释放了
+
 
 
     //Mod_UsbHostPoll();                  //USB主机接口处理

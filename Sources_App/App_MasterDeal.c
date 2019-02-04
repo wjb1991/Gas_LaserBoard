@@ -713,7 +713,7 @@ BOOL App_StdbusMasterDealFram(StdbusFram_t* pst_Fram)
                 Bsp_IntDis();
                 for(i = 0; i < st_ModWave.uin_SampleDot; i++)
                 {
-                    un_Temp.auin_Buff[i] = aui_TestSenseRecvBuff[i];//st_ModWave.puin_RecvBuff[i];
+                    un_Temp.auin_Buff[i] = st_ModWave.puin_RecvBuff[i];//aui_TestSenseRecvBuff[i];//
                 }
                 Bsp_IntEn();
 
@@ -777,6 +777,47 @@ BOOL App_StdbusMasterDealFram(StdbusFram_t* pst_Fram)
             res = TRUE;    //应答
         }
         break;
+//==================================================================================
+//                                   获取处理后吸收峰波形
+//==================================================================================
+    case CMD_R_IR_PROC_SPECTRUM:
+        if(pst_Fram->uch_SubCmd == e_StdbusReadCmd)
+        {
+             //第一个字节是PageIndex  第二三个字节是ReadAddress 第四五个字节是ReadLenth
+            if(pst_Fram->uin_PayLoadLenth == 0)
+            {
+                //读取第一页返回数组长度
+                pst_Fram->uin_PayLoadLenth = 2;
+                Bsp_CnvINT16UToArr(&pst_Fram->puc_PayLoad[0],st_IrSpectrum.uin_SpectrumLen,FALSE);
+                /* 加载光谱到 缓冲区 确保不会再传输一半中 更新光谱*/
+                Bsp_IntDis();
+                for(i = 0; i < st_IrSpectrum.uin_SpectrumLen; i++)
+                {
+                    un_Temp.af_Buff[i] = st_IrSpectrum.af_OriginalSpectrum[i];//st_ModWave.puin_RecvBuff[i];
+                }
+                Bsp_IntEn();
+
+                MASTERDEAL_DBG(">>MASTERDEAL_DBG: 加载处理后吸收峰波形到缓冲区 %d个点\r\n",i);
+            }
+            else if(pst_Fram->uin_PayLoadLenth == 4)
+            {
+                uint16_t i = 0;
+                uint16_t uin_Offset = Bsp_CnvArrToINT16U(pst_Fram->puc_PayLoad,FALSE);
+                uint16_t uin_Lenth = Bsp_CnvArrToINT16U(pst_Fram->puc_PayLoad + 2,FALSE);
+
+                pst_Fram->uin_PayLoadLenth = 4 + uin_Lenth * 4;
+                for(i = 0; i<uin_Lenth;i++)
+                {
+                    Bsp_CnvFP32ToArr(&pst_Fram->puc_PayLoad[i * 4 + 4],un_Temp.af_Buff[uin_Offset + i],FALSE);
+                }
+
+                MASTERDEAL_DBG(">>MASTERDEAL_DBG: 发送缓冲区数据 Offset = %d 长度 = %d \r\n",uin_Offset,i);
+            }
+            res = TRUE;    //应答
+        }
+        break;
+
+
 #endif
 
     default:

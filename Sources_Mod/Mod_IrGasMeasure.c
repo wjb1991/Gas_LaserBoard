@@ -7,18 +7,36 @@ IrSpectrum_t st_IrSpectrum = {
     {0},
     {0},
     {0},
+    NULL,
 };
 
 
-BOOL Mod_IRSpectrumPoll(IrSpectrum_t* pst_Spe)
+BOOL Mod_IrSpectrumProc(IrSpectrum_t* pst_Spe)
 {
     INT16U  i;
+
+    for(i = 0; i < st_Laser.pst_Wave->uin_SampleDot;i++)
+    {
+        st_Laser.pst_Wave->puin_RecvBuff[i] -= 32768UL;
+        //st_Laser.pst_Wave->puin_RecvBuff[i] = aui_TestSenseRecvBuff[i] - 32768UL;       //使用调试数组计算
+    }
+
+    /* 调用锁相放大器 计算出吸收峰 吸收峰计算完成后 接受缓冲区就已经被释放了 */
+    Mod_DLiaCal(&st_DLia,
+                 (INT16S*)st_Laser.pst_Wave->puin_RecvBuff,
+                 st_Laser.pst_Wave->uin_SampleDot,
+                 pst_Spe->af_RawSpectrum,
+                 &pst_Spe->uin_SpectrumLen);
+
+
+    for(i = 0; i < pst_Spe->uin_SpectrumLen; i++)
+        pst_Spe->af_SumSpectrum[i] += pst_Spe->af_RawSpectrum[i];        //累计求和光谱
 
     if(++pst_Spe->uch_ScanCnt >= pst_Spe->uch_ScanAvg)
     {
         pst_Spe->uch_ScanCnt = 0;
 
-        Mod_TransmissionPoll();                                                                      //计算透过率
+        Mod_TransmissionPoll();                                                                         //计算透过率
 
         for(i = 0; i < pst_Spe->uin_SpectrumLen; i++) 
         {
@@ -49,10 +67,6 @@ BOOL Mod_IRSpectrumPoll(IrSpectrum_t* pst_Spe)
             pst_Spe->af_OriginalSpectrum[i] = pst_Spe->af_ProceSpectrum[i] / f_AverDc;                  //ac/dc 修正光谱透过率
         }
     }
-    else
-    {
-        for(i = 0; i < pst_Spe->uin_SpectrumLen; i++) 
-            pst_Spe->af_SumSpectrum[i] += pst_Spe->af_RawSpectrum[i];        //累计求和光谱
-    }
+
     return TRUE;
 }
