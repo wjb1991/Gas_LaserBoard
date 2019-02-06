@@ -6,6 +6,11 @@ Device_t st_Device = {
 };
 
 
+void SpectrumReady(FP32* pf_Spectrum,INT16U uin_SpectrumLen)
+{
+    Mod_GasMeasForIr(&st_GasMeasForIr, pf_Spectrum, uin_SpectrumLen);
+}
+
 BOOL App_DeviceInit(void)
 {
     Bsp_Init();
@@ -16,8 +21,12 @@ BOOL App_DeviceInit(void)
 
     //Mod_Usb4000Init();
     //Mod_UsbHostInit();
+
     Mod_TemperInit(&st_LaserTemper);
     Mod_TemperInit(&st_PcbTemper);
+
+
+    st_IrSpectrum.cb_SpectrumReady = SpectrumReady;
 
     TRACE_DBG("==================================================================================\r\n");
     TRACE_DBG("| 程序名称 | GAS_LASER                                                            \r\n");
@@ -33,6 +42,7 @@ BOOL App_DeviceInit(void)
 
 BOOL App_DeviceStart(void)
 {
+    Mod_GasMeasInit(&st_GasMeasForIr);
     Mod_GenerateModWave(&st_ModWave);               //生成调制波数组
 
     st_DLia.f_PsdFreq = st_ModWave.f_SinFreq * 2;      // 放大正弦波的二次谐波
@@ -45,7 +55,6 @@ BOOL App_DeviceStart(void)
 
 BOOL App_DevicrRun(void)
 {
-    INT16U i;
 //==================================================================================
 //                                  等待进入高电平
 //==================================================================================

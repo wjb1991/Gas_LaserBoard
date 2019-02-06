@@ -9,6 +9,16 @@
 //==================================================================================
 #include "App_Include.h"
 
+#define DEF_TEMPER_DBG_EN           FALSE
+
+#if (DEF_TEMPER_DBG_EN == TRUE)
+    #define TEMPER_DBG(...)             do {                            \
+                                            Bsp_Printf(__VA_ARGS__);    \
+                                        }while(0)
+#else
+    #define TEMPER_DBG(...)
+#endif
+
 //---------------------------------TEC温度测量数据------------------------------//
 const FP32 f_TecTR_Temp[91]={
 -20,
@@ -417,6 +427,8 @@ FP32 Mod_GetTemper(Temper_t* pst_Temper)
     INT16U uin_Hex = Bsp_Ltc1867SampleAvg(pst_Temper->e_Channel,10);
     FP32 f_Aver = Bsp_Ltc1867HexToVolt(uin_Hex);
     pst_Temper->f_Temperature = s_fx(pst_Temper->af_K,pst_Temper->uch_Order,f_Aver);
+
+    TEMPER_DBG("  >>TempHex = 0x%04x, TemperVolt = %04f",uin_Hex,f_Aver);
     return pst_Temper->f_Temperature;
 }
 

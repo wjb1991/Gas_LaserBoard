@@ -69,6 +69,8 @@ BOOL Mod_SpectrumProcForIr(IrSpectrum_t* pst_Spe)
 
             pst_Spe->af_OriginalSpectrum[i] = pst_Spe->af_ProceSpectrum[i] / f_AverDc;                  //ac/dc 修正光谱透过率
         }
+        if(pst_Spe->cb_SpectrumReady != NULL)
+            pst_Spe->cb_SpectrumReady(pst_Spe->af_OriginalSpectrum,pst_Spe->uin_SpectrumLen);       //调用回调函数
     }
 
     return TRUE;

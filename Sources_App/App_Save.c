@@ -21,7 +21,16 @@ START_ADD+0x4000 + 0x18, (uint32_t)(&st_ModWave.uin_HigtDot),   KIND_INT16U,1,  
 START_ADD+0x4000 + 0x1c, (uint32_t)(&st_ModWave.uin_FallDot),   KIND_INT16U,1,  LIMIT_RANGE,  DEF_FALLDOT_MIN,      DEF_FALLDOT_MAX,    1000,
 START_ADD+0x4000 + 0x20, (uint32_t)(&st_ModWave.uin_LowDot),    KIND_INT16U,1,  LIMIT_RANGE,  DEF_SAMPLEDOT_MIN,    DEF_SAMPLEDOT_MAX,  7000,
 START_ADD+0x4000 + 0x24, (uint32_t)(&st_LaserTEC.f_SetCtrlVolt),KIND_FP32,  1,  LIMIT_RANGE,  DEF_TECVOLT_MIN,	    DEF_TECVOLT_MAX, 	0.986,
-START_ADD+0x4000 + 0x28, (uint32_t)(&st_DLia.f_PsdPhase),       KIND_FP32,  1,  LIMIT_RANGE,  	  0, 					360, 		  0,
+START_ADD+0x4000 + 0x28, (uint32_t)(&st_DLia.f_PsdPhase),       KIND_FP32,  1,  LIMIT_RANGE,  	  0, 					360, 		    0,
+
+START_ADD+0x4080 + 0x00, (uint32_t)(&st_IrSpectrum.uch_ScanAvg),KIND_INT16U,  1,  LIMIT_RANGE,      1,                    200,          5,
+START_ADD+0x4080 + 0x04, (uint32_t)(&st_GasMeasForIr.f_FilterCoeff),KIND_FP32,  1,  LIMIT_RANGE,      0,                    1,          0.5,
+START_ADD+0x4080 + 0x08, (uint32_t)(&st_GasMeasForIr.b_DiffMeasrue),KIND_INT16U,1,  LIMIT_RANGE,      0,                    1,          1,
+START_ADD+0x4080 + 0x0C, (uint32_t)(&st_GasCO2.f_CalibCon),     KIND_FP32,  1,  LIMIT_RANGE,      0,                   100.0,          0,
+START_ADD+0x4080 + 0x10, (uint32_t)(&st_GasCO.f_CalibCon),      KIND_FP32,  1,  LIMIT_RANGE,      0,                   100.0,          0,
+
+START_ADD+0x4100 + 0x00, (uint32_t)(&st_GasMeasForIr.af_ZeroSpectrum[0]),  KIND_FP32,  200,  LIMIT_RANGE,      -65535.0,          65535.0,         0,
+START_ADD+0x4500 + 0x00, (uint32_t)(&st_GasMeasForIr.af_CalibSpectrum[0]), KIND_FP32,  200,  LIMIT_RANGE,      -65535.0,          65535.0,         0,
 
 
 #if 0  
@@ -177,7 +186,7 @@ void InitParaFromEeprom(INT8U uch_InitFlag)
         	            WriteIntToEeprom(ul_SaveAddr+k*MW2,uin_Temp);
         	        }
         	    }
-        	    *(INT16U*)(p->ul_VariableAddr+k*MW2) = uin_Temp;
+        	    *(INT16U*)(p->ul_VariableAddr+k*MW1) = uin_Temp;
         	}
     	    break;
     	  
@@ -201,7 +210,7 @@ void InitParaFromEeprom(INT8U uch_InitFlag)
         	            WriteLongToEeprom(ul_SaveAddr+k*MW4,ul_Temp);
         	        }
         	    }
-        	    *(INT32U*)(p->ul_VariableAddr+k*MW4) = ul_Temp;
+        	    *(INT32U*)(p->ul_VariableAddr+k*MW2) = ul_Temp;
             }
     	    break;
     	  
@@ -224,7 +233,7 @@ void InitParaFromEeprom(INT8U uch_InitFlag)
         	            WriteFloatToEeprom(ul_SaveAddr+k*MW4,f_Temp);
         	        }
         	    }
-        	    *(FP32*)(p->ul_VariableAddr+k*MW4) = f_Temp;
+        	    *(FP32*)(p->ul_VariableAddr+k*MW2) = f_Temp;
             }
     	    break;
     	  case KIND_FP64:
@@ -244,7 +253,7 @@ void InitParaFromEeprom(INT8U uch_InitFlag)
         	            WriteDoubleToEeprom(ul_SaveAddr+k*MW8,lf_Temp);
         	        }
         	    }
-        	    *(FP64*)(p->ul_VariableAddr+k*MW8) = lf_Temp;
+        	    *(FP64*)(p->ul_VariableAddr+k*MW4) = lf_Temp;
             }
     	    break;
     	  default:
@@ -478,7 +487,7 @@ BOOL SaveToEepromExt(INT32U ul_VariableAddr,INT16U uin_Len)
 	  case KIND_INT16S:
 	    for(k=0; k < uin_Len; k++)
 	    {
-    	    uin_Temp = *(INT16U*)(ul_VariableAddr+k*MW2);
+    	    uin_Temp = *(INT16U*)(ul_VariableAddr+k*MW1);
     	    if(p->uch_LimitFlag == LIMIT_RANGE)
     	    {
     	        if(uin_Temp >= (INT16U)p->f_Min && uin_Temp <= (INT16U)p->f_Max)
@@ -502,7 +511,7 @@ BOOL SaveToEepromExt(INT32U ul_VariableAddr,INT16U uin_Len)
 	  case KIND_INT32S:
 	    for(k=0; k < p->uin_Len; k++)
 	    {
-    	    ul_Temp = *(INT32U*)(ul_VariableAddr+k*MW4);
+    	    ul_Temp = *(INT32U*)(ul_VariableAddr+k*MW2);
     	    if(p->uch_LimitFlag == LIMIT_RANGE)
     	    {
     	        if(ul_Temp >= (INT32U)p->f_Min && ul_Temp <= (INT32U)p->f_Max)
@@ -525,7 +534,7 @@ BOOL SaveToEepromExt(INT32U ul_VariableAddr,INT16U uin_Len)
 	  case KIND_FP32:
 	    for(k=0; k < p->uin_Len; k++)
 	    {
-    	    f_Temp = *(FP32*)(ul_VariableAddr+k*MW4);
+    	    f_Temp = *(FP32*)(ul_VariableAddr+k*MW2);
     	    if(p->uch_LimitFlag == LIMIT_RANGE)
     	    {
     	        if(f_Temp >= (FP32)p->f_Min && f_Temp <= (FP32)p->f_Max)
@@ -546,7 +555,7 @@ BOOL SaveToEepromExt(INT32U ul_VariableAddr,INT16U uin_Len)
 	  case KIND_FP64:
 	    for(k=0; k < p->uin_Len; k++)
 	    {
-    	    f_Temp = *(FP64*)(ul_VariableAddr+k*MW8);
+    	    f_Temp = *(FP64*)(ul_VariableAddr+k*MW4);
     	    if(p->uch_LimitFlag == LIMIT_RANGE)
     	    {
     	        if(f_Temp >= (FP64)p->f_Min && f_Temp <= (FP64)p->f_Max)

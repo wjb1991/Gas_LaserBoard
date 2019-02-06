@@ -101,6 +101,7 @@ void Mod_LaserEnable(void* pv_Laser)
     Bsp_Time0Stop();
 
     Mod_TecEnable(p->pst_Tec,20);
+
     TRACE_DBG("\r\n=========================激光器启动=========================\r\n");
 
     TRACE_DBG("    >>关闭Mos管钳位\r\n");
