@@ -396,6 +396,11 @@
 			<locationURI>PARENT-1-PROJECT_LOC/Sources_Mod/Mod_Laser.c</locationURI>
 		</link>
 		<link>
+			<name>Sources_Mod/Mod_Measure.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Sources_Mod/Mod_Measure.c</locationURI>
+		</link>
+		<link>
 			<name>Sources_Mod/Mod_SpectrumProc.c</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/Sources_Mod/Mod_SpectrumProc.c</locationURI>

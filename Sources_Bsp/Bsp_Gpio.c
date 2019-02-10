@@ -136,9 +136,3 @@ interrupt void xint3_isr(void)
 	Bsp_GpioEvent(36,(BOOL)GPIO_ReadPin(36));
 	PieCtrlRegs.PIEACK.all = PIEACK_GROUP12;
 }
-
-
-void Bsp_GpioEvent(INT32U ul_Pin, BOOL b_IsRising)
-{
-
-}

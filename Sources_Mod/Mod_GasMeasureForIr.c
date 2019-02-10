@@ -24,6 +24,7 @@ GasInfoForIr st_GasCO2 = {
     0,                              /* 系数R */
     
     0,                              /* 浓度 */
+    NULL,                           /* 浓度通知回调 */  
 };
 
 GasInfoForIr st_GasCO = {
@@ -39,6 +40,7 @@ GasInfoForIr st_GasCO = {
     0,                              /* 系数R */
     
     0,                              /* 浓度 */
+    NULL,                           /* 浓度通知回调 */  
 };
 
 GasMeasForIr_t st_GasMeasForIr = {
@@ -74,6 +76,14 @@ BOOL Mod_GasMeasInit(GasMeasForIr_t* pst_Meas)
         pst_Meas->af_DiffSpectrum[i] = 0;
     }
 
+    return TRUE;
+}
+
+BOOL Mod_GasMeasDoIdle(GasMeasForIr_t* pst_Meas)
+{
+    if(pst_Meas == NULL || pst_Meas->uin_ScanAvg != 0)
+        return FALSE;
+    pst_Meas->e_State = eGasIdle;
     return TRUE;
 }
 
@@ -126,9 +136,12 @@ BOOL Mod_GasMeasDoCalib(GasMeasForIr_t* pst_Meas,INT16U uin_Kind,INT16U uin_Coun
 
 BOOL Mod_GasMeasDoAbsMeasure(GasMeasForIr_t* pst_Meas)
 {
+    if(pst_Meas == NULL || pst_Meas->uin_ScanAvg != 0)
+        return FALSE;
     if(pst_Meas->b_DiffMeasrue == FALSE)
     {
         pst_Meas->e_State = eGasAbsMeasure;
+        GASMEASIR_DBG(">>GASMEASIR_DB: 进入绝对测量模式\r\n");
         return TRUE;
     }
     else
@@ -139,9 +152,12 @@ BOOL Mod_GasMeasDoAbsMeasure(GasMeasForIr_t* pst_Meas)
 
 BOOL Mod_GasMeasDoDiffMeasure(GasMeasForIr_t* pst_Meas)
 {
+    if(pst_Meas == NULL || pst_Meas->uin_ScanAvg != 0)
+        return FALSE;
     if(pst_Meas->b_DiffMeasrue == TRUE)
     {
         pst_Meas->e_State = eGasDiffMeasure;  
+        GASMEASIR_DBG(">>GASMEASIR_DB: 进入差分测量模式\r\n");
         return TRUE;
     }
     else
@@ -152,9 +168,13 @@ BOOL Mod_GasMeasDoDiffMeasure(GasMeasForIr_t* pst_Meas)
 
 BOOL Mod_GasMeasDoDiffBackground(GasMeasForIr_t* pst_Meas)
 {
+    if(pst_Meas == NULL || pst_Meas->uin_ScanAvg != 0)
+        return FALSE;
     if(pst_Meas->b_DiffMeasrue == TRUE)
     {
         pst_Meas->e_State = eGasDiffBackground;  
+
+        GASMEASIR_DBG(">>GASMEASIR_DB: 进入差分背景模式\r\n");
         return TRUE;
     }
     else
@@ -374,6 +394,9 @@ void Mod_GasMeasMeasure(GasMeasForIr_t* pst_Meas,GasInfoForIr* pst_Gas)
                      pst_Gas->uin_SpectrumRangeRight - pst_Gas->uin_SpectrumRangeLeft + 1,
                      &pst_Gas->f_K,&pst_Gas->f_B,&pst_Gas->f_R);
     pst_Gas->f_Con = pst_Gas->f_CalibCon * pst_Gas->f_K;
+    
+    if(pst_Gas->cb_Notification != NULL)
+        pst_Gas->cb_Notification(pst_Gas->f_Con);
 }
 
 ///////////////////////////////////////////////////////////////////

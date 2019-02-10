@@ -25,6 +25,7 @@ extern  "C" {                                  /* See Note #1.                  
 #include "Mod_Transmission.h"
 #include "Mod_SpectrumProc.h"
 #include "Mod_GasMeasureForIr.h"
+#include "Mod_Measure.h"
 
 #include "Pub_Nihe.h"
 

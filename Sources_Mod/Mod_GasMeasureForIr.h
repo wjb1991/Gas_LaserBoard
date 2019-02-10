@@ -24,6 +24,8 @@ typedef struct {
     FP32        f_R;                            /* 系数R */
     
     FP32        f_Con;                          /* 浓度 f_Concentration */
+    
+    void        (*cb_Notification)(FP32 f_Con); /* 浓度通知回调 */    
 }GasInfoForIr;
 
 typedef enum {

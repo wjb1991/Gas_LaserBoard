@@ -42,6 +42,7 @@ BOOL App_DeviceInit(void)
 
 BOOL App_DeviceStart(void)
 {
+    Mod_MeasureInit(&st_Measure);
     Mod_GasMeasInit(&st_GasMeasForIr);
     Mod_GenerateModWave(&st_ModWave);               //生成调制波数组
 
@@ -71,6 +72,8 @@ BOOL App_DevicrRun(void)
     Bsp_DelayUs(1);
     Mod_TransSmapleLow();                   //3MS左右的样子
 
+
+    Mod_MeasurePoll(&st_Measure);
     Bsp_RunLed(eLedOn);
     Mod_SpectrumProcForIr(&st_IrSpectrum);     //吸收峰计算完成后 接受缓冲区就已经被释放了
     Bsp_RunLed(eLedOff);
