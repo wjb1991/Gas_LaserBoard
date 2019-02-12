@@ -19,9 +19,6 @@ BOOL App_DeviceInit(void)
     Mod_StdbusSlaveInit();
     Mod_StdbusMasterInit();
 
-    //Mod_Usb4000Init();
-    //Mod_UsbHostInit();
-
     Mod_TemperInit(&st_LaserTemper);
     Mod_TemperInit(&st_PcbTemper);
 
@@ -35,6 +32,15 @@ BOOL App_DeviceInit(void)
     TRACE_DBG("==================================================================================\r\n");
 
     st_Device.e_State = e_DevSelfTest;
+
+    Mod_Usb4000Init();
+    Mod_UsbHostInit();
+
+    while(1)
+    {
+       Mod_UsbHostPoll();                  //USB主机接口处理
+       Mod_Usb4000Poll();                  //光谱仪处理
+    }
 
     return TRUE;
 }

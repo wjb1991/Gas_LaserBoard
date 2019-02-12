@@ -186,11 +186,11 @@ BOOL Mod_UsbHostInit(void)
 
     Bsp_UsbPow(eUsbPowOff);
 
-    //Bsp_DelayMs(200);
+    Bsp_DelayMs(200);
 
     Bsp_UsbPow(eUsbPowOn);
 
-    //Bsp_DelayMs(3000);
+    Bsp_DelayMs(3000);
 
     //
     // Initialize USB GPIO

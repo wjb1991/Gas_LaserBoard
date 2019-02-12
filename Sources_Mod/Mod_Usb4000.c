@@ -1,6 +1,6 @@
 #include "App_Include.h"
 
-#define DEF_USB4000_DBG_EN           FALSE
+#define DEF_USB4000_DBG_EN           TRUE
 
 #if (DEF_USB4000_DBG_EN == TRUE)
     #define USB4000_DBG(...)           do {                            \
