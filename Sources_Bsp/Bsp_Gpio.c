@@ -41,14 +41,14 @@ void Bsp_GpioInit(void)
     //PGA2_A1
 	GPIO_SetupPinMux(15, GPIO_MUX_CPU1, 0);
 	GPIO_SetupPinOptions(15, GPIO_OUTPUT, GPIO_PUSHPULL);
-/*
+/**/
 	//LASER_PR
 	GPIO_SetupPinMux(20, GPIO_MUX_CPU1, 0);
 	GPIO_SetupPinOptions(20, GPIO_OUTPUT, GPIO_PUSHPULL);
     //SOFT_START
     GPIO_SetupPinMux(21, GPIO_MUX_CPU1, 0);
     GPIO_SetupPinOptions(21, GPIO_OUTPUT, GPIO_PUSHPULL);
-*/
+
     //SWAP_SIG
 	GPIO_SetupPinMux(93, GPIO_MUX_CPU1, 0);
 	GPIO_SetupPinOptions(93, GPIO_OUTPUT, GPIO_PUSHPULL);

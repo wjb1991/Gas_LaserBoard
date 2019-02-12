@@ -18,7 +18,7 @@ void  Bsp_Init (void)
     Bsp_DelayMs(100);
 
     Bsp_GpioInit();
-    //Bsp_SramInit();
+    Bsp_SramInit();
     Bsp_SpibInit();       // init SPI
     Bsp_AdcInit();
 

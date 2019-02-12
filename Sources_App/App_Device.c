@@ -33,13 +33,13 @@ BOOL App_DeviceInit(void)
 
     st_Device.e_State = e_DevSelfTest;
 
-    Mod_Usb4000Init();
-    Mod_UsbHostInit();
+    //Mod_Usb4000Init();
+    //Mod_UsbHostInit();
 
-    while(1)
+    while(0)
     {
-       Mod_UsbHostPoll();                  //USB主机接口处理
-       Mod_Usb4000Poll();                  //光谱仪处理
+       //Mod_UsbHostPoll();                  //USB主机接口处理
+       //Mod_Usb4000Poll();                  //光谱仪处理
     }
 
     return TRUE;
