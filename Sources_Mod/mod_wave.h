@@ -15,7 +15,7 @@
 #define     DEF_SINVPP_MIN      (0.0)
 #define     DEF_SINVPP_MAX      (0.1)
 #define     DEF_TRGVPP_MIN      (0.0)
-#define     DEF_TRGVPP_MAX      (0.5)
+#define     DEF_TRGVPP_MAX      (0.6)
 #define     DEF_DCOFFSET_MIN    (0.0)    
 #define     DEF_DCOFFSET_MAX    (1.0)    
 #define     DEF_SINFREQ_MIN     (1.0)

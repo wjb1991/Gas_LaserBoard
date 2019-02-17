@@ -5,7 +5,7 @@
 
 #define  DEF_AD5546ADDR		(0x00300000)
 #define  DEF_AD5546_REF_VOLTA   (2.5)       //参考电压
-#define  DEF_AD5546_SCALE       (-5)        //运放放大倍数
+#define  DEF_AD5546_SCALE       (-4)        //运放放大倍数
 
 #ifdef __cplusplus
 extern "C" {
