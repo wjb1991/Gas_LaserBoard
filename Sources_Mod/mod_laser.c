@@ -37,6 +37,77 @@ static void Mod_HigtLevelInit(void* pv_Laser);
 static void Mod_FallLevelInit(void* pv_Laser);
 static void Mod_LowLevelInit(void* pv_Laser);
 
+//==================================================================================
+//| 函数名称 | DMA_Handle
+//|----------|----------------------------------------------------------------------
+//| 函数功能 | DMA2 DAC输出DMA中断 切换四个状态
+//|----------|----------------------------------------------------------------------
+//| 输入参数 | pv_Laser:句柄
+//|----------|----------------------------------------------------------------------
+//| 返回参数 | 无
+//|----------|----------------------------------------------------------------------
+//| 函数设计 | wjb
+//==================================================================================
+void DMA_Handle(void)
+{
+    Bsp_Time0Stop();
+    //TimeA上升 TimeB延时 TimeC下降 TimeD延时
+    switch(st_Laser.e_State)
+    {
+    /* 上升沿结束 初始化高电平 */
+    case eLaserRise:
+        Mod_HigtLevelInit(&st_Laser);
+        break;
+    /* 高电平结束 初始化下降沿 */
+    case eLaserHigh:
+        Mod_FallLevelInit(&st_Laser);
+        break;
+    /* 下降沿结束 初始化低电平 */
+    case eLaserFall:
+        Mod_LowLevelInit(&st_Laser);
+        break;
+    /* 低电平结束 初始化上升沿 但不开启*/
+    case eLaserLow:
+        Mod_RiseLevelInit(&st_Laser);
+        break;
+    /* 下降状态结束 初始化上升沿 但不开启*/
+    case eLaserStop:
+        Mod_RiseLevelInit(&st_Laser);
+        st_Laser.e_State = eLaserIdle;
+        return; //低电平结束后不开启定时器
+    default:
+        Mod_RiseLevelInit(&st_Laser);
+        break;
+    }
+    Bsp_Time0Start();
+}
+
+//==================================================================================
+//| 函数名称 | DMA_Handle1
+//|----------|----------------------------------------------------------------------
+//| 函数功能 | DMA1 ADC接受DMA中断 调试用
+//|----------|----------------------------------------------------------------------
+//| 输入参数 | pv_Laser:句柄
+//|----------|----------------------------------------------------------------------
+//| 返回参数 | 无
+//|----------|----------------------------------------------------------------------
+//| 函数设计 | wjb
+//==================================================================================
+void DMA_Handle1(void)
+{
+    static int j = 0;
+    if(j ==0 )
+    {
+        j = 1;
+        Bsp_AlarmLed(eLedOff);
+    }
+    else
+    {
+        j = 0;
+        Bsp_AlarmLed(eLedOn);
+    }
+}
+
 
 //==================================================================================
 //| 函数名称 | Mod_SetDcVolt
@@ -100,28 +171,28 @@ void Mod_LaserEnable(void* pv_Laser)
 
     Bsp_Time0Stop();
 
-    Mod_TecEnable(p->pst_Tec,20);
+    Mod_TecEnable(p->pst_Tec,2);
 
-    TRACE_DBG("\r\n=========================激光器启动=========================\r\n");
+    Bsp_Printf("\r\n=========================激光器启动=========================\r\n");
 
-    TRACE_DBG("    >>关闭Mos管钳位\r\n");
+    Bsp_Printf("    >>关闭Mos管钳位\r\n");
     Bsp_LaserPR(eLaserPrOff);
   
-    TRACE_DBG("    >>软启动激光器电源\r\n");
+    Bsp_Printf("    >>软启动激光器电源\r\n");
     Bsp_SoftStart(eSofrtStartOn);
     
-    TRACE_DBG("    >>设置直流偏置电压(100次分段)\r\n");
+    Bsp_Printf("    >>设置直流偏置电压(100次分段)\r\n");
     Mod_SetDcVolt(p->pst_Wave->f_HwDcOffset,p->pst_Wave->f_HwAcOffset);
 
-    TRACE_DBG("    >>打印10s激光器电流\r\n");
-    for(i = 1; i <= 10 ; i++)
+    Bsp_Printf("    >>打印10s激光器电流\r\n");
+    for(i = 1; i <= 1 ; i++)
     {
         FP32 f_Curr = Mod_LaserGetCurr(p);
-        TRACE_DBG("    >>第%02u秒激光器电流:%.4f(mA)\r\n",i,f_Curr);
+        Bsp_Printf("    >>第%02u秒激光器电流:%.4f(mA)\r\n",i,f_Curr);
         Bsp_DelayMs(1000);
     }
 
-    TRACE_DBG("    >>启动定时器开启DMA输出\r\n");
+    Bsp_Printf("    >>启动定时器开启DMA输出\r\n");
     Mod_RiseLevelInit(p);
     Bsp_Time0Start();
 }
@@ -142,16 +213,92 @@ void Mod_LaserDisable(void* pv_Laser)
     Bsp_Printf("\r\n=========================激光器关闭=========================\r\n");
     Bsp_Time0Stop();
     
-    TRACE_DBG("    >>设置直流偏置电压为 (100次分段):0.0V \r\n");
+    Bsp_Printf("    >>设置直流偏置电压为 (100次分段):0.0V \r\n");
     Mod_SetDcVolt(0.0,0.0);
 
-    TRACE_DBG("    >>关闭激光器电流源...\r\n");
+    Bsp_Printf("    >>关闭激光器电流源...\r\n");
     Bsp_SoftStart(eSofrtStartOff);
 
-    TRACE_DBG("    >>断开激光器保护继电器...\r\n");
+    Bsp_Printf("    >>断开激光器保护继电器...\r\n");
     Bsp_LaserPR(eLaserPrOn);
 }
 
+void Mod_LaserDoStop(void* pv_Laser)
+{
+    Bsp_Time0Stop();
+    Laser_t* p = pv_Laser;
+
+
+    switch (p->e_State)
+    {
+    /* 上升沿 根据当前电压回到0位*/
+    case eLaserRise:
+        {
+            TRACE_DBG("    >>上升沿 根据当前电压回到0位\r\n");
+
+            INT16U i = Bsp_Dma1GetTranCont();
+            INT16U hex = p->pst_Wave->puin_RiseBuff[i];
+            for(i = 0; i < p->pst_Wave->uin_FallDot;i++)
+            {
+                if (hex < p->pst_Wave->puin_FallBuff[i])
+                {
+                    break;
+                }
+            }
+
+            //TRACE_DBG("    >>i = %d, hex = %04x\r\n", i, hex);
+
+            Bsp_Dma1Stop();
+            Bsp_Dma2Stop();
+
+            Bsp_Dma1Init((void*)&p->pst_Wave->puin_FallBuff[i],
+                 (void*)DEF_AD5546ADDR,
+                 1,
+                 0,
+                 p->pst_Wave->uin_FallDot - i);                   //后DA
+
+            Bsp_Dma1HookRegister(&DMA_Handle);                  //注册DMA1回调函数
+            Bsp_Dma1IntEnable();                                //开启DMA1
+
+            Bsp_Dma1Start();                                    //开启DA
+            Bsp_Dma2Stop();                                     //关闭AD接受
+            p->e_State = eLaserStop;
+
+            //TRACE_DBG("    >>p->pst_Wave->uin_FallDot - i = %d, hex = %04x\r\n", p->pst_Wave->uin_FallDot - i, p->pst_Wave->puin_FallBuff[i]);
+        }
+        break;
+    /* 高电平 直接调用下降沿程序回到0位*/
+    case eLaserHigh:
+        TRACE_DBG("    >>高电平 直接调用下降沿程序回到0位\r\n");
+        Bsp_Dma1Stop();
+        Bsp_Dma2Stop();
+        Mod_FallLevelInit(&st_Laser);
+        p->e_State = eLaserStop;
+        break;
+    /* 下降沿 不改变 继续下降到0位*/
+    case eLaserFall:
+        TRACE_DBG("    >>下降沿 不改变 继续下降到0位\r\n");
+        p->e_State = eLaserStop;
+        break;
+    /* 低电平 按照上升沿方式配置 但不开启定时器直接退出 */
+    case eLaserLow:
+        TRACE_DBG("    >>低电平 按照上升沿方式配置 但不开启定时器直接退出\r\n");
+        Bsp_Dma1Stop();
+        Bsp_Dma2Stop();
+        Mod_RiseLevelInit(&st_Laser);
+        p->e_State = eLaserIdle;
+        return;
+    }
+
+    Bsp_Time0Start();
+}
+
+void Mod_LaserExitIdle(void* pv_Laser)
+{
+    Laser_t* p = pv_Laser;
+    Bsp_Time0Start();
+    p->e_State = eLaserRise;
+}
 
 void Mod_LaserPoll(void* pv_Laser)
 {
@@ -167,83 +314,19 @@ void Mod_LaserPoll(void* pv_Laser)
         if(p->e_State == eLaserLow)
         {
             while(st_Laser.e_State == eLaserLow){}
-            Bsp_Time0Start();
+            //Bsp_Time0Start();
             //  <<在此处开启USB读取一张光谱
         }
         else if(p->e_State == eLaserRise)
         {
-            Bsp_Time0Start();
+            //Bsp_Time0Start();
             //  <<在此处开启USB读取一张光谱
             TRACE_DBG("    >>低电平时间处理超时\r\n");
         }
     }
 }
 
-//==================================================================================
-//| 函数名称 | DMA_Handle
-//|----------|----------------------------------------------------------------------
-//| 函数功能 | DMA2 DAC输出DMA中断 切换四个状态 
-//|----------|----------------------------------------------------------------------
-//| 输入参数 | pv_Laser:句柄
-//|----------|----------------------------------------------------------------------
-//| 返回参数 | 无
-//|----------|----------------------------------------------------------------------
-//| 函数设计 | wjb
-//==================================================================================
-void DMA_Handle(void)
-{
-    Bsp_Time0Stop();
-    //TimeA上升 TimeB延时 TimeC下降 TimeD延时
-    switch(st_Laser.e_State)  
-    {
-    /* 上升沿结束 初始化高电平 */
-    case eLaserRise:
-        Mod_HigtLevelInit(&st_Laser);
-        break;
-    /* 高电平结束 初始化下降沿 */
-    case eLaserHigh:
-        Mod_FallLevelInit(&st_Laser);
-        break;
-    /* 下降沿结束 初始化低电平 */
-    case eLaserFall:
-        Mod_LowLevelInit(&st_Laser);
-        break;
-    /* 低电平结束 初始化上升沿 */
-    case eLaserLow:
-        Mod_RiseLevelInit(&st_Laser);
-        return; //低电平结束后不开启定时器
-    default:
-        Mod_RiseLevelInit(&st_Laser);
-        break;
-    }
-    Bsp_Time0Start();
-}
 
-//==================================================================================
-//| 函数名称 | DMA_Handle1
-//|----------|----------------------------------------------------------------------
-//| 函数功能 | DMA1 ADC接受DMA中断 调试用
-//|----------|----------------------------------------------------------------------
-//| 输入参数 | pv_Laser:句柄
-//|----------|----------------------------------------------------------------------
-//| 返回参数 | 无
-//|----------|----------------------------------------------------------------------
-//| 函数设计 | wjb
-//==================================================================================
-void DMA_Handle1(void)
-{
-    static int j = 0;
-    if(j ==0 )
-    {
-        j = 1;
-        Bsp_AlarmLed(eLedOff);
-    }
-    else
-    {
-        j = 0;
-        Bsp_AlarmLed(eLedOn);
-    }
-}
 
 //==================================================================================
 //| 函数名称 | Mod_RiseLevelInit
@@ -376,3 +459,6 @@ void Mod_LowLevelInit(void* pv_Laser)
     Bsp_Dma1Start();                                //开启DA
     Bsp_Dma2Stop();                                 //关闭AD接受
 }
+
+
+

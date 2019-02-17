@@ -36,7 +36,7 @@ void  Bsp_Init (void)
 
 
     /* µ÷ÊÔ¿Ú  RS485 */
-    COM1.ul_BaudRate   = 230400;
+    COM1.ul_BaudRate   = 1000000;
     COM1.ul_WordLength = UART_WORDLENGTH_8B;
     COM1.ul_StopBits   = UART_STOPBITS_1;
     COM1.ul_Parity     = UART_PARITY_NONE;

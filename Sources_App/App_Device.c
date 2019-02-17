@@ -1,15 +1,20 @@
 #include "App_Include.h"
 
+#define DEF_DEV_DBG_EN           TRUE
+
+#if (DEF_DEV_DBG_EN == TRUE)
+    #define DEV_DBG(...)             do {                            \
+                                            Bsp_Printf(__VA_ARGS__);    \
+                                        }while(0)
+#else
+    #define DEV_DBG(...)
+#endif
+
 Device_t st_Device = {
     e_DevInit,
     {e_NoAlarm,e_NoAlarm,e_NoAlarm,e_NoAlarm,e_NoAlarm},
 };
 
-
-void SpectrumReady(FP32* pf_Spectrum,INT16U uin_SpectrumLen)
-{
-    Mod_GasMeasForIr(&st_GasMeasForIr, pf_Spectrum, uin_SpectrumLen);
-}
 
 BOOL App_DeviceInit(void)
 {
@@ -22,8 +27,6 @@ BOOL App_DeviceInit(void)
     Mod_TemperInit(&st_LaserTemper);
     Mod_TemperInit(&st_PcbTemper);
 
-
-    st_IrSpectrum.cb_SpectrumReady = SpectrumReady;
 
     TRACE_DBG("==================================================================================\r\n");
     TRACE_DBG("| 程序名称 | GAS_LASER                                                            \r\n");
@@ -50,7 +53,7 @@ BOOL App_DeviceStart(void)
 {
     Mod_MeasureInit(&st_Measure);
     Mod_GasMeasInit(&st_GasMeasForIr);
-    Mod_GenerateModWave(&st_ModWave);               //生成调制波数组
+    Mod_GenerateModWave(&st_ModWave);                //生成调制波数组
 
     st_DLia.f_PsdFreq = st_ModWave.f_SinFreq * 2;      // 放大正弦波的二次谐波
     st_DLia.f_SampleFreq = st_ModWave.f_SampleFreq;    // 采样频率
@@ -65,33 +68,66 @@ BOOL App_DevicrRun(void)
 //==================================================================================
 //                                  等待进入高电平
 //==================================================================================
-    while(st_Laser.e_State != eLaserHigh){}
-    //采集透过率高点
-    Bsp_DelayUs(1);
-    Mod_TransSmapleHigh();                  //3MS左右的样子
+    while(st_Laser.e_State != eLaserHigh && st_Laser.e_State != eLaserStop){}
+    if(st_Laser.e_State == eLaserHigh)
+    {
+        //采集透过率高点
+        Bsp_DelayUs(1);
+        Mod_TransSmapleHigh();                  //3MS左右的样子
+    }
 
 //==================================================================================
 //                                  等待进入低电平
 //==================================================================================
-    while(st_Laser.e_State != eLaserLow){}
-    //采集透过率高点
-    Bsp_DelayUs(1);
-    Mod_TransSmapleLow();                   //3MS左右的样子
+    while(st_Laser.e_State != eLaserLow && st_Laser.e_State != eLaserStop && st_Laser.e_State != eLaserIdle){}
+    if(st_Laser.e_State == eLaserLow)
+    {
+        //采集透过率高点
+        Bsp_DelayUs(1);
+        Mod_TransSmapleLow();                   //3MS左右的样子
 
+        if(st_Laser.e_State != eLaserIdle)          //如果在采样透过率下限时发生触发则不发送数据
+        {
+            Mod_SpectrumPost((INT16U*)st_ModWave.puin_RecvBuff, st_ModWave.uin_SampleDot);   //接受缓冲区已经被释放了
+        }
+    }
 
-    Mod_MeasurePoll(&st_Measure);
-    Bsp_RunLed(eLedOn);
-    Mod_SpectrumProcForIr(&st_IrSpectrum);     //吸收峰计算完成后 接受缓冲区就已经被释放了
-    Bsp_RunLed(eLedOff);
-
+//==================================================================================
+//                                  其他逻辑处理
+//==================================================================================
     Mod_StdbusSlavePoll();                  //通讯处理
     Mod_StdbusMasterPoll();                 //通讯处理
+    Mod_MeasurePoll(&st_Measure);            //气体浓度分析
 
-    Mod_LaserPoll(&st_Laser);
+    Mod_LaserPoll(&st_Laser);                //等待进入下一个周期
 
+//==================================================================================
+//                                   核心计算
+//==================================================================================
+    Bsp_RunLed(eLedOn);
+    Mod_SpectrumProc(&st_IrSpectrum);
+    Bsp_RunLed(eLedOff);
 
+    /**
+    Bsp_DelayMs(38);
+    Mod_LaserDoStop(&st_Laser);
+    Bsp_DelayMs(10);
+    Mod_LaserExitIdle(&st_Laser);
 
+    DEV_DBG(">>GASMEASIR_DBG: %s浓度 = %f, K = %f, B = %f, R = %f\r\n",
+                  st_GasCO2.puch_Name,
+                  st_GasCO2.f_Con,
+                  st_GasCO2.f_K,
+                  st_GasCO2.f_B,
+                  st_GasCO2.f_R);
 
+    DEV_DBG(">>GASMEASIR_DBG: %s浓度 = %f, K = %f, B = %f, R = %f\r\n",
+                  st_GasCO.puch_Name,
+                  st_GasCO.f_Con,
+                  st_GasCO.f_K,
+                  st_GasCO.f_B,
+                  st_GasCO.f_R);
+                  */
     //Mod_UsbHostPoll();                  //USB主机接口处理
     //Mod_Usb4000Poll();                  //光谱仪处理
 

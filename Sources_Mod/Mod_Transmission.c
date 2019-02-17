@@ -128,3 +128,9 @@ FP32 Mod_TransmissionPoll(void)
 	return st_Trans.f_Transmission;
 }
 
+void Mod_TransmissionClear(void)
+{
+    st_Trans.uin_SampleCount = 0;
+    st_Trans.ul_TransSumAD1 = 0;
+    st_Trans.ul_TransSumAD2 = 0;
+}

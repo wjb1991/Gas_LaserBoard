@@ -17,6 +17,8 @@ typedef enum {
     eLaserHigh,
     eLaserFall,
     eLaserLow,
+    eLaserStop,//停止状态   同步信号接受到来车信号后 调制波下降到0的过程
+    eLaserIdle,//空闲状态   调制波下降到0后 等待 接受到车辆离去信号后 开始测量
 }eLaserState;
 
 
@@ -37,5 +39,6 @@ extern Laser_t    st_Laser;
 extern void Mod_LaserEnable(void* pv_Laser);
 extern void Mod_LaserDisable(void* pv_Laser);
 extern void Mod_LaserPoll(void* pv_Laser);
-
+extern void Mod_LaserDoStop(void* pv_Laser);
+extern void Mod_LaserExitIdle(void* pv_Laser);
 #endif

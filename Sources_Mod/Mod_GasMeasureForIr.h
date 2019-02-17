@@ -63,7 +63,7 @@ extern GasMeasForIr_t st_GasMeasForIr;
 
 BOOL Mod_GasMeasInit(GasMeasForIr_t* pst_Meas);
 
-BOOL Mod_GasMeasForIr(GasMeasForIr_t* pst_Meas,FP32* pf_Spectrum, INT16U uin_SpectrumLen);
+BOOL Mod_GasMeas(GasMeasForIr_t* pst_Meas,FP32* pf_Spectrum, INT16U uin_SpectrumLen);
 
 BOOL Mod_GasMeasDoAdjZero(GasMeasForIr_t* pst_Meas,INT16U uin_Count);
 

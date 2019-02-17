@@ -51,6 +51,11 @@ void Bsp_Dma1Init(void * source, void * dest, uint16_t srcSetp, uint16_t destSet
 	IER |= M_INT7;						 // Enable CPU INT6
 }
 
+INT16U Bsp_Dma1GetTranCont(void)
+{
+    return DmaRegs.CH1.TRANSFER_SIZE - DmaRegs.CH1.TRANSFER_COUNT;
+}
+
 void Bsp_Dma1Start(void)
 {
     EALLOW;
@@ -61,7 +66,8 @@ void Bsp_Dma1Start(void)
 void Bsp_Dma1Stop(void)
 {
     EALLOW;
-    DmaRegs.CH1.CONTROL.bit.RUN = 0;
+    DmaRegs.CH1.CONTROL.bit.HALT = 1;
+    DmaRegs.CH1.CONTROL.bit.SOFTRESET = 1;
     EDIS;
 }
 

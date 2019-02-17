@@ -62,6 +62,11 @@ GasMeasForIr_t st_GasMeasForIr = {
     
 };
 
+void SpectrumReady(FP32* pf_Spectrum,INT16U uin_SpectrumLen)
+{
+    Mod_GasMeas(&st_GasMeasForIr, pf_Spectrum, uin_SpectrumLen);
+}
+
 BOOL Mod_GasMeasInit(GasMeasForIr_t* pst_Meas)
 {
     INT16U i = 0;
@@ -75,6 +80,8 @@ BOOL Mod_GasMeasInit(GasMeasForIr_t* pst_Meas)
         pst_Meas->af_BkgSpectrum[i] = 0;
         pst_Meas->af_DiffSpectrum[i] = 0;
     }
+
+    st_IrSpectrum.cb_SpectrumReady = SpectrumReady;
 
     return TRUE;
 }
@@ -103,31 +110,35 @@ BOOL Mod_GasMeasDoCalib(GasMeasForIr_t* pst_Meas,INT16U uin_Kind,INT16U uin_Coun
 {
     if(pst_Meas == NULL || pst_Meas->uin_ScanAvg != 0)
         return FALSE;
-    if(uin_Kind == 1)
+    if(uin_Kind == eGasCalibGas1)
     {
         pst_Meas->e_State = eGasCalibGas1;
         pst_Meas->uin_ScanAvg = uin_Count;
         pst_Meas->uin_Cnt = 0;
         pst_Meas->pst_Gas1->f_CalibCon = f_CalibCon1;
+        SaveToEeprom((INT32U)(&st_GasCO2.f_CalibCon));
         GASMEASIR_DBG(">>GASMEASIR_DB: 进入标定模式 标定气体1 %d次平均\r\n",pst_Meas->uin_ScanAvg);
         return TRUE;
     }
-    else if(uin_Kind == 2)
+    else if(uin_Kind == eGasCalibGas2)
     {
         pst_Meas->e_State = eGasCalibGas2;
         pst_Meas->uin_ScanAvg = uin_Count;
         pst_Meas->uin_Cnt = 0;
         pst_Meas->pst_Gas2->f_CalibCon = f_CalibCon2;
+        SaveToEeprom((INT32U)(&st_GasCO.f_CalibCon));
         GASMEASIR_DBG(">>GASMEASIR_DB: 进入标定模式 标定气体2 %d次平均\r\n",pst_Meas->uin_ScanAvg);
         return TRUE;
     }
-    else if(uin_Kind == 3)
+    else if(uin_Kind == eGasCalibGasAll)
     {
         pst_Meas->e_State = eGasCalibGasAll;
         pst_Meas->uin_ScanAvg = uin_Count;
         pst_Meas->uin_Cnt = 0;
         pst_Meas->pst_Gas1->f_CalibCon = f_CalibCon1;  
         pst_Meas->pst_Gas2->f_CalibCon = f_CalibCon2;  
+        SaveToEeprom((INT32U)(&st_GasCO2.f_CalibCon));
+        SaveToEeprom((INT32U)(&st_GasCO.f_CalibCon));
         GASMEASIR_DBG(">>GASMEASIR_DB: 进入标定模式 标定所有气体 %d次平均\r\n",pst_Meas->uin_ScanAvg);
         return TRUE;
     }
@@ -219,7 +230,7 @@ static void Mod_GasMeasAdjZero(GasMeasForIr_t* pst_Meas)
             pst_Meas->e_State = eGasAbsMeasure;
 
 
-        GASMEASIR_DBG(">>GASMEASIR_DB: 调零完成");
+        GASMEASIR_DBG(">>GASMEASIR_DB: 调零完成\r\n");
     }
 
 }
@@ -266,7 +277,7 @@ static void Mod_GasMeasCalib(GasMeasForIr_t* pst_Meas, GasInfoForIr* pst_Gas)
         else
             pst_Meas->e_State = eGasAbsMeasure;
 
-        GASMEASIR_DBG(">>GASMEASIR_DB: 标定完成");
+        GASMEASIR_DBG(">>GASMEASIR_DB: 标定完成\r\n");
     }
 }
 
@@ -323,7 +334,7 @@ static void Mod_GasMeasCalibAll(GasMeasForIr_t* pst_Meas, GasInfoForIr* pst_Gas1
         else
             pst_Meas->e_State = eGasAbsMeasure;
 
-        GASMEASIR_DBG(">>GASMEASIR_DB: 标定完成");
+        GASMEASIR_DBG(">>GASMEASIR_DB: 标定完成\r\n");
     }
 }
 
@@ -365,14 +376,14 @@ void LinearRegression(FP32* f_X, FP32* f_Y, INT16U uin_SampleNum,
     {
         f_Lyy += f_Y[i]*f_Y[i];
     }
-    f_Lxx -= uin_SampleNum*f_Xavg*f_Xavg;
+    f_Lyy -= uin_SampleNum*f_Yavg*f_Yavg;
       
     f_Lxy = 0;
     for (i = 0; i < uin_SampleNum; i++ )
     {
         f_Lxy += f_X[i]*f_Y[i];
     }
-    f_Lxx -= uin_SampleNum*f_Xavg*f_Yavg;
+    f_Lxy -= uin_SampleNum*f_Xavg*f_Yavg;
 
 ///////////////////////////////////////////////////////////////////
 //                          计算K B R
@@ -395,8 +406,24 @@ void Mod_GasMeasMeasure(GasMeasForIr_t* pst_Meas,GasInfoForIr* pst_Gas)
                      &pst_Gas->f_K,&pst_Gas->f_B,&pst_Gas->f_R);
     pst_Gas->f_Con = pst_Gas->f_CalibCon * pst_Gas->f_K;
     
+    /* 浓度限制 */
+    if(pst_Gas->f_Con > 100)
+        pst_Gas->f_Con = 100;
+    if(pst_Gas->f_Con < 0)
+        pst_Gas->f_Con = 0;
+
     if(pst_Gas->cb_Notification != NULL)
         pst_Gas->cb_Notification(pst_Gas->f_Con);
+
+#if 0
+    GASMEASIR_DBG(">>GASMEASIR_DBG: %s浓度 = %f, K = %f, B = %f, R = %f\r\n",
+                  pst_Gas->puch_Name,
+                  pst_Gas->f_Con,
+                  pst_Gas->f_K,
+                  pst_Gas->f_B,
+                  pst_Gas->f_R);
+#endif
+
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -439,7 +466,7 @@ static void Mod_GasMeasBackground(GasMeasForIr_t* pst_Meas)
     }
 }
        
-BOOL Mod_GasMeasForIr(GasMeasForIr_t* pst_Meas,FP32* pf_Spectrum, INT16U uin_SpectrumLen)
+BOOL Mod_GasMeas(GasMeasForIr_t* pst_Meas,FP32* pf_Spectrum, INT16U uin_SpectrumLen)
 {
     pst_Meas->pf_ProcSpectrum = pf_Spectrum;
     pst_Meas->uin_SpectrumLen = uin_SpectrumLen;

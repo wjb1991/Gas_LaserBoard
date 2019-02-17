@@ -117,18 +117,20 @@ void Bsp_GpioInit(void)
 
 interrupt void xint1_isr(void)
 {
+
 	// Acknowledge this interrupt to get more from group 1
 	Bsp_GpioEvent(55,(BOOL)GPIO_ReadPin(55));
 
-	PieCtrlRegs.PIEACK.all = PIEACK_GROUP1;
+    PieCtrlRegs.PIEACK.all = PIEACK_GROUP1;
 }
 
 
 interrupt void xint2_isr(void)
 {
+
 	// Acknowledge this interrupt to get more from group 1
 	Bsp_GpioEvent(56,(BOOL)GPIO_ReadPin(56));
-	PieCtrlRegs.PIEACK.all = PIEACK_GROUP1;
+    PieCtrlRegs.PIEACK.all = PIEACK_GROUP1;
 }
 
 

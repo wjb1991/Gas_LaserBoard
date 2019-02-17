@@ -60,12 +60,14 @@ void TimeOut(void* timer)
     {
     case e_MeasureWait:
         PostMsg((void*)e_MeasureTimeOut);	//等待超时
+        Mod_MeasurePoll(&st_Measure);       //立即处理
         break;
     case e_MeasureDead:
         PostMsg((void*)e_MeasureSample);	//死区结束开始采样
+        Mod_MeasurePoll(&st_Measure);       //立即处理
         break;
     case e_MeasureSample:
-        PostMsg((void*)e_MeasureCal);		//采样结束开始计算
+        PostMsg((void*)e_MeasureCal);		//采样结束开始计算  等待到主程序处理
         break;
     }
 }
@@ -167,34 +169,29 @@ void Mod_MeasurePoll(Measure_t* pst_Meas)
     switch(e_Msg)
     {
     case e_MeasureWait:
-        MEASURE_DBG(">>MEASURE DBG:   车辆进入 准备开始测量\r\n");
-
         pst_Meas->e_State = e_MeasureWait;
-        StartTimeOutCheck(5000);                                    //开始超时检测
-        Mod_GasMeasDoDiffMeasure(&st_GasMeasForIr);                 //开始差分采样
+        StartTimeOutCheck(5000);                                        //开始超时检测 10Km/h 经过所需时间200ms 180Km/h经过所需时间10ms/h
+        Mod_GasMeasDoDiffMeasure(&st_GasMeasForIr);                  //开始差分采样
 
+        MEASURE_DBG(">>MEASURE DBG:   车辆进入 准备开始测量\r\n");
         break;
     case e_MeasureDead:
-        MEASURE_DBG(">>MEASURE DBG:   车辆离去 死区延时\r\n");
-
 		pst_Meas->e_State = e_MeasureDead;
-
-        StopTimeOutCheck();                                     	//停止超时检测
+        StopTimeOutCheck();                                     	    //停止超时检测
         if ( pst_Meas->ul_DeadTime > 0 )
         {
-			StartTimeOutCheck(pst_Meas->ul_DeadTime);               //开始死区记时
+			StartTimeOutCheck(pst_Meas->ul_DeadTime);                   //开始死区记时
+	        MEASURE_DBG(">>MEASURE DBG:   车辆离去 死区延时\r\n");
         }
         else
         {
-			PostMsg((void*)e_MeasureSample);	                    //死区结束开始采样
+			PostMsg((void*)e_MeasureSample);	                        //死区结束开始采样
+			Mod_MeasurePoll(pst_Meas);                                  //递归注意
         }
-
         break;
 
     case e_MeasureSample:
-        MEASURE_DBG(">>MEASURE DBG:   开始采样\r\n");
         pst_Meas->e_State = e_MeasureSample;
-
         pst_Meas->st_SampleCO.ul_Len = 0;
         pst_Meas->st_SampleCO2.ul_Len = 0;
 
@@ -207,10 +204,10 @@ void Mod_MeasurePoll(Measure_t* pst_Meas)
         {
             PostMsg((void*)e_MeasureCal);							//死区结束开始采样
         }
+        MEASURE_DBG(">>MEASURE DBG:   开始采样\r\n");
         break;
     case e_MeasureCal:
         MEASURE_DBG(">>MEASURE DBG:   开启计算\r\n");
-
         if(st_Measure.b_IsStaticMeasure == TRUE)
         {
 			PostMsg((void*)e_MeasureSample);						//继续采样开始采样
@@ -303,14 +300,19 @@ void Bsp_GpioEvent(INT32U ul_Pin, BOOL b_IsRising)
     {
         if(st_Measure.e_State == e_MeasureIdle)
         {
+            Mod_LaserDoStop(&st_Laser);           //停止激光器扫描
             PostMsg((void*)e_MeasureWait);
+            Mod_MeasurePoll(&st_Measure);           //立即处理
         }
     }
     else if(ul_Pin == 56  && b_IsRising == FALSE )   //车位离开第二个传感器
     {
         if(st_Measure.e_State == e_MeasureWait)
         {
+            Mod_LaserExitIdle(&st_Laser);
+            Mod_TransmissionClear();
             PostMsg((void*)e_MeasureDead);
+            Mod_MeasurePoll(&st_Measure);           //立即处理
         }
     }
 #else

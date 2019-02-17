@@ -51,11 +51,6 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>usbhspe.c</name>
-			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/Sources_Mod/usbhspe.c</locationURI>
-		</link>
-		<link>
 			<name>usblib.lib</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/F2837xD_common/lib/usblib.lib</locationURI>
@@ -438,12 +433,12 @@
 		<link>
 			<name>Sources_Mod/Mod_Usb4000.c</name>
 			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/Sources_Mod/Mod_Usb4000.c</locationURI>
+			<location>D:/Wangjiangbo/Documents/GitHub/__CCS/Gas_LaserBoard/Sources_Mod/Mod_Usb4000.c</location>
 		</link>
 		<link>
 			<name>Sources_Mod/Mod_UsbHost.c</name>
 			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/Sources_Mod/Mod_USBHost.c</locationURI>
+			<location>D:/Wangjiangbo/Documents/GitHub/__CCS/Gas_LaserBoard/Sources_Mod/Mod_USBHost.c</location>
 		</link>
 		<link>
 			<name>Sources_Mod/Mod_Wave.c</name>

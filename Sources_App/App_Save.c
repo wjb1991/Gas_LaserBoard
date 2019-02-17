@@ -28,13 +28,13 @@ START_ADD+0x4080 + 0x04, (uint32_t)(&st_GasMeasForIr.f_FilterCoeff),KIND_FP32,  
 START_ADD+0x4080 + 0x08, (uint32_t)(&st_GasMeasForIr.b_DiffMeasrue),KIND_INT16U,1,  LIMIT_RANGE,      0,                    1,          1,
 START_ADD+0x4080 + 0x0C, (uint32_t)(&st_GasCO2.f_CalibCon),     KIND_FP32,  1,  LIMIT_RANGE,      0,                   100.0,          0,
 START_ADD+0x4080 + 0x10, (uint32_t)(&st_GasCO.f_CalibCon),      KIND_FP32,  1,  LIMIT_RANGE,      0,                   100.0,          0,
-START_ADD+0x4080 + 0x14, (uint32_t)(&st_Trans.f_TransK),      KIND_FP32,  1,  LIMIT_RANGE,      0,                   100.0,          0.3,
+START_ADD+0x4000 + 0x14, (uint32_t)(&st_Trans.f_TransK),      KIND_FP32,  1,  LIMIT_RANGE,      0,                   100.0,          0.3,
 
 
-START_ADD+0x4080 + 0x14, (uint32_t)(&st_Measure.ul_DeadTime),   KIND_INT32U,  1,  LIMIT_RANGE,      0,          1000,               0,
-START_ADD+0x4080 + 0x18, (uint32_t)(&st_Measure.ul_MesureTime), KIND_INT32U,  1,  LIMIT_RANGE,      0,          100000,          1000,
-START_ADD+0x4080 + 0x1C, (uint32_t)(&st_Measure.uin_InvalidDots),KIND_INT16U,  1,  LIMIT_RANGE,      0,          1000,               0,
-START_ADD+0x4080 + 0x20, (uint32_t)(&st_Measure.uin_ActiveDots), KIND_INT16U,  1,  LIMIT_RANGE,      0,          100000,          1000,
+START_ADD+0x4080 + 0x44, (uint32_t)(&st_Measure.ul_DeadTime),   KIND_INT32U,  1,  LIMIT_RANGE,      0,          1000,               0,
+START_ADD+0x4080 + 0x48, (uint32_t)(&st_Measure.ul_MesureTime), KIND_INT32U,  1,  LIMIT_RANGE,      0,          100000,          1000,
+START_ADD+0x4080 + 0x4C, (uint32_t)(&st_Measure.uin_InvalidDots),KIND_INT16U,  1,  LIMIT_RANGE,      0,          1000,               0,
+START_ADD+0x4080 + 0x40, (uint32_t)(&st_Measure.uin_ActiveDots), KIND_INT16U,  1,  LIMIT_RANGE,      0,          100000,          1000,
 
 
 START_ADD+0x4100 + 0x00, (uint32_t)(&st_GasMeasForIr.af_ZeroSpectrum[0]),  KIND_FP32,  200,  LIMIT_RANGE,      -65535.0,          65535.0,         0,

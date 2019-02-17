@@ -21,7 +21,7 @@ extern void Mod_TransInit(void);
 extern void Mod_TransSmapleHigh(void);
 extern void Mod_TransSmapleLow(void);
 extern FP32 Mod_TransmissionPoll(void);
-
+extern void Mod_TransmissionClear(void);
 
 #endif
 

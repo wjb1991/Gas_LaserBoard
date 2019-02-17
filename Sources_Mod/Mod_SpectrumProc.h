@@ -13,7 +13,7 @@ typedef struct {
 }IrSpectrum_t;
 
 extern IrSpectrum_t st_IrSpectrum;
-
-BOOL Mod_SpectrumProcForIr(IrSpectrum_t* pst_Spe);
+BOOL Mod_SpectrumPost(INT16U* pui_Spectrum, INT16U uin_Len);
+BOOL Mod_SpectrumProc(IrSpectrum_t* pst_Spe);
 
 #endif

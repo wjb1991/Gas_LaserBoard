@@ -10190,7 +10190,7 @@ BOOL Mod_DLiaSetPhase(DLia_t* pst_DLia,FP32 f_Phase,BOOL b_WriteEPROM)
 //|----------|-------------------------------------------------------------------------------------- 
 //| 函数设计 | 
 //==================================================================================================
-#pragma CODE_SECTION(Mod_DLiaCal, ".TI.ramfunc");       //加载到Ram当中去运行 看情况使用
+//#pragma CODE_SECTION(Mod_DLiaCal, ".TI.ramfunc");       //加载到Ram当中去运行 看情况使用
 BOOL Mod_DLiaCal(DLia_t* pst_DLia,INT16S* puin_InData, INT16U uin_InDataLen,FP32* pf_OutData,INT16U* puin_OutDataLen)
 {
     INT16U i;

@@ -16,6 +16,8 @@ void Bsp_Dma1IntDisable(void);
 
 void Bsp_Dma1HookRegister( void (*hook)(void));
 
+INT16U Bsp_Dma1GetTranCont(void);
+
 
 void Bsp_Dma2Init(void * source, void * dest, uint16_t srcSetp, uint16_t destSetp, uint16_t len);
 

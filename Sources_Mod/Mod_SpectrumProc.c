@@ -1,5 +1,16 @@
 #include "App_Include.h"
 
+#define     DEF_SPE_DBG_EN           FALSE
+
+#if (DEF_SPE_DBG_EN == TRUE)
+    #define SPE_DBG(...)            do {                            \
+                                            Bsp_Printf(__VA_ARGS__);    \
+                                        }while(0)
+#else
+    #define SPE_DBG(...)
+#endif
+
+
 IrSpectrum_t st_IrSpectrum = {
     5,          //uch_ScanAvg
     0,          //uch_ScanCnt
@@ -11,24 +22,66 @@ IrSpectrum_t st_IrSpectrum = {
     NULL,       //cb_SpectrumReady
 };
 
+#ifdef __cplusplus
+#pragma DATA_SECTION("Exsram")
+#else
+//#pragma DATA_SECTION(auin_RecvBuff,"Exsram");
+#endif
+volatile static INT16U aui_SpeBuff[DEF_SAMPLEDOT_MAX] = {0};
+volatile static INT16U uin_SpeLen = 0;
 
-BOOL Mod_SpectrumProcForIr(IrSpectrum_t* pst_Spe)
+BOOL Mod_SpectrumPost(INT16U* pui_Spectrum, INT16U uin_Len)
 {
     INT16U  i;
+    if(pui_Spectrum == NULL || uin_Len == 0)
+        return FALSE;
 
-    for(i = 0; i < st_Laser.pst_Wave->uin_SampleDot;i++)
+    for(i = 0; i < uin_Len ; i++)
     {
-        st_Laser.pst_Wave->puin_RecvBuff[i] -= 32768UL;
+        aui_SpeBuff[i] = pui_Spectrum[i];
+    }
+    uin_SpeLen = uin_Len;
+    SPE_DBG("uin_SpeLen = %d,uin_Len = %d\r\n",uin_SpeLen,uin_Len);
+    return TRUE;
+}
+
+BOOL Mod_SpectrumPend(INT16U** ppui_Spectrum, INT16U* pui_Len)
+{
+    if(ppui_Spectrum == NULL || pui_Len == NULL || uin_SpeLen == 0)
+        return FALSE;
+    SPE_DBG("uin_SpeLen = %d\r\n",uin_SpeLen);
+    *ppui_Spectrum = (INT16U*)aui_SpeBuff;
+    *pui_Len = uin_SpeLen;
+    uin_SpeLen = 0;
+    return TRUE;
+}
+
+
+BOOL Mod_SpectrumProc(IrSpectrum_t* pst_Spe)
+{
+    INT16U  i;
+    INT16U* pui_Spectrum = NULL;
+    INT16U ui_Len = 0;
+
+
+    if(Mod_SpectrumPend(&pui_Spectrum,&ui_Len) == FALSE)
+        return FALSE;
+
+    SPE_DBG("Mod_SpectrumProc\r\n");
+
+    for(i = 0; i < ui_Len;i++)
+    {
+        pui_Spectrum[i] -= 32768UL;
         //st_Laser.pst_Wave->puin_RecvBuff[i] = aui_TestSenseRecvBuff[i] - 32768UL;       //使用调试数组计算
     }
 
-    /* 调用锁相放大器 计算出吸收峰 吸收峰计算完成后 接受缓冲区就已经被释放了 */
+    SPE_DBG("ui_Len = %d\r\n",ui_Len);
+    /* 调用锁相放大器 计算出吸收峰 吸收峰计算完成后 接受缓冲区就已经被释放了*/
     Mod_DLiaCal(&st_DLia,
-                 (INT16S*)st_Laser.pst_Wave->puin_RecvBuff,
-                 st_Laser.pst_Wave->uin_SampleDot,
+                 (INT16S*)pui_Spectrum,
+                 ui_Len,
                  pst_Spe->af_RawSpectrum,
                  &pst_Spe->uin_SpectrumLen);
-
 
     for(i = 0; i < pst_Spe->uin_SpectrumLen; i++)
         pst_Spe->af_SumSpectrum[i] += pst_Spe->af_RawSpectrum[i];        //累计求和光谱
