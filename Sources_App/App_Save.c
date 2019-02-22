@@ -22,6 +22,8 @@ START_ADD+0x4000 + 0x1c, (uint32_t)(&st_ModWave.uin_FallDot),   KIND_INT16U,1,  
 START_ADD+0x4000 + 0x20, (uint32_t)(&st_ModWave.uin_LowDot),    KIND_INT16U,1,  LIMIT_RANGE,  DEF_SAMPLEDOT_MIN,    DEF_SAMPLEDOT_MAX,  7000,
 START_ADD+0x4000 + 0x24, (uint32_t)(&st_LaserTEC.f_SetCtrlVolt),KIND_FP32,  1,  LIMIT_RANGE,  DEF_TECVOLT_MIN,	    DEF_TECVOLT_MAX, 	0.986,
 START_ADD+0x4000 + 0x28, (uint32_t)(&st_DLia.f_PsdPhase),       KIND_FP32,  1,  LIMIT_RANGE,  	  0, 					360, 		    0,
+START_ADD+0x4000 + 0x2C, (uint32_t)(&st_Gain.in_AcGain),        KIND_INT16U,1,  LIMIT_RANGE,      1,                    8,              1,
+START_ADD+0x4000 + 0x30, (uint32_t)(&st_Gain.in_DcGain),        KIND_INT16U,1,  LIMIT_RANGE,      1,                    3,              1,
 
 START_ADD+0x4080 + 0x00, (uint32_t)(&st_IrSpectrum.uch_ScanAvg),KIND_INT16U,  1,  LIMIT_RANGE,      1,                    200,          5,
 START_ADD+0x4080 + 0x04, (uint32_t)(&st_GasMeasForIr.f_FilterCoeff),KIND_FP32,  1,  LIMIT_RANGE,      0,                    1,          0.5,

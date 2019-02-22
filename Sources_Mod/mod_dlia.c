@@ -9,7 +9,6 @@
 //==================================================================================
 #include "App_Include.h"
 
-
 const INT16U aui_TestSenseRecvBuff[10000] = {
         25839,
         34198,
@@ -10122,7 +10121,7 @@ DLia_t st_DLia = {
 };
 
 void Mod_FIRFilter(FP32 * pf_Input, INT16U uin_Lenth, const FP32* pf_Factor,INT16U uin_Order,INT16U uin_Avg,INT16U uin_Spand);
-
+void Mod_FIRFilterDsp(FP32 * pf_Input, INT16U uin_Lenth, const FP32* pf_Factor,INT16U uin_Order,INT16U uin_Avg,INT16U uin_Spand);
 //==================================================================================================
 //| 函数名称 | Mod_DLiaGeneratePsdWave
 //|----------|--------------------------------------------------------------------------------------
@@ -10147,10 +10146,25 @@ BOOL Mod_DLiaGeneratePsdWave(DLia_t* pst_DLia)
 
 	for(i = 0; i < pst_DLia->uin_SampleMaxDots; i++)
 	{
-		f1 = sin( 2 * mPI * (fw * i * fdt) + fdp);
+		//f1 = __sin((fw * i * fdt + __mpy2pif32(pst_DLia->f_PsdPhase/360)));
+        f1 = sin( 2 * mPI * (fw * i * fdt) + fdp);
+
 		pst_DLia->pf_Buff[i] = (FP32)f1;
         //喂狗
 	}
+#if 0
+	//使用硬件TMU生成正弦波
+    fdt = 1.0 / (pst_DLia->f_SampleFreq * 1000);        /* 计算采样周期 S*/
+    fdp = pst_DLia->f_PsdPhase / 360;                   /* 转换角度为弧度 */
+    fw = pst_DLia->f_PsdFreq * 1000;                    /* 计算正弦波频率 HZ*/
+    //fdp = pst_DLia->f_PsdPhase/360;
+    for(i = 0; i < pst_DLia->uin_SampleMaxDots; i++)
+    {
+        f1 = __sinpuf32((fw * i * fdt + fdp));
+        pst_DLia->pf_Buff[i] = (FP32)f1;
+        //喂狗
+    }
+#endif
 	return TRUE;
 }
 
@@ -10213,13 +10227,14 @@ BOOL Mod_DLiaCal(DLia_t* pst_DLia,INT16S* puin_InData, INT16U uin_InDataLen,FP32
        得到 VPP*[Cos(+-Phase)]/2 当两个信号相位相同时或接近是 Phase ~= 0   
        得到 VPP*[Cos(0)]/2 = VPP/2
     */
+    Bsp_RunLed(eLedOn);
     Mod_FIRFilter(pst_DLia->pf_Buff, uin_InDataLen, B3, BL3, 1, 10);				//
     Mod_FIRFilter(pst_DLia->pf_Buff, uin_InDataLen/10, B4, BL4, 1, 5);			//
-
+    Bsp_RunLed(eLedOff);
     /* 复制数据到输出数组 */
     if(pf_OutData != NULL)
-    for(i = 0; i < uin_InDataLen/5/10; i++)
-        pf_OutData[i] = pst_DLia->pf_Buff[i];
+        for(i = 0; i < uin_InDataLen/5/10; i++)
+            pf_OutData[i] = pst_DLia->pf_Buff[i];
 
     if(puin_OutDataLen != NULL)
         *puin_OutDataLen = uin_InDataLen/5/10;
@@ -10240,6 +10255,7 @@ BOOL Mod_DLiaCal(DLia_t* pst_DLia,INT16S* puin_InData, INT16U uin_InDataLen,FP32
 //|----------|-------------------------------------------------------------------------------------- 
 //| 函数设计 | 
 //==================================================================================================
+#pragma CODE_SECTION(Mod_DLiaCal, ".TI.ramfunc");       //加载到Ram当中去运行 看情况使用
 void Mod_FIRFilter(FP32 * pf_Input, INT16U uin_Lenth, const FP32* pf_Factor,INT16U uin_Order,INT16U uin_Avg,INT16U uin_Spand)
 {
 	INT16U i,j;
@@ -10294,3 +10310,81 @@ void Mod_FIRFilter(FP32 * pf_Input, INT16U uin_Lenth, const FP32* pf_Factor,INT1
 	}
 }
 
+#if 0
+//==================================================================================================
+//| 函数名称 | Mod_FIRFilter
+//|----------|--------------------------------------------------------------------------------------
+//| 函数功能 | FIR滤波器
+//|----------|--------------------------------------------------------------------------------------
+//| 输入参数 | pf_Input: FIR采样点输入   uin_Lenth:采样点长度
+//|          | pf_Factor: FIR系数        uin_Order: FIR阶数
+//|          | uin_Avg: 平均滤波         uin_Spand: 结果数组缩放比例 5 = 1000个点缩放为200个点
+//|----------|--------------------------------------------------------------------------------------
+//| 返回参数 | 无
+//|----------|--------------------------------------------------------------------------------------
+//| 函数设计 |
+//==================================================================================================
+void Mod_FIRFilterDsp(FP32 * pf_Input, INT16U uin_Lenth, const FP32* pf_Factor,INT16U uin_Order,INT16U uin_Avg,INT16U uin_Spand)
+{
+    INT16U i,j;
+    FP32 f_tmp = 0;
+    FP32* pf_tmp = NULL;
+
+    float dbuffer[300];
+    float xn,yn;
+
+    FIR_FP  firFP = FIR_FP_DEFAULTS;
+    FIR_FP_Handle hnd_firFP = &firFP;
+
+    // FIR Generic Filter Initialization
+    hnd_firFP->order       = uin_Order;
+    hnd_firFP->dbuffer_ptr = dbuffer;
+    hnd_firFP->coeff_ptr   = (float *)pf_Factor;
+    hnd_firFP->init(hnd_firFP);
+
+    for(i=0; i < uin_Lenth; i++)
+    {
+        hnd_firFP->input = pf_Input[i];
+        hnd_firFP->calc(&firFP);
+        yn = hnd_firFP->output;
+        pf_Input[i] = yn;
+    }
+
+    /* 填充最后几个无法正常Fir的点 */
+    for(i = uin_Lenth - uin_Order; i < uin_Lenth; i++)
+    {
+        pf_Input[i]= pf_Input[uin_Lenth - uin_Order -1];
+    }
+
+    /* 平均滤波 */
+    //mpy_SP_RVxRV_2(y, x1, x2, SIZE);
+    if(uin_Avg > 1)
+    {
+        for( i = 0; i<(uin_Lenth - uin_Avg); i++)
+        {
+            pf_tmp = &pf_Input[i];
+            f_tmp = 0;
+            for(j = 0; j < uin_Avg; j++)
+            {
+                f_tmp += pf_tmp[j];
+            }
+            pf_Input[i] = f_tmp/uin_Avg;
+        }
+    }
+
+    /* 数组缩放 */
+    if(uin_Spand > 1)
+    {
+        for(i = 0; i < uin_Lenth / uin_Spand; i++)
+        {
+            pf_tmp = &pf_Input[i*uin_Spand];
+            f_tmp = 0;
+            for(j = 0 ; j < uin_Spand;j++)
+            {
+                f_tmp += pf_tmp[j];
+            }
+            pf_Input[i] = f_tmp/uin_Spand;
+        }
+    }
+}
+#endif

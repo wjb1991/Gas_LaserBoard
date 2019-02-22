@@ -2,6 +2,8 @@
 #define     __MOD_IRSPECTRUM_H__
 
 typedef struct {
+    INT16U* pui_RawData;
+    INT16U  uin_RawDataLen;
     INT16U  uch_ScanAvg;
     INT16U  uch_ScanCnt;
     INT16U  uin_SpectrumLen;

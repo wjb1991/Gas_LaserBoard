@@ -33,6 +33,8 @@ typedef enum
 
     CMD_RW_SYS_LASER_TEMP = 0x2a,
     CMD_RW_SYS_PCB_TEMP = 0x2c,
+    CMD_RW_IR_ACGAIN,
+    CMD_RW_IR_DCGAIN,
 
 
 
@@ -819,6 +821,42 @@ BOOL App_StdbusMasterDealFram(StdbusFram_t* pst_Fram)
         }
         break;
 
+//==================================================================================
+//                              设置交流放大倍数
+//==================================================================================
+    case CMD_RW_IR_ACGAIN:
+        if(pst_Fram->uch_SubCmd == e_StdbusWriteCmd)
+        {
+            if(pst_Fram->uin_PayLoadLenth == 1)
+            {
+                res = Mod_GainSetAcGain(&st_Gain,pst_Fram->puc_PayLoad[0],TRUE);
+            }
+        }
+        else if(pst_Fram->uch_SubCmd == e_StdbusReadCmd)
+        {
+            pst_Fram->uin_PayLoadLenth = 1;
+            pst_Fram->puc_PayLoad[0] = st_Gain.in_AcGain & 0x00ff;
+            res = TRUE;    //应答
+        }
+        break;
+//==================================================================================
+//                              设置直流放大倍数
+//==================================================================================
+    case CMD_RW_IR_DCGAIN:
+        if(pst_Fram->uch_SubCmd == e_StdbusWriteCmd)
+        {
+            if(pst_Fram->uin_PayLoadLenth == 1)
+            {
+                res = Mod_GainSetDcGain(&st_Gain,pst_Fram->puc_PayLoad[0],TRUE);
+            }
+        }
+        else if(pst_Fram->uch_SubCmd == e_StdbusReadCmd)
+        {
+            pst_Fram->uin_PayLoadLenth = 1;
+            pst_Fram->puc_PayLoad[0] = st_Gain.in_DcGain & 0x00ff;
+            res = TRUE;    //应答
+        }
+        break;
 #endif
 
 

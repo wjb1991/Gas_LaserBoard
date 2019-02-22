@@ -83,7 +83,7 @@ INT16U Bsp_Ltc1867SampleAvg(INT16U ch,INT16U avg)
 }
 
 
-FP64 Bsp_Ltc1867HexToVolt(INT16U hex)
+FP64 Bsp_Ltc1867HexToVolt(FP64 hex)
 {
     return ( hex * 4.096 / 65535.0);
 }

@@ -1,5 +1,5 @@
 //==================================================================================
-//| 文件名称 | LTC1867驱动
+//| 文件名称 | Mod_Range.h
 //|----------|----------------------------------------------------------------------
 //| 文件功能 | 
 //|----------|----------------------------------------------------------------------
@@ -7,27 +7,22 @@
 //|----------|----------------------------------------------------------------------
 //| 返回参数 | 无
 //==================================================================================
+#ifndef __MOD_RANGE_H__
+#define __MOD_RANGE_H__
 
-#ifndef __BSP_LTC1867_H__
-#define __BSP_LTC1867_H__
 
-#include "bsp.h"
 
-typedef enum {
-    eSignalDC = 0,
-    eLaserVolt = 1,
-    eLaserCurr = 2,
-    eI_DC = 3,
-    eRefTempVolt = 4,
-    eBoardTemp = 5,
-    eSenseTemp = 6,
-    eLaserTemp = 7,
-}AdcChannel_t;
 
-void Bsp_Ltc1867Init(void);
+typedef struct {
+    INT16S  in_DcGain;
+    INT16S  in_AcGain;
+}Gain_t;
 
-INT16U Bsp_Ltc1867SampleOne(INT16U ch);
-INT16U Bsp_Ltc1867SampleAvg(INT16U ch,INT16U avg);
-FP64   Bsp_Ltc1867HexToVolt(FP64 hex);
+extern Gain_t st_Gain;
 
-#endif /* _BSP_LTC1867_H_ */
+BOOL Mod_GainInit(Gain_t* pst_Gain);
+
+BOOL Mod_GainSetAcGain(Gain_t* pst_Gain, INT16S in_Gain,BOOL b_WriteEPROM);
+BOOL Mod_GainSetDcGain(Gain_t* pst_Gain, INT16S in_Gain,BOOL b_WriteEPROM);
+
+#endif

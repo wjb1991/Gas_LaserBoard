@@ -10,8 +10,17 @@
     #define SPE_DBG(...)
 #endif
 
+#ifdef __cplusplus
+#pragma DATA_SECTION("Exsram")
+#else
+//#pragma DATA_SECTION(auin_RecvBuff,"Exsram");
+#endif
+volatile static INT16U aui_SpeBuff[DEF_SAMPLEDOT_MAX] = {0};
+volatile static INT16U uin_SpeLen = 0;
 
 IrSpectrum_t st_IrSpectrum = {
+    (INT16U*)aui_SpeBuff,
+    DEF_SAMPLEDOT_MAX,
     5,          //uch_ScanAvg
     0,          //uch_ScanCnt
     150,        //uin_SpectrumLen
@@ -21,14 +30,6 @@ IrSpectrum_t st_IrSpectrum = {
     {0},        //af_OriginalSpectrum
     NULL,       //cb_SpectrumReady
 };
-
-#ifdef __cplusplus
-#pragma DATA_SECTION("Exsram")
-#else
-//#pragma DATA_SECTION(auin_RecvBuff,"Exsram");
-#endif
-volatile static INT16U aui_SpeBuff[DEF_SAMPLEDOT_MAX] = {0};
-volatile static INT16U uin_SpeLen = 0;
 
 BOOL Mod_SpectrumPost(INT16U* pui_Spectrum, INT16U uin_Len)
 {
@@ -60,26 +61,23 @@ BOOL Mod_SpectrumPend(INT16U** ppui_Spectrum, INT16U* pui_Len)
 BOOL Mod_SpectrumProc(IrSpectrum_t* pst_Spe)
 {
     INT16U  i;
-    INT16U* pui_Spectrum = NULL;
-    INT16U ui_Len = 0;
 
-
-    if(Mod_SpectrumPend(&pui_Spectrum,&ui_Len) == FALSE)
+    if(Mod_SpectrumPend(&pst_Spe->pui_RawData,&pst_Spe->uin_RawDataLen) == FALSE)
         return FALSE;
 
     SPE_DBG("Mod_SpectrumProc\r\n");
 
-    for(i = 0; i < ui_Len;i++)
+    for(i = 0; i < pst_Spe->uin_RawDataLen;i++)
     {
-        pui_Spectrum[i] -= 32768UL;
-        //st_Laser.pst_Wave->puin_RecvBuff[i] = aui_TestSenseRecvBuff[i] - 32768UL;       //使用调试数组计算
+        pst_Spe->pui_RawData[i] -= 32768UL;
+        //pst_Spe->pui_RawData[i] = aui_TestSenseRecvBuff[i] - 32768UL;       //使用调试数组计算
     }
 
     SPE_DBG("ui_Len = %d\r\n",ui_Len);
-    /* 调用锁相放大器 计算出吸收峰 吸收峰计算完成后 接受缓冲区就已经被释放了*/
+    /* 调用锁相放大器 计算出吸收峰 吸收峰计算完成后 接受缓冲区就已经被释放了 */
     Mod_DLiaCal(&st_DLia,
-                 (INT16S*)pui_Spectrum,
-                 ui_Len,
+                 (INT16S*)pst_Spe->pui_RawData,
+                 pst_Spe->uin_RawDataLen,
                  pst_Spe->af_RawSpectrum,
                  &pst_Spe->uin_SpectrumLen);
 
@@ -95,11 +93,12 @@ BOOL Mod_SpectrumProc(IrSpectrum_t* pst_Spe)
         for(i = 0; i < pst_Spe->uin_SpectrumLen; i++) 
         {
             pst_Spe->af_ProceSpectrum[i] = pst_Spe->af_SumSpectrum[i]/pst_Spe->uch_ScanAvg;             //计算平均光谱
-            /*还需要转换成电压单位 并除去 交流的放大倍数 才是实际的吸收峰 */
+            /* 还需要转换成电压单位 并除去 交流的放大倍数 才是实际的吸收峰 */
             
             pst_Spe->af_SumSpectrum[i] = 0;                                                             //清零求和光谱
         }
 
+#if 1
         for(i = 0; i < pst_Spe->uin_SpectrumLen; i++) 
         {
             //点斜率式 通过相似三角形算出f1 是三角波的直流分量
@@ -120,8 +119,16 @@ BOOL Mod_SpectrumProc(IrSpectrum_t* pst_Spe)
                 f_AverDc = f2 +  f_K * st_Trans.f_OffestCompare;								        //透过率修正偏差值
             }
 
-            pst_Spe->af_OriginalSpectrum[i] = pst_Spe->af_ProceSpectrum[i] / f_AverDc;                  //ac/dc 修正光谱透过率
+            pst_Spe->af_OriginalSpectrum[i] = pst_Spe->af_ProceSpectrum[i] / f_AverDc / st_Gain.in_AcGain; //ac/dc 修正光谱透过率
         }
+#else
+        for(i = 0; i < pst_Spe->uin_SpectrumLen; i++)
+        {
+            pst_Spe->af_OriginalSpectrum[i] = pst_Spe->af_ProceSpectrum[i] / st_Gain.in_AcGain; //ac/dc 修正光谱透过率
+        }
+#endif
+
+
         if(pst_Spe->cb_SpectrumReady != NULL)
             pst_Spe->cb_SpectrumReady(pst_Spe->af_OriginalSpectrum,pst_Spe->uin_SpectrumLen);       //调用回调函数
     }

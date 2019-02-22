@@ -54,6 +54,7 @@ BOOL App_DeviceStart(void)
     Mod_MeasureInit(&st_Measure);
     Mod_GasMeasInit(&st_GasMeasForIr);
     Mod_GenerateModWave(&st_ModWave);                //生成调制波数组
+    Mod_GainInit(&st_Gain);                           //根据EPROM存储的数据 更改运放的放大倍数
 
     st_DLia.f_PsdFreq = st_ModWave.f_SinFreq * 2;      // 放大正弦波的二次谐波
     st_DLia.f_SampleFreq = st_ModWave.f_SampleFreq;    // 采样频率
@@ -72,8 +73,8 @@ BOOL App_DevicrRun(void)
     if(st_Laser.e_State == eLaserHigh)
     {
         //采集透过率高点
-        Bsp_DelayUs(1);
-        Mod_TransSmapleHigh();                  //3MS左右的样子
+        Bsp_DelayUs(10);
+        Mod_TransSmapleHigh();                      //3MS左右的样子
     }
 
 //==================================================================================
@@ -83,10 +84,10 @@ BOOL App_DevicrRun(void)
     if(st_Laser.e_State == eLaserLow)
     {
         //采集透过率高点
-        Bsp_DelayUs(1);
-        Mod_TransSmapleLow();                   //3MS左右的样子
+        Bsp_DelayUs(10);
+        Mod_TransSmapleLow();                       //3MS左右的样子
 
-        if(st_Laser.e_State != eLaserIdle)          //如果在采样透过率下限时发生触发则不发送数据
+        if(st_Laser.e_State != eLaserIdle)            //如果在采样透过率下限时发生触发则不发送数据
         {
             Mod_SpectrumPost((INT16U*)st_ModWave.puin_RecvBuff, st_ModWave.uin_SampleDot);   //接受缓冲区已经被释放了
         }
@@ -95,18 +96,18 @@ BOOL App_DevicrRun(void)
 //==================================================================================
 //                                  其他逻辑处理
 //==================================================================================
-    Mod_StdbusSlavePoll();                  //通讯处理
-    Mod_StdbusMasterPoll();                 //通讯处理
-    Mod_MeasurePoll(&st_Measure);            //气体浓度分析
+    Mod_StdbusSlavePoll();                         //通讯处理
+    Mod_StdbusMasterPoll();                        //通讯处理
+    Mod_MeasurePoll(&st_Measure);                   //气体浓度分析
 
-    Mod_LaserPoll(&st_Laser);                //等待进入下一个周期
+    Mod_LaserPoll(&st_Laser);                       //等待进入下一个周期
 
 //==================================================================================
 //                                   核心计算
 //==================================================================================
-    Bsp_RunLed(eLedOn);
+
     Mod_SpectrumProc(&st_IrSpectrum);
-    Bsp_RunLed(eLedOff);
+
 
     /**
     Bsp_DelayMs(38);

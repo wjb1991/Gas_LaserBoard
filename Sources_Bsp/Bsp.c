@@ -64,7 +64,5 @@ void  Bsp_Init (void)
 
     Bsp_At24c512Init();
 
-    Bsp_Pga2A0(1);
-    Bsp_Pga2A1(1);
 }
 

@@ -105,8 +105,8 @@ FP32 Mod_TransmissionPoll(void)
         st_Trans.ul_TransSumAD2 = temp;
     }
     
-    st_Trans.f_VoltMax = Bsp_Ltc1867HexToVolt(st_Trans.ul_TransSumAD1/(FP32)st_Trans.uin_SampleCount);
-    st_Trans.f_VoltMin = Bsp_Ltc1867HexToVolt(st_Trans.ul_TransSumAD2/(FP32)st_Trans.uin_SampleCount);
+    st_Trans.f_VoltMax = Bsp_Ltc1867HexToVolt((FP64)st_Trans.ul_TransSumAD1/st_Trans.uin_SampleCount);
+    st_Trans.f_VoltMin = Bsp_Ltc1867HexToVolt((FP64)st_Trans.ul_TransSumAD2/st_Trans.uin_SampleCount);
         
     f_Sub = (st_Trans.ul_TransSumAD1 - st_Trans.ul_TransSumAD2)/(FP32)st_Trans.uin_SampleCount; 
 	f_Sub  = Bsp_Ltc1867HexToVolt(f_Sub);       //转换成实际电压差

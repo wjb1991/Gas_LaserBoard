@@ -44,7 +44,6 @@ extern  "C" {                                  /* See Note #1.                  
 #include  "utils/uartstdio.h"
 
 
-
 #ifdef      OS_SUPPORT
 #include  "bsp_os.h"
 #include  <cpu_core.h>
