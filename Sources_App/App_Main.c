@@ -27,6 +27,16 @@ int main(void)
     // This is useful for debug purposes.
     InitPieVectTable();
 
+#ifdef _STANDALONE
+#ifdef _FLASH
+    //  Send boot command to allow the CPU02 application to begin execution
+    IPCBootCPU2(C1C2_BROM_BOOTMODE_BOOT_FROM_FLASH);
+#else
+    //  Send boot command to allow the CPU02 application to begin execution
+    IPCBootCPU2(C1C2_BROM_BOOTMODE_BOOT_FROM_RAM);
+#endif
+#endif
+
     // Step 4. Initialize the Device Peripherals:
     App_DeviceInit();
 

@@ -28,6 +28,7 @@ extern  "C" {                                  /* See Note #1.                  
 
 
 #include  "F28x_Project.h"
+#include  "F2837xD_Ipc_drivers.h"           //双核通讯用IPC模块
 #include  "inc/hw_memmap.h"
 #include  "inc/hw_types.h"
 #include  "inc/hw_ints.h"

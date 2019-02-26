@@ -64,5 +64,10 @@ void  Bsp_Init (void)
 
     Bsp_At24c512Init();
 
+    while(0)
+    {
+        #include "App_Include.h"
+
+    }
 }
 

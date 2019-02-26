@@ -8,6 +8,7 @@
 //| 返回参数 | 无
 //==================================================================================
 #include "App_Include.h"
+#include "fpu_filter.h"
 
 const INT16U aui_TestSenseRecvBuff[10000] = {
         25839,
@@ -10012,8 +10013,11 @@ const INT16U aui_TestSenseRecvBuff[10000] = {
         24191,
 
 };
-
-
+#ifdef __cplusplus
+#pragma DATA_SECTION("PublicRam")
+#else
+#pragma DATA_SECTION(B3,"PublicRam");
+#endif
 //%低通 400k_200_9000_1_100
 int BL3 = 141;
 FP32 B3[141] = {
@@ -10047,6 +10051,12 @@ FP32 B3[141] = {
     8.919350512e-005,7.08219668e-005,5.528879046e-005,4.228337275e-005,3.151876808e-005,
     4.510488361e-005
 };
+
+#ifdef __cplusplus
+#pragma DATA_SECTION("PublicRam")
+#else
+#pragma DATA_SECTION(B4,"PublicRam");
+#endif
 //%低通 40k_10_500_1_100
 int BL4 = 253;
 FP32 B4[253] = {
@@ -10104,12 +10114,25 @@ FP32 B4[253] = {
 };
 
 #ifdef __cplusplus
-#pragma DATA_SECTION("Exsram")
+#pragma DATA_SECTION("PublicRam")
 #else
-//#pragma DATA_SECTION(af_Buff,"Exsram");
+#pragma DATA_SECTION(af_Buff,"PublicRam");
 #endif
 static FP32 af_Buff[DEF_SAMPLEDOT_MAX] = {0};
 
+/* FIR接口结构体 */
+typedef struct {
+    FP32*   fp_InData;
+    INT16U  uin_InLenth;
+    FP32*   fp_Coeef;
+    INT16U  uin_Order;
+    FP32*   fp_OutData;
+    INT16U  uin_OutLenth;
+    INT16U  uin_Spand;
+}FirInterface;
+
+#define CPU01_TO_CPU02_PASSMSG   0x0003FC00     // CPU01 TO CPU02 MSG RAM offsets for
+#define CPU02_TO_CPU01_PASSMSG   0x0003F800     // CPU02 TO CPU01 MSG RAM offsets for
 
 DLia_t st_DLia = {
     10.0,                       /* 鉴相器频率 KHZ       */
@@ -10122,6 +10145,8 @@ DLia_t st_DLia = {
 
 void Mod_FIRFilter(FP32 * pf_Input, INT16U uin_Lenth, const FP32* pf_Factor,INT16U uin_Order,INT16U uin_Avg,INT16U uin_Spand);
 void Mod_FIRFilterDsp(FP32 * pf_Input, INT16U uin_Lenth, const FP32* pf_Factor,INT16U uin_Order,INT16U uin_Avg,INT16U uin_Spand);
+void Mod_FIRFilterTwoCpu(FP32 * pf_Input, INT16U uin_Lenth, const FP32* pf_Factor,INT16U uin_Order,INT16U uin_Avg,INT16U uin_Spand);
+
 //==================================================================================================
 //| 函数名称 | Mod_DLiaGeneratePsdWave
 //|----------|--------------------------------------------------------------------------------------
@@ -10228,8 +10253,8 @@ BOOL Mod_DLiaCal(DLia_t* pst_DLia,INT16S* puin_InData, INT16U uin_InDataLen,FP32
        得到 VPP*[Cos(0)]/2 = VPP/2
     */
     Bsp_RunLed(eLedOn);
-    Mod_FIRFilter(pst_DLia->pf_Buff, uin_InDataLen, B3, BL3, 1, 10);				//
-    Mod_FIRFilter(pst_DLia->pf_Buff, uin_InDataLen/10, B4, BL4, 1, 5);			//
+    Mod_FIRFilterTwoCpu(pst_DLia->pf_Buff, uin_InDataLen, B3, BL3, 1, 10);				//
+    Mod_FIRFilterTwoCpu(pst_DLia->pf_Buff, uin_InDataLen/10, B4, BL4, 1, 5);			//
     Bsp_RunLed(eLedOff);
     /* 复制数据到输出数组 */
     if(pf_OutData != NULL)
@@ -10241,7 +10266,98 @@ BOOL Mod_DLiaCal(DLia_t* pst_DLia,INT16S* puin_InData, INT16U uin_InDataLen,FP32
 
 	return TRUE;
 }
+//==================================================================================================
+//| 函数名称 | Mod_FIRFilter
+//|----------|--------------------------------------------------------------------------------------
+//| 函数功能 | FIR滤波器
+//|----------|--------------------------------------------------------------------------------------
+//| 输入参数 | pf_Input: FIR采样点输入   uin_Lenth:采样点长度
+//|          | pf_Factor: FIR系数        uin_Order: FIR阶数
+//|          | uin_Avg: 平均滤波         uin_Spand: 结果数组缩放比例 5 = 1000个点缩放为200个点
+//|----------|--------------------------------------------------------------------------------------
+//| 返回参数 | 无
+//|----------|--------------------------------------------------------------------------------------
+//| 函数设计 |
+//==================================================================================================
+#pragma CODE_SECTION(Mod_FIRFilterTwoCpu, ".TI.ramfunc");       //加载到Ram当中去运行 看情况使用
+void Mod_FIRFilterTwoCpu(FP32 * pf_Input, INT16U uin_Lenth, const FP32* pf_Factor,INT16U uin_Order,INT16U uin_Avg,INT16U uin_Spand)
+{
+    INT16U i,j,k,l;
+    FP32 f_tmp = 0;
+    FP32 *pf_tmp = 0;
 
+    /* Fir 双CPU同步计算  CPU2计算后半部分*/
+    k = uin_Lenth / 2;
+    l = uin_Lenth / 2;
+    FirInterface* p = (void*)CPU01_TO_CPU02_PASSMSG;
+    p->fp_InData = (void*)&pf_Input[k];
+    p->uin_InLenth = l;
+    p->fp_Coeef = (void*)pf_Factor;
+    p->uin_Order = uin_Order;
+    p->fp_OutData = (void*)CPU02_TO_CPU01_PASSMSG;
+    p->uin_Spand = uin_Spand;
+    IPCLtoRFlagSet(IPC_FLAG10);                 //开启CPU2任务 计算FIR后半部分
+
+
+    for(j = 0 ; j < (k) ; j++)        //CPU1计算前半部分
+    {
+        pf_tmp = &pf_Input[j];
+        f_tmp = 0;
+        for(i = 0 ; i < uin_Order;i++)
+        {
+            f_tmp += pf_tmp[i]*pf_Factor[i];
+        }
+        pf_Input[j] = f_tmp;
+    }
+
+    /* 填充最后几个无法正常Fir的点
+    for(i = uin_Lenth - uin_Order; i < uin_Lenth; i++)
+    {
+        pf_Input[i]= pf_Input[uin_Lenth - uin_Order -1];
+    }*/
+
+    /* 平均滤波
+    if(uin_Avg > 1)
+    {
+        for( i = 0; i<(uin_Lenth - uin_Avg); i++)
+        {
+            pf_tmp = &pf_Input[i];
+            f_tmp = 0;
+            for(j = 0; j < uin_Avg; j++)
+            {
+                f_tmp += pf_tmp[j];
+            }
+            pf_Input[i] = f_tmp/uin_Avg;
+        }
+    }*/
+
+    /* 数组缩放 */
+    k /= uin_Spand;
+    l /= uin_Spand;
+
+    if(uin_Spand > 1)
+    {
+        for(i = 0; i < k; i++)
+        {
+            pf_tmp = &pf_Input[i*uin_Spand];
+            f_tmp = 0;
+            for(j = 0 ; j < uin_Spand;j++)
+            {
+                f_tmp += pf_tmp[j];
+            }
+            pf_Input[i] = f_tmp/uin_Spand;
+        }
+    }
+
+    while(IPCLtoRFlagBusy(IPC_FLAG10) != 0){}   //等待CPU2计算完成
+
+    /* 复制CPU2计算的结果到 后半段*/
+    pf_tmp = (void*)CPU02_TO_CPU01_PASSMSG;
+    for(i = 0 ; i < l; i++)
+    {
+        pf_Input[i + k]= pf_tmp[i];
+    }
+}
 //==================================================================================================
 //| 函数名称 | Mod_FIRFilter
 //|----------|--------------------------------------------------------------------------------------
@@ -10310,7 +10426,7 @@ void Mod_FIRFilter(FP32 * pf_Input, INT16U uin_Lenth, const FP32* pf_Factor,INT1
 	}
 }
 
-#if 0
+#if 1
 //==================================================================================================
 //| 函数名称 | Mod_FIRFilter
 //|----------|--------------------------------------------------------------------------------------
@@ -10331,7 +10447,7 @@ void Mod_FIRFilterDsp(FP32 * pf_Input, INT16U uin_Lenth, const FP32* pf_Factor,I
     FP32* pf_tmp = NULL;
 
     float dbuffer[300];
-    float xn,yn;
+    float yn;
 
     FIR_FP  firFP = FIR_FP_DEFAULTS;
     FIR_FP_Handle hnd_firFP = &firFP;

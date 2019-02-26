@@ -21,7 +21,7 @@
 #define     DEF_SINFREQ_MIN     (1.0)
 #define     DEF_SINFREQ_MAX     (20.0)
 #define     DEF_SAMPLEFREQ_MIN  (100.0)
-#define     DEF_SAMPLEFREQ_MAX  (750.0)
+#define     DEF_SAMPLEFREQ_MAX  (1250.0)
 #define     DEF_SAMPLEDOT_MIN   (1000)
 #define     DEF_SAMPLEDOT_MAX   (10000)
 

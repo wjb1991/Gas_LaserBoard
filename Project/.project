@@ -51,6 +51,11 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
+			<name>c28x_fpu_dsp_library.lib</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Sources_FPU/lib/c28x_fpu_dsp_library.lib</locationURI>
+		</link>
+		<link>
 			<name>usblib.lib</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/F2837xD_common/lib/usblib.lib</locationURI>

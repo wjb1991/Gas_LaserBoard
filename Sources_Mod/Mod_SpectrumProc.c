@@ -69,8 +69,8 @@ BOOL Mod_SpectrumProc(IrSpectrum_t* pst_Spe)
 
     for(i = 0; i < pst_Spe->uin_RawDataLen;i++)
     {
-        pst_Spe->pui_RawData[i] -= 32768UL;
-        //pst_Spe->pui_RawData[i] = aui_TestSenseRecvBuff[i] - 32768UL;       //使用调试数组计算
+        //pst_Spe->pui_RawData[i] -= 32768UL;
+        pst_Spe->pui_RawData[i] = aui_TestSenseRecvBuff[i] - 32768UL;       //使用调试数组计算
     }
 
     SPE_DBG("ui_Len = %d\r\n",ui_Len);
