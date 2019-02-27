@@ -99,12 +99,12 @@ void DMA_Handle1(void)
     if(j ==0 )
     {
         j = 1;
-        Bsp_AlarmLed(eLedOff);
+        //Bsp_AlarmLed(eLedOff);
     }
     else
     {
         j = 0;
-        Bsp_AlarmLed(eLedOn);
+        //Bsp_AlarmLed(eLedOn);
     }
 }
 

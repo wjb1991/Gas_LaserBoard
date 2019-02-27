@@ -10239,7 +10239,7 @@ BOOL Mod_DLiaCal(DLia_t* pst_DLia,INT16S* puin_InData, INT16U uin_InDataLen,FP32
         所以 VPP*Sin(A)*Sin(A+Phase) = VPP*<[Cos(A+A+Phase)+Cos(A-A-+Phase)]/2>
                                      = VPP*<[Cos(2*A+Phase)+Cos(+-Phase)]/2>
     */
-    Bsp_RunLed(eLedOn);
+
     Mod_DLiaGeneratePsdWave(pst_DLia);
 
     for(i = 0; i < uin_InDataLen; i++)
@@ -10252,9 +10252,12 @@ BOOL Mod_DLiaCal(DLia_t* pst_DLia,INT16S* puin_InData, INT16U uin_InDataLen,FP32
        得到 VPP*[Cos(+-Phase)]/2 当两个信号相位相同时或接近是 Phase ~= 0   
        得到 VPP*[Cos(0)]/2 = VPP/2
     */
+    Bsp_AlarmLed(eLedOn);
+    Mod_FIRFilterTwoCpu(pst_DLia->pf_Buff, uin_InDataLen, B3, BL3, 1, 10);				//5.1ms
+    Bsp_AlarmLed(eLedOff);
 
-    Mod_FIRFilterTwoCpu(pst_DLia->pf_Buff, uin_InDataLen, B3, BL3, 1, 10);				//
-    Mod_FIRFilterTwoCpu(pst_DLia->pf_Buff, uin_InDataLen/10, B4, BL4, 1, 5);			//
+    Bsp_RunLed(eLedOn);
+    Mod_FIRFilterTwoCpu(pst_DLia->pf_Buff, uin_InDataLen/10, B4, BL4, 1, 5);			//0.9ms
     Bsp_RunLed(eLedOff);
     /* 复制数据到输出数组 */
     if(pf_OutData != NULL)
@@ -10285,6 +10288,7 @@ void Mod_FIRFilterTwoCpu(FP32 * pf_Input, INT16U uin_Lenth, const FP32* pf_Facto
     INT16U i,j,k,l;
     FP32 f_tmp = 0;
     FP32 *pf_tmp = 0;
+    FP32 af_Coeff[400];
 
     /* Fir 双CPU同步计算  CPU2计算后半部分*/
     k = uin_Lenth / 2;
@@ -10298,6 +10302,10 @@ void Mod_FIRFilterTwoCpu(FP32 * pf_Input, INT16U uin_Lenth, const FP32* pf_Facto
     p->uin_Spand = uin_Spand;
     IPCLtoRFlagSet(IPC_FLAG10);                 //开启CPU2任务 计算FIR后半部分
 
+    for(i = 0; i < uin_Order; i++)
+    {
+        af_Coeff[i] = pf_Factor[i];
+    }
 
     for(j = 0 ; j < (k) ; j++)        //CPU1计算前半部分
     {
@@ -10305,7 +10313,7 @@ void Mod_FIRFilterTwoCpu(FP32 * pf_Input, INT16U uin_Lenth, const FP32* pf_Facto
         f_tmp = 0;
         for(i = 0 ; i < uin_Order;i++)
         {
-            f_tmp += pf_tmp[i]*pf_Factor[i];
+            f_tmp += pf_tmp[i]*af_Coeff[i];
         }
         pf_Input[j] = f_tmp;
     }
