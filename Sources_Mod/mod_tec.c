@@ -80,7 +80,7 @@ BOOL Mod_TecEnable(Tec_t* pst_Tec, INT16S uin_TimeOut)
             Bsp_DelayMs(1000);
             pst_Tec->f_FbTemper = Mod_GetTemper(pst_Tec->pst_Temper);
             TRACE_DBG("    >>第%02u秒TEC温度:%.4f\r\n",i,pst_Tec->f_FbTemper);
-            if(abs(pst_Tec->f_FbTemper - pst_Tec->f_SetTemper) <= 1.0)
+            if(fabs(pst_Tec->f_FbTemper - pst_Tec->f_SetTemper) <= 1.0)
             {
                 if(++uin_SuccessCnt >= 5 )
                 {
@@ -105,7 +105,7 @@ BOOL Mod_TecEnable(Tec_t* pst_Tec, INT16S uin_TimeOut)
             pst_Tec->f_FbTemper = Mod_GetTemper(pst_Tec->pst_Temper);
             TRACE_DBG("    >>第%02u秒TEC温度:%.4f\r\n",i,pst_Tec->f_FbTemper);
             /* 到达设定温度 */
-            if(abs(pst_Tec->f_FbTemper - pst_Tec->f_SetTemper) <= 1.0)
+            if(fabs(pst_Tec->f_FbTemper - pst_Tec->f_SetTemper) <= 1.0)
             {
                 if(++uin_SuccessCnt >= 5 )
                 {

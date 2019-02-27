@@ -10164,7 +10164,7 @@ BOOL Mod_DLiaGeneratePsdWave(DLia_t* pst_DLia)
 	FP64 f1;
 	FP64 fdp,fdt,fw;
 	FP64 mPI= 3.1415926535897932384626433832795;
-
+#if 0
 	fdt = 1.0 / (pst_DLia->f_SampleFreq * 1000);        /* 计算采样周期 S*/
 	fdp = pst_DLia->f_PsdPhase / 180 * mPI;             /* 转换角度为弧度 */
 	fw = pst_DLia->f_PsdFreq * 1000;                    /* 计算正弦波频率 HZ*/
@@ -10177,7 +10177,7 @@ BOOL Mod_DLiaGeneratePsdWave(DLia_t* pst_DLia)
 		pst_DLia->pf_Buff[i] = (FP32)f1;
         //喂狗
 	}
-#if 0
+#else
 	//使用硬件TMU生成正弦波
     fdt = 1.0 / (pst_DLia->f_SampleFreq * 1000);        /* 计算采样周期 S*/
     fdp = pst_DLia->f_PsdPhase / 360;                   /* 转换角度为弧度 */
@@ -10239,7 +10239,7 @@ BOOL Mod_DLiaCal(DLia_t* pst_DLia,INT16S* puin_InData, INT16U uin_InDataLen,FP32
         所以 VPP*Sin(A)*Sin(A+Phase) = VPP*<[Cos(A+A+Phase)+Cos(A-A-+Phase)]/2>
                                      = VPP*<[Cos(2*A+Phase)+Cos(+-Phase)]/2>
     */
-
+    Bsp_RunLed(eLedOn);
     Mod_DLiaGeneratePsdWave(pst_DLia);
 
     for(i = 0; i < uin_InDataLen; i++)
@@ -10252,7 +10252,7 @@ BOOL Mod_DLiaCal(DLia_t* pst_DLia,INT16S* puin_InData, INT16U uin_InDataLen,FP32
        得到 VPP*[Cos(+-Phase)]/2 当两个信号相位相同时或接近是 Phase ~= 0   
        得到 VPP*[Cos(0)]/2 = VPP/2
     */
-    Bsp_RunLed(eLedOn);
+
     Mod_FIRFilterTwoCpu(pst_DLia->pf_Buff, uin_InDataLen, B3, BL3, 1, 10);				//
     Mod_FIRFilterTwoCpu(pst_DLia->pf_Buff, uin_InDataLen/10, B4, BL4, 1, 5);			//
     Bsp_RunLed(eLedOff);

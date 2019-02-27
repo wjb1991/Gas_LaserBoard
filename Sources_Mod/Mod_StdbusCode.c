@@ -363,13 +363,13 @@ void Mod_StdbusPortSendOneByte(StdbusPort_t * pst_Port)
             {
                 //Bsp_Rs485de(eRs485Recv);
             }
+
             pst_Port->e_State = e_StdbusSended;
-            
-            if(PostMsg(pst_Port) == FALSE)
-            {
-                Mod_StdbusRscPack(pst_Port);                  //释放本端口的数据
-                UnLockPort(pst_Port);
-            }
+            PostMsg(pst_Port);
+
+            Mod_StdbusRscPack(pst_Port);                    //释放本端口的数据
+            UnLockPort(pst_Port);
+
         }
     }
 }
@@ -397,6 +397,7 @@ BOOL Mod_StdbusPortRecvOneByte(StdbusPort_t* pst_Port,INT8U uch_Byte)
     {
         if (uch_Byte == 0x7b)
         {
+            //STDBUS_DBG(">>STDBUS DBG:   接受到帧头\r\n");
             Mod_StdbusRscPack(pst_Port);                    //释放本端口的数据
             pst_Port->e_State = e_StdbusRecv;
             pst_Port->puc_Buff[pst_Port->uin_BuffLenth++] = uch_Byte;
@@ -409,6 +410,7 @@ BOOL Mod_StdbusPortRecvOneByte(StdbusPort_t* pst_Port,INT8U uch_Byte)
         {
             if (uch_Byte == 0x7d)                               //判断是否接受到帧尾
             {
+                //STDBUS_DBG(">>STDBUS DBG:   接受到帧尾\r\n");
                 pst_Port->e_State = e_StdbusRecved;
                 pst_Port->puc_Buff[pst_Port->uin_BuffLenth++] = uch_Byte;
                 if(PostMsg(pst_Port) == FALSE)
@@ -419,12 +421,14 @@ BOOL Mod_StdbusPortRecvOneByte(StdbusPort_t* pst_Port,INT8U uch_Byte)
             }
             else if (uch_Byte == 0x7b)                          //再次接收到帧头
             {
+                //STDBUS_DBG(">>STDBUS DBG:   再次接收到帧头\r\n");
                 Mod_StdbusRscPack(pst_Port);                    //释放本端口的数据
                 pst_Port->e_State = e_StdbusRecv;
                 pst_Port->puc_Buff[pst_Port->uin_BuffLenth++] = uch_Byte;
             }
             else                                                //其他情况
             {
+                //STDBUS_DBG(">>STDBUS DBG:   转义符\r\n");
                 if(pst_Port->uch_LastByte == 0x7c)
                     pst_Port->puc_Buff[pst_Port->uin_BuffLenth-1] ^= uch_Byte;
                 else
@@ -434,6 +438,7 @@ BOOL Mod_StdbusPortRecvOneByte(StdbusPort_t* pst_Port,INT8U uch_Byte)
         }
         else                                                //20181203 添加尝试修复死机问题
         {
+            //STDBUS_DBG(">>STDBUS DBG:   数据超长\r\n");
             Mod_StdbusRscPack(pst_Port);                  //释放本端口的数据
             UnLockPort(pst_Port);
         }
@@ -848,8 +853,6 @@ void Mod_StdbusPortPoll(StdbusPort_t * pst_Port)
             }
             break;
         case e_StdbusSended:
-            Mod_StdbusRscPack(pst_Port);                  // 释放本端口的数据
-            UnLockPort(pst_Port);                         // 释放总线 
             STDBUS_DBG(">>STDBUS DBG:   %s 发送完成\r\n",pst_Port->pch_Name);
             break;
         default:

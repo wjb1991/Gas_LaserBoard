@@ -131,6 +131,7 @@ SECTIONS
 
    Exsram            : > EXSRAM,     PAGE = 1
    PublicRam         : > RAMGS0,     PAGE = 1
+   PrivateRam        : > RAMLS0_5,   PAGE = 1
    /* The following section definitions are required when using the IPC API Drivers */
     GROUP : > CPU1TOCPU2RAM, PAGE = 1
     {
