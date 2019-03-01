@@ -11,12 +11,12 @@
 #endif
 
 #ifdef __cplusplus
-#pragma DATA_SECTION("Exsram")
+#pragma DATA_SECTION("PublicRam")
 #else
-//#pragma DATA_SECTION(auin_RecvBuff,"Exsram");
+//#pragma DATA_SECTION(aui_SpeBuff,"PublicRam");
 #endif
-volatile static INT16U aui_SpeBuff[DEF_SAMPLEDOT_MAX] = {0};
-volatile static INT16U uin_SpeLen = 0;
+static INT16U aui_SpeBuff[DEF_SAMPLEDOT_MAX] = {0};
+static INT16U uin_SpeLen = 0;
 
 IrSpectrum_t st_IrSpectrum = {
     (INT16U*)aui_SpeBuff,
@@ -67,19 +67,18 @@ BOOL Mod_SpectrumProc(IrSpectrum_t* pst_Spe)
 
     SPE_DBG("Mod_SpectrumProc\r\n");
 
-    for(i = 0; i < pst_Spe->uin_RawDataLen;i++)
-    {
-        pst_Spe->pui_RawData[i] -= 32768UL;
-        //pst_Spe->pui_RawData[i] = aui_TestSenseRecvBuff[i] - 32768UL;       //使用调试数组计算
-    }
+
+    Bsp_RunLed(eLedOn);
 
     SPE_DBG("ui_Len = %d\r\n",ui_Len);
-    /* 调用锁相放大器 计算出吸收峰 吸收峰计算完成后 接受缓冲区就已经被释放了 */
+    /* 调用锁相放大器 计算出吸收峰 */
     Mod_DLiaCal(&st_DLia,
-                 (INT16S*)pst_Spe->pui_RawData,
+                 pst_Spe->pui_RawData,
                  pst_Spe->uin_RawDataLen,
                  pst_Spe->af_RawSpectrum,
                  &pst_Spe->uin_SpectrumLen);
+
+    Bsp_RunLed(eLedOff);
 
     for(i = 0; i < pst_Spe->uin_SpectrumLen; i++)
         pst_Spe->af_SumSpectrum[i] += pst_Spe->af_RawSpectrum[i];        //累计求和光谱

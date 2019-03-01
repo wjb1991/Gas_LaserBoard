@@ -12,6 +12,9 @@
 #include  "Bsp.h"
 
 
+float af_Tmp[5] = {10.1,20.2,30.3,40.4,50.5};
+float pf_InData[5] = {0};
+
 void  Bsp_Init (void)
 {
 
@@ -67,6 +70,41 @@ void  Bsp_Init (void)
     while(0)
     {
         #include "App_Include.h"
+
+
+
+        //配置DMA并行拷贝后半段数据
+        DMACH3AddrConfig((volatile Uint16 *)&pf_InData[0],(volatile Uint16 *)&af_Tmp[0]);
+        DMACH3BurstConfig(0,0,0);           // Burst size, src step, dest step  Burst size 0 = 1次传输
+        //DMACH3WrapConfig(0, 0, 0, 0);
+        DMACH3TransferConfig((10)-1,1,1);       // transfer size, src step, dest step   transfer size 0 = 1次传输
+        DMACH3ModeConfig(0,
+                           PERINT_ENABLE,
+                           ONESHOT_ENABLE,
+                           CONT_DISABLE,
+                           SYNC_DISABLE,
+                           SYNC_SRC,
+                           OVRFLOW_DISABLE,
+                           SIXTEEN_BIT,
+                           CHINT_END,
+                           CHINT_DISABLE);
+
+        StartDMACH3();
+
+
+        while(1){
+            int i = 0;
+            for( i = 0; i < 5; i++)
+            {
+                TRACE_DBG("af_Tmp[%d] = %f\r\n",i ,af_Tmp[i]);
+            }
+
+            for( i = 0; i < 5; i++)
+            {
+                TRACE_DBG("pf_InData[%d]= %f\r\n" ,i ,pf_InData[i]);
+            }
+
+        }
 
     }
 }

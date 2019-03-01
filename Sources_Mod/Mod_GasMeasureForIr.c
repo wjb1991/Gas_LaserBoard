@@ -1,7 +1,7 @@
 #include "App_Include.h"
 
 
-#define DEF_GASMEASIR_DBG_EN           TRUE
+#define DEF_GASMEASIR_DBG_EN           FALSE
 
 #if (DEF_GASMEASIR_DBG_EN == TRUE)
     #define GASMEASIR_DBG(...)             do {                            \

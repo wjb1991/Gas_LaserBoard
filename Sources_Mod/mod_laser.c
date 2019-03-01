@@ -171,7 +171,7 @@ void Mod_LaserEnable(void* pv_Laser)
 
     Bsp_Time0Stop();
 
-    Mod_TecEnable(p->pst_Tec,20);
+    Mod_TecEnable(p->pst_Tec,1);
 
     Bsp_Printf("\r\n=========================激光器启动=========================\r\n");
 
@@ -185,7 +185,7 @@ void Mod_LaserEnable(void* pv_Laser)
     Mod_SetDcVolt(p->pst_Wave->f_HwDcOffset,p->pst_Wave->f_HwAcOffset);
 
     Bsp_Printf("    >>打印10s激光器电流\r\n");
-    for(i = 1; i <= 10 ; i++)
+    for(i = 1; i <= 1 ; i++)
     {
         FP32 f_Curr = Mod_LaserGetCurr(p);
         Bsp_Printf("    >>第%02u秒激光器电流:%.4f(mA)\r\n",i,f_Curr);

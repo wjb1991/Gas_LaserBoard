@@ -10014,9 +10014,9 @@ const INT16U aui_TestSenseRecvBuff[10000] = {
 
 };
 #ifdef __cplusplus
-#pragma DATA_SECTION("PublicRam")
+#pragma DATA_SECTION("PrivateRam")
 #else
-#pragma DATA_SECTION(B3,"PublicRam");
+#pragma DATA_SECTION(B3,"PrivateRam");
 #endif
 //%低通 400k_200_9000_1_100
 int BL3 = 141;
@@ -10053,9 +10053,9 @@ FP32 B3[141] = {
 };
 
 #ifdef __cplusplus
-#pragma DATA_SECTION("PublicRam")
+#pragma DATA_SECTION("PrivateRam")
 #else
-#pragma DATA_SECTION(B4,"PublicRam");
+#pragma DATA_SECTION(B4,"PrivateRam");
 #endif
 //%低通 40k_10_500_1_100
 int BL4 = 253;
@@ -10122,13 +10122,13 @@ static FP32 af_Buff[DEF_SAMPLEDOT_MAX] = {0};
 
 /* FIR接口结构体 */
 typedef struct {
-    FP32*   fp_InData;
+    FP32*   pf_InData;
     INT16U  uin_InLenth;
-    FP32*   fp_Coeef;
-    INT16U  uin_Order;
-    FP32*   fp_OutData;
+    FP32*   pf_OutData;
     INT16U  uin_OutLenth;
     INT16U  uin_Spand;
+    FP32    af_Coeef[450];      //450*2 900个word
+    INT16U  uin_Order;
 }FirInterface;
 
 #define CPU01_TO_CPU02_PASSMSG   0x0003FC00     // CPU01 TO CPU02 MSG RAM offsets for
@@ -10158,16 +10158,18 @@ void Mod_FIRFilterTwoCpu(FP32 * pf_Input, INT16U uin_Lenth, const FP32* pf_Facto
 //|----------|-------------------------------------------------------------------------------------- 
 //| 函数设计 | 
 //==================================================================================================
-BOOL Mod_DLiaGeneratePsdWave(DLia_t* pst_DLia)
+#pragma CODE_SECTION(Mod_DLiaGeneratePsdWave, ".TI.ramfunc");       //加载到Ram当中去运行 看情况使用
+BOOL Mod_DLiaGeneratePsdWave(DLia_t* pst_DLia, INT16U* puin_InData, INT16U uin_InDataLen)
 {
     INT16U i;
 	FP64 f1;
 	FP64 fdp,fdt,fw;
 	FP64 mPI= 3.1415926535897932384626433832795;
-#if 0
-	fdt = 1.0 / (pst_DLia->f_SampleFreq * 1000);        /* 计算采样周期 S*/
-	fdp = pst_DLia->f_PsdPhase / 180 * mPI;             /* 转换角度为弧度 */
-	fw = pst_DLia->f_PsdFreq * 1000;                    /* 计算正弦波频率 HZ*/
+/*
+    //使用软件生成正弦波
+	fdt = 1.0 / (pst_DLia->f_SampleFreq * 1000);        // 计算采样周期 S
+	fdp = pst_DLia->f_PsdPhase / 180 * mPI;             // 转换角度为弧度
+	fw = pst_DLia->f_PsdFreq * 1000;                    // 计算正弦波频率 HZ
 
 	for(i = 0; i < pst_DLia->uin_SampleMaxDots; i++)
 	{
@@ -10177,20 +10179,35 @@ BOOL Mod_DLiaGeneratePsdWave(DLia_t* pst_DLia)
 		pst_DLia->pf_Buff[i] = (FP32)f1;
         //喂狗
 	}
-#else
+*/
 	//使用硬件TMU生成正弦波
-    fdt = 1.0 / (pst_DLia->f_SampleFreq * 1000);        /* 计算采样周期 S*/
-    fdp = pst_DLia->f_PsdPhase / 360;                   /* 转换角度为弧度 */
-    fw = pst_DLia->f_PsdFreq * 1000;                    /* 计算正弦波频率 HZ*/
-    //fdp = pst_DLia->f_PsdPhase/360;
+    fdt = 1.0 / (pst_DLia->f_SampleFreq * 1000);        // 计算采样周期 S
+    fdp = pst_DLia->f_PsdPhase / 360;                   // 转换角度为弧度
+    fw = pst_DLia->f_PsdFreq * 1000;                    // 计算正弦波频率 HZ
     for(i = 0; i < pst_DLia->uin_SampleMaxDots; i++)
     {
         f1 = __sinpuf32((fw * i * fdt + fdp));
-        pst_DLia->pf_Buff[i] = (FP32)f1;
+
+        pst_DLia->pf_Buff[i] = (aui_TestSenseRecvBuff[i]) * f1;       //使用调试数组计算
+        pst_DLia->pf_Buff[i] = (puin_InData[i]) * f1;   //使用接受的数据计算
         //喂狗
     }
-#endif
+
 	return TRUE;
+}
+
+#pragma CODE_SECTION(Mod_DLiaGeneratePsdWave, ".TI.ramfunc");       //加载到Ram当中去运行 看情况使用
+BOOL Mod_DLiaGeneratePsdWaveTwoCpu(DLia_t* pst_DLia)
+{
+    while(IPCLtoRFlagBusy(IPC_FLAG11) != 0){}           //任务是否完成
+    DLia_t* p = (void*)CPU01_TO_CPU02_PASSMSG;
+    p->f_PsdFreq = pst_DLia->f_PsdFreq;
+    p->f_PsdPhase = pst_DLia->f_PsdPhase;
+    p->f_SampleFreq = pst_DLia->f_SampleFreq;
+    p->pf_Buff = pst_DLia->pf_Buff;
+    p->uin_SampleMaxDots = pst_DLia->uin_SampleMaxDots;
+    IPCLtoRFlagSet(IPC_FLAG11);                          //开启CPU2任务 计算FIR后半部分
+    return TRUE;
 }
 
 //==================================================================================================
@@ -10229,8 +10246,8 @@ BOOL Mod_DLiaSetPhase(DLia_t* pst_DLia,FP32 f_Phase,BOOL b_WriteEPROM)
 //|----------|-------------------------------------------------------------------------------------- 
 //| 函数设计 | 
 //==================================================================================================
-//#pragma CODE_SECTION(Mod_DLiaCal, ".TI.ramfunc");       //加载到Ram当中去运行 看情况使用
-BOOL Mod_DLiaCal(DLia_t* pst_DLia,INT16S* puin_InData, INT16U uin_InDataLen,FP32* pf_OutData,INT16U* puin_OutDataLen)
+#pragma CODE_SECTION(Mod_DLiaCal, ".TI.ramfunc");       //加载到Ram当中去运行 看情况使用
+BOOL Mod_DLiaCal(DLia_t* pst_DLia,INT16U* puin_InData, INT16U uin_InDataLen,FP32* pf_OutData,INT16U* puin_OutDataLen)
 {
     INT16U i;
     
@@ -10240,25 +10257,22 @@ BOOL Mod_DLiaCal(DLia_t* pst_DLia,INT16S* puin_InData, INT16U uin_InDataLen,FP32
                                      = VPP*<[Cos(2*A+Phase)+Cos(+-Phase)]/2>
     */
 
-    Mod_DLiaGeneratePsdWave(pst_DLia);
+    //Mod_DLiaGenerateTwoCpu(pst_DLia);
+    Mod_DLiaGeneratePsdWave(pst_DLia, puin_InData, uin_InDataLen);
 
-    for(i = 0; i < uin_InDataLen; i++)
-    {
-        pst_DLia->pf_Buff[i] *= ((FP32)puin_InData[i]);
-    }
-    
+
     /* 低通滤波器 滤除高频成分 提取包络线 
        把 VPP*<[Cos(2*A+Phase)+Cos(+-Phase)]/2> 通过高通滤波器后
        得到 VPP*[Cos(+-Phase)]/2 当两个信号相位相同时或接近是 Phase ~= 0   
        得到 VPP*[Cos(0)]/2 = VPP/2
     */
-    Bsp_AlarmLed(eLedOn);
+    //Bsp_AlarmLed(eLedOn);
     Mod_FIRFilterTwoCpu(pst_DLia->pf_Buff, uin_InDataLen, B3, BL3, 1, 10);				//5.1ms
-    Bsp_AlarmLed(eLedOff);
+    //Bsp_AlarmLed(eLedOff);
 
-    Bsp_RunLed(eLedOn);
+
     Mod_FIRFilterTwoCpu(pst_DLia->pf_Buff, uin_InDataLen/10, B4, BL4, 1, 5);			//0.9ms
-    Bsp_RunLed(eLedOff);
+
     /* 复制数据到输出数组 */
     if(pf_OutData != NULL)
         for(i = 0; i < uin_InDataLen/5/10; i++)
@@ -10266,6 +10280,9 @@ BOOL Mod_DLiaCal(DLia_t* pst_DLia,INT16S* puin_InData, INT16U uin_InDataLen,FP32
 
     if(puin_OutDataLen != NULL)
         *puin_OutDataLen = uin_InDataLen/5/10;
+
+
+
 
 	return TRUE;
 }
@@ -10288,56 +10305,32 @@ void Mod_FIRFilterTwoCpu(FP32 * pf_Input, INT16U uin_Lenth, const FP32* pf_Facto
     INT16U i,j,k,l;
     FP32 f_tmp = 0;
     FP32 *pf_tmp = 0;
-    FP32 af_Coeff[400];
 
     /* Fir 双CPU同步计算  CPU2计算后半部分*/
-    k = uin_Lenth / 2;
-    l = uin_Lenth / 2;
+    k = uin_Lenth / 2;          //CPU1计算的点数
+    l = uin_Lenth / 2;          //CPU2计算的点数
     FirInterface* p = (void*)CPU01_TO_CPU02_PASSMSG;
-    p->fp_InData = (void*)&pf_Input[k];
+    p->pf_InData = (void*)&pf_Input[k];
     p->uin_InLenth = l;
-    p->fp_Coeef = (void*)pf_Factor;
     p->uin_Order = uin_Order;
-    p->fp_OutData = (void*)CPU02_TO_CPU01_PASSMSG;
+    p->pf_OutData = (void*)CPU02_TO_CPU01_PASSMSG;
     p->uin_Spand = uin_Spand;
+
     IPCLtoRFlagSet(IPC_FLAG10);                 //开启CPU2任务 计算FIR后半部分
 
     for(i = 0; i < uin_Order; i++)
-    {
-        af_Coeff[i] = pf_Factor[i];
-    }
+        p->af_Coeef[i] = pf_Factor[i];          //将系数复制到MSG
 
-    for(j = 0 ; j < (k) ; j++)        //CPU1计算前半部分
+    for(j = 0 ; j < k ; j++)                    //CPU1计算前半部分
     {
         pf_tmp = &pf_Input[j];
         f_tmp = 0;
         for(i = 0 ; i < uin_Order;i++)
         {
-            f_tmp += pf_tmp[i]*af_Coeff[i];
+            f_tmp += pf_tmp[i]*pf_Factor[i];
         }
         pf_Input[j] = f_tmp;
     }
-
-    /* 填充最后几个无法正常Fir的点
-    for(i = uin_Lenth - uin_Order; i < uin_Lenth; i++)
-    {
-        pf_Input[i]= pf_Input[uin_Lenth - uin_Order -1];
-    }*/
-
-    /* 平均滤波
-    if(uin_Avg > 1)
-    {
-        for( i = 0; i<(uin_Lenth - uin_Avg); i++)
-        {
-            pf_tmp = &pf_Input[i];
-            f_tmp = 0;
-            for(j = 0; j < uin_Avg; j++)
-            {
-                f_tmp += pf_tmp[j];
-            }
-            pf_Input[i] = f_tmp/uin_Avg;
-        }
-    }*/
 
     /* 数组缩放 */
     k /= uin_Spand;
@@ -10357,7 +10350,11 @@ void Mod_FIRFilterTwoCpu(FP32 * pf_Input, INT16U uin_Lenth, const FP32* pf_Facto
         }
     }
 
-    while(IPCLtoRFlagBusy(IPC_FLAG10) != 0){}   //等待CPU2计算完成
+    while(IPCLtoRFlagBusy(IPC_FLAG10) != 0){
+        Bsp_AlarmLed(eLedOn);
+    }   //等待CPU2计算完成
+
+    Bsp_AlarmLed(eLedOff);
 
     /* 复制CPU2计算的结果到 后半段*/
     pf_tmp = (void*)CPU02_TO_CPU01_PASSMSG;
@@ -10379,7 +10376,7 @@ void Mod_FIRFilterTwoCpu(FP32 * pf_Input, INT16U uin_Lenth, const FP32* pf_Facto
 //|----------|-------------------------------------------------------------------------------------- 
 //| 函数设计 | 
 //==================================================================================================
-#pragma CODE_SECTION(Mod_DLiaCal, ".TI.ramfunc");       //加载到Ram当中去运行 看情况使用
+#pragma CODE_SECTION(Mod_FIRFilter, ".TI.ramfunc");       //加载到Ram当中去运行 看情况使用
 void Mod_FIRFilter(FP32 * pf_Input, INT16U uin_Lenth, const FP32* pf_Factor,INT16U uin_Order,INT16U uin_Avg,INT16U uin_Spand)
 {
 	INT16U i,j;

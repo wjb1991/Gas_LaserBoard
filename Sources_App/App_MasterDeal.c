@@ -1,6 +1,6 @@
 #include "App_Include.h"
 
-#define DEF_MASTERDEAL_DBG_EN           TRUE
+#define DEF_MASTERDEAL_DBG_EN           FALSE
 
 #if (DEF_MASTERDEAL_DBG_EN == TRUE)
     #define MASTERDEAL_DBG(...)        do {                            \

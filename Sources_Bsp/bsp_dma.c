@@ -71,6 +71,13 @@ void Bsp_Dma1Stop(void)
     EDIS;
 }
 
+void Bsp_Dma1SoftTrigger()
+{
+    EALLOW;
+    DmaRegs.CH1.CONTROL.bit.PERINTFRC = 1;
+    EDIS;
+}
+
 void Bsp_Dma1IntEnable(void)
 {
     EALLOW;

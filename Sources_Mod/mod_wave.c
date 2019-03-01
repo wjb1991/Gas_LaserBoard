@@ -14,23 +14,23 @@
  *********************************/
 
 #ifdef __cplusplus
-#pragma DATA_SECTION("Exsram")
+#pragma DATA_SECTION("PublicRam")
 #else
-//#pragma DATA_SECTION(auin_RiseBuff,"Exsram");
+#pragma DATA_SECTION(auin_RiseBuff,"PublicRam");
 #endif
 volatile INT16U auin_RiseBuff[DEF_SAMPLEDOT_MAX] = {0};	//
 
 #ifdef __cplusplus
-#pragma DATA_SECTION("Exsram")
+#pragma DATA_SECTION("PublicRam")
 #else
-//#pragma DATA_SECTION(auin_FallBuff,"Exsram");
+#pragma DATA_SECTION(auin_FallBuff,"PublicRam");
 #endif
 volatile INT16U auin_FallBuff[DEF_FALLDOT_MAX]={0};
 
 #ifdef __cplusplus
-#pragma DATA_SECTION("Exsram")
+#pragma DATA_SECTION("PublicRam")
 #else
-//#pragma DATA_SECTION(auin_RecvBuff,"Exsram");
+#pragma DATA_SECTION(auin_RecvBuff,"PublicRam");
 #endif
 volatile INT16U auin_RecvBuff[DEF_SAMPLEDOT_MAX] = {0};
 
