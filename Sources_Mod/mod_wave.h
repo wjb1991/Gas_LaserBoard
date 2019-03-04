@@ -19,7 +19,7 @@
 #define     DEF_DCOFFSET_MIN    (0.0)    
 #define     DEF_DCOFFSET_MAX    (1.0)    
 #define     DEF_SINFREQ_MIN     (1.0)
-#define     DEF_SINFREQ_MAX     (20.0)
+#define     DEF_SINFREQ_MAX     (120.0)
 #define     DEF_SAMPLEFREQ_MIN  (100.0)
 #define     DEF_SAMPLEFREQ_MAX  (1250.0)
 #define     DEF_SAMPLEDOT_MIN   (1000)
@@ -28,7 +28,7 @@
 #define		 DEF_FALLDOT_MIN	 (400)
 #define		 DEF_FALLDOT_MAX	 (1000)
 
-#define		 DEF_WAVE_MAX		 (2)
+#define		 DEF_WAVE_MAX		 (1)
 
 typedef struct {
     /* public */
