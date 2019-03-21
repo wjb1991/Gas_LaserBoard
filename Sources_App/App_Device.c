@@ -73,7 +73,8 @@ BOOL App_DevicrRun(void)
     if(st_Laser.e_State == eLaserHigh)
     {
         //采集透过率高点
-        Bsp_DelayUs(10);
+        Bsp_DelayUs(200);
+
         Mod_TransSmapleHigh();
     }
 
@@ -84,7 +85,8 @@ BOOL App_DevicrRun(void)
     if(st_Laser.e_State == eLaserLow)
     {
         //采集透过率高点
-        Bsp_DelayUs(10);
+        Bsp_DelayUs(200);
+
         Mod_TransSmapleLow();
 
         if(st_Laser.e_State != eLaserIdle)            //如果在采样透过率下限时发生触发则不发送数据

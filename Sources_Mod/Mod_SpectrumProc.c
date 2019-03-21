@@ -97,7 +97,7 @@ BOOL Mod_SpectrumProc(IrSpectrum_t* pst_Spe)
             pst_Spe->af_SumSpectrum[i] = 0;                                                             //清零求和光谱
         }
 
-#if 1
+#if 0
         for(i = 0; i < pst_Spe->uin_SpectrumLen; i++) 
         {
             //点斜率式 通过相似三角形算出f1 是三角波的直流分量
@@ -123,7 +123,7 @@ BOOL Mod_SpectrumProc(IrSpectrum_t* pst_Spe)
 #else
         for(i = 0; i < pst_Spe->uin_SpectrumLen; i++)
         {
-            pst_Spe->af_OriginalSpectrum[i] = pst_Spe->af_ProceSpectrum[i] / st_Gain.in_AcGain; //ac/dc 修正光谱透过率
+            pst_Spe->af_OriginalSpectrum[i] = pst_Spe->af_ProceSpectrum[i] / st_Gain.in_AcGain;         //不修正透过率
         }
 #endif
 

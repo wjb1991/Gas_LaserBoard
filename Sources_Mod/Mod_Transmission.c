@@ -55,7 +55,7 @@ void Mod_TransInit(void)
 void Mod_TransSmapleHigh(void)
 {
     INT16U uin_Temp;
-	uin_Temp = Bsp_Ltc1867SampleAvg(eSignalDC,10);      //50次约3ms
+	uin_Temp = Bsp_Ltc1867SampleAvg(eSignalDC,10);      //50次约3ms   10次约200us
     st_Trans.ul_TransSumAD1 += uin_Temp; 
 }
 
@@ -74,7 +74,7 @@ void Mod_TransSmapleHigh(void)
 void Mod_TransSmapleLow(void)
 {
     INT16U uin_Temp;
-	uin_Temp = Bsp_Ltc1867SampleAvg(eSignalDC,10);       //50次约3ms
+	uin_Temp = Bsp_Ltc1867SampleAvg(eSignalDC,10);       //50次约3ms  10次约200us
     st_Trans.ul_TransSumAD2 += uin_Temp; 
     st_Trans.uin_SampleCount++;
 }

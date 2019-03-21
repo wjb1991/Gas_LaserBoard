@@ -173,7 +173,7 @@ void Bsp_SramInit(void)
 														  // of 1 Emif Clock
 								 EMIF_ASYNC_RSTROBE_8   | // Read Strobe time
 														  // of 4 Emif Clock
-								 EMIF_ASYNC_RSETUP_1    | // Read Setup time
+								 EMIF_ASYNC_RSETUP_4    | // Read Setup time
 														  // of 1 Emif Clock
 								 EMIF_ASYNC_WHOLD_1     | // Write Hold time
 														  // of 1 Emif Clock
