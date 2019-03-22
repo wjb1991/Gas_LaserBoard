@@ -69,6 +69,19 @@ void  Bsp_Init (void)
 
     while(0)
     {
+#include "App_Include.h"
+
+        float a[10] = {0,2,3,4,5,6,7,8,9,10};
+        float b[3] = {1,2,3};
+        a[0] += 1;
+        Mod_FIRFilter(a,10,b,2,2,2);
+        b[0] += 1;
+
+    }
+
+
+    while(0)
+    {
         #include "App_Include.h"
 
 

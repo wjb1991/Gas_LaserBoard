@@ -206,7 +206,7 @@ BOOL Mod_SetHighDots(void * pv_Wave,INT16U uin_Dots,BOOL b_WriteEPROM)
     Wave_t* p = pv_Wave;
     if( p != NULL)
     {
-        if(uin_Dots >= DEF_SAMPLEDOT_MIN && uin_Dots <= DEF_SAMPLEDOT_MAX)
+        if(uin_Dots >= DEF_LEVENDOT_MIN && uin_Dots <= DEF_LEVENDOT_MAX)
         {
             p->uin_HigtDot = uin_Dots;
             if(b_WriteEPROM == TRUE)
@@ -239,7 +239,7 @@ BOOL Mod_SetLowDots(void * pv_Wave,INT16U uin_Dots,BOOL b_WriteEPROM)
     Wave_t* p = pv_Wave;
     if( p != NULL)
     {
-        if(uin_Dots >= DEF_SAMPLEDOT_MIN && uin_Dots <= DEF_SAMPLEDOT_MAX)
+        if(uin_Dots >= DEF_LEVENDOT_MIN && uin_Dots <= DEF_LEVENDOT_MAX)
         {
             p->uin_LowDot = uin_Dots;
             if(b_WriteEPROM == TRUE)

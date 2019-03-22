@@ -91,7 +91,9 @@ BOOL App_DevicrRun(void)
 
         if(st_Laser.e_State != eLaserIdle)            //如果在采样透过率下限时发生触发则不发送数据
         {
+            //DEV_DBG("DEV_DBG:发送数据\r\n");
             Mod_SpectrumPost((INT16U*)st_ModWave.puin_RecvBuff, st_ModWave.uin_SampleDot);   //接受缓冲区已经被释放了
+            //Mod_SpectrumPost((INT16U*)aui_TestSenseRecvBuff, st_ModWave.uin_SampleDot);     //使用调试数组计算
         }
     }
 

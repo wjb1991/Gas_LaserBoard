@@ -61,7 +61,7 @@ BOOL Mod_SpectrumPend(INT16U** ppui_Spectrum, INT16U* pui_Len)
 BOOL Mod_SpectrumProc(IrSpectrum_t* pst_Spe)
 {
     INT16U  i;
-
+    INT16U DumpPoint = 10000 % (INT16U)((st_ModWave.f_SampleFreq/st_ModWave.f_SinFreq));
     if(Mod_SpectrumPend(&pst_Spe->pui_RawData,&pst_Spe->uin_RawDataLen) == FALSE)
         return FALSE;
 
@@ -70,11 +70,10 @@ BOOL Mod_SpectrumProc(IrSpectrum_t* pst_Spe)
 
     Bsp_RunLed(eLedOn);
 
-    SPE_DBG("ui_Len = %d\r\n",ui_Len);
     /* 调用锁相放大器 计算出吸收峰 */
     Mod_DLiaCal(&st_DLia,
                  pst_Spe->pui_RawData,
-                 pst_Spe->uin_RawDataLen,
+                 pst_Spe->uin_RawDataLen - DumpPoint,                   //去掉最后几个点
                  pst_Spe->af_RawSpectrum,
                  &pst_Spe->uin_SpectrumLen);
 

@@ -386,6 +386,11 @@
 			<locationURI>PARENT-1-PROJECT_LOC/Sources_Mod/Mod_Doublebuff.c</locationURI>
 		</link>
 		<link>
+			<name>Sources_Mod/Mod_FirFilte.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Sources_Mod/Mod_FirFilte.c</locationURI>
+		</link>
+		<link>
 			<name>Sources_Mod/Mod_Gain.c</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/Sources_Mod/Mod_Gain.c</locationURI>

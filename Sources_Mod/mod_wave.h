@@ -28,6 +28,9 @@
 #define		 DEF_FALLDOT_MIN	 (400)
 #define		 DEF_FALLDOT_MAX	 (1000)
 
+#define     DEF_LEVENDOT_MIN    (100)
+#define     DEF_LEVENDOT_MAX    (10000)
+
 #define		 DEF_WAVE_MAX		 (1)
 
 typedef struct {
