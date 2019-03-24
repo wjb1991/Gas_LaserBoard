@@ -36,6 +36,13 @@ typedef enum
     CMD_RW_IR_ACGAIN,
     CMD_RW_IR_DCGAIN,
 
+    CMD_RW_IR_GAS1_LEFT,
+    CMD_RW_IR_GAS1_CENTER,
+    CMD_RW_IR_GAS1_RIGHT,
+    CMD_RW_IR_GAS2_LEFT,
+    CMD_RW_IR_GAS2_CENTER,
+    CMD_RW_IR_GAS2_RIGHT,
+    CMD_RW_IR_GAS_LIMIT_CENTER,
 
 
     //读取光谱相关
@@ -859,10 +866,162 @@ BOOL App_StdbusMasterDealFram(StdbusFram_t* pst_Fram)
         break;
 #endif
 
+//==================================================================================
+//                              气体1光谱左边界
+//==================================================================================
+    case CMD_RW_IR_GAS1_LEFT:
+        if(pst_Fram->uch_SubCmd == e_StdbusWriteCmd)
+        {
+            if(pst_Fram->uin_PayLoadLenth == 2)
+            {
+                INT16U uin_Temp = Bsp_CnvArrToINT16U(&pst_Fram->puc_PayLoad[0],FALSE);
+                if(Mod_GasSetLeft(&st_GasCO2, uin_Temp,TRUE) == TRUE)
+                {
+                    res = TRUE;    //应答
+                }
+            }
+        }
+        else if(pst_Fram->uch_SubCmd == e_StdbusReadCmd)
+        {
+            pst_Fram->uin_PayLoadLenth = 2;
+            Bsp_CnvINT16UToArr(&pst_Fram->puc_PayLoad[0],st_GasCO2.uin_GasLeft,FALSE);
+            res = TRUE;    //应答
+        }
+        break;
+//==================================================================================
+//                              气体1吸收峰中点
+//==================================================================================
+    case CMD_RW_IR_GAS1_CENTER:
+        if(pst_Fram->uch_SubCmd == e_StdbusWriteCmd)
+        {
+            if(pst_Fram->uin_PayLoadLenth == 2)
+            {
+                INT16U uin_Temp = Bsp_CnvArrToINT16U(&pst_Fram->puc_PayLoad[0],FALSE);
+                if(Mod_GasSetCenter(&st_GasCO2, uin_Temp,TRUE) == TRUE)
+                {
+                    res = TRUE;    //应答
+                }
+            }
+        }
+        else if(pst_Fram->uch_SubCmd == e_StdbusReadCmd)
+        {
+            pst_Fram->uin_PayLoadLenth = 2;
+            Bsp_CnvINT16UToArr(&pst_Fram->puc_PayLoad[0],st_GasCO2.uin_GasCenter,FALSE);
+            res = TRUE;    //应答
+        }
+        break;
+//==================================================================================
+//                              气体1光谱右边界
+//==================================================================================
+    case CMD_RW_IR_GAS1_RIGHT:
+        if(pst_Fram->uch_SubCmd == e_StdbusWriteCmd)
+        {
+            if(pst_Fram->uin_PayLoadLenth == 2)
+            {
+                INT16U uin_Temp = Bsp_CnvArrToINT16U(&pst_Fram->puc_PayLoad[0],FALSE);
+                if(Mod_GasSetRight(&st_GasCO2, uin_Temp,TRUE) == TRUE)
+                {
+                    res = TRUE;    //应答
+                }
+            }
+        }
+        else if(pst_Fram->uch_SubCmd == e_StdbusReadCmd)
+        {
+            pst_Fram->uin_PayLoadLenth = 2;
+            Bsp_CnvINT16UToArr(&pst_Fram->puc_PayLoad[0],st_GasCO2.uin_GasRight,FALSE);
+            res = TRUE;    //应答
+        }
+        break;
 
+//==================================================================================
+//                              气体2光谱左边界
+//==================================================================================
+    case CMD_RW_IR_GAS2_LEFT:
+        if(pst_Fram->uch_SubCmd == e_StdbusWriteCmd)
+        {
+            if(pst_Fram->uin_PayLoadLenth == 2)
+            {
+                INT16U uin_Temp = Bsp_CnvArrToINT16U(&pst_Fram->puc_PayLoad[0],FALSE);
+                if(Mod_GasSetLeft(&st_GasCO, uin_Temp,TRUE) == TRUE)
+                {
+                    res = TRUE;    //应答
+                }
+            }
+        }
+        else if(pst_Fram->uch_SubCmd == e_StdbusReadCmd)
+        {
+            pst_Fram->uin_PayLoadLenth = 2;
+            Bsp_CnvINT16UToArr(&pst_Fram->puc_PayLoad[0],st_GasCO.uin_GasLeft,FALSE);
+            res = TRUE;    //应答
+        }
+        break;
+//==================================================================================
+//                              气体2吸收峰中点
+//==================================================================================
+    case CMD_RW_IR_GAS2_CENTER:
+        if(pst_Fram->uch_SubCmd == e_StdbusWriteCmd)
+        {
+            if(pst_Fram->uin_PayLoadLenth == 2)
+            {
+                INT16U uin_Temp = Bsp_CnvArrToINT16U(&pst_Fram->puc_PayLoad[0],FALSE);
+                if(Mod_GasSetCenter(&st_GasCO, uin_Temp,TRUE) == TRUE)
+                {
+                    res = TRUE;    //应答
+                }
+            }
+        }
+        else if(pst_Fram->uch_SubCmd == e_StdbusReadCmd)
+        {
+            pst_Fram->uin_PayLoadLenth = 2;
+            Bsp_CnvINT16UToArr(&pst_Fram->puc_PayLoad[0],st_GasCO.uin_GasCenter,FALSE);
+            res = TRUE;    //应答
+        }
+        break;
+//==================================================================================
+//                              气体2光谱右边界
+//==================================================================================
+    case CMD_RW_IR_GAS2_RIGHT:
+        if(pst_Fram->uch_SubCmd == e_StdbusWriteCmd)
+        {
+            if(pst_Fram->uin_PayLoadLenth == 2)
+            {
+                INT16U uin_Temp = Bsp_CnvArrToINT16U(&pst_Fram->puc_PayLoad[0],FALSE);
+                if(Mod_GasSetRight(&st_GasCO, uin_Temp,TRUE) == TRUE)
+                {
+                    res = TRUE;    //应答
+                }
+            }
+        }
+        else if(pst_Fram->uch_SubCmd == e_StdbusReadCmd)
+        {
+            pst_Fram->uin_PayLoadLenth = 2;
+            Bsp_CnvINT16UToArr(&pst_Fram->puc_PayLoad[0],st_GasCO.uin_GasRight,FALSE);
+            res = TRUE;    //应答
+        }
+        break;
 
-
-
+//==================================================================================
+//                              气体1和气体2分界点
+//==================================================================================
+    case CMD_RW_IR_GAS_LIMIT_CENTER:
+        if(pst_Fram->uch_SubCmd == e_StdbusWriteCmd)
+        {
+            if(pst_Fram->uin_PayLoadLenth == 2)
+            {
+                INT16U uin_Temp = Bsp_CnvArrToINT16U(&pst_Fram->puc_PayLoad[0],FALSE);
+                if(Mod_GasSetLimitCenter(&st_GasMeasForIr, uin_Temp,TRUE) == TRUE)
+                {
+                    res = TRUE;    //应答
+                }
+            }
+        }
+        else if(pst_Fram->uch_SubCmd == e_StdbusReadCmd)
+        {
+            pst_Fram->uin_PayLoadLenth = 2;
+            Bsp_CnvINT16UToArr(&pst_Fram->puc_PayLoad[0],st_GasMeasForIr.uin_SpeLimitCenter,FALSE);
+            res = TRUE;    //应答
+        }
+        break;
 
 
 #if TRUE //读取光谱相关

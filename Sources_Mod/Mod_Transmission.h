@@ -4,8 +4,8 @@
 
 typedef struct {
     INT16U  uin_SampleCount;
-    INT32U  ul_TransSumAD1;
-    INT32U  ul_TransSumAD2;
+    FP32   ul_TransSumAD1;
+    FP32   ul_TransSumAD2;
 
     FP32    f_OffestCompare;  //透过率修正偏差值
     FP32    f_LightTrans;     //通光量         采样电压差值/发送电压差值，这是反应透过率大小的原始参数

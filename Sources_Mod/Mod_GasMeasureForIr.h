@@ -14,8 +14,9 @@ typedef struct {
     INT8U*      puch_Name;                      /* 气体名字 */
     GasType_e   e_GasType;                      /* 气体编号 */
 
-    INT16U      uin_SpectrumRangeLeft;          /* 光谱范围 */
-    INT16U      uin_SpectrumRangeRight;         /* 光谱范围 */
+    INT16U      uin_GasLeft;                   /* 光谱范围 */
+    INT16U      uin_GasCenter;                   /* 光谱范围 */
+    INT16U      uin_GasRight;                  /* 光谱范围 */
 
     FP32        f_CalibCon;                     /* 标定浓度 */
     
@@ -41,7 +42,9 @@ typedef enum {
 
 typedef struct {
     GasMeasureState_e   e_State;                /* 状态 */
-    INT16U  uin_SpectrumLen;
+
+    INT16U  uin_SpeLimitCenter;                 /* 两个气体的分界线*/
+    INT16U  uin_SpectrumLen;                    /* 光谱长度*/
     FP32*   pf_ProcSpectrum;                    /* 处理后光谱 */
     FP32    af_ZeroSpectrum[200];               /* 调零光谱 */
     FP32    af_BkgSpectrum[200];                /* 背景光谱 */
@@ -75,5 +78,12 @@ BOOL Mod_GasMeasDoDiffMeasure(GasMeasForIr_t* pst_Meas);
 
 BOOL Mod_GasMeasDoDiffBackground(GasMeasForIr_t* pst_Meas);
 
+BOOL Mod_GasSetLeft(GasInfoForIr* pst_Gas,INT16U uin_Index,BOOL b_WriteEPROM);
+BOOL Mod_GasSetCenter(GasInfoForIr* pst_Gas,INT16U uin_Index,BOOL b_WriteEPROM);
+BOOL Mod_GasSetRight(GasInfoForIr* pst_Gas,INT16U uin_Index,BOOL b_WriteEPROM);
+
+BOOL Mod_GasSetLimitCenter(GasMeasForIr_t* pst_Meas,INT16U uin_Index,BOOL b_WriteEPROM);
+
+BOOL Mod_GasMeasPoll(GasMeasForIr_t* pst_Meas);
 
 #endif

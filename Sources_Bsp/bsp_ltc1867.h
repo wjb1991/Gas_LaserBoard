@@ -27,7 +27,7 @@ typedef enum {
 void Bsp_Ltc1867Init(void);
 
 INT16U Bsp_Ltc1867SampleOne(INT16U ch);
-INT16U Bsp_Ltc1867SampleAvg(INT16U ch,INT16U avg);
+FP32 Bsp_Ltc1867SampleAvg(INT16U ch,INT16U avg);
 FP64   Bsp_Ltc1867HexToVolt(FP64 hex);
 
 #endif /* _BSP_LTC1867_H_ */

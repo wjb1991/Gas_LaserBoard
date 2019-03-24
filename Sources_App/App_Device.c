@@ -73,9 +73,11 @@ BOOL App_DevicrRun(void)
     if(st_Laser.e_State == eLaserHigh)
     {
         //采集透过率高点
-        Bsp_DelayUs(200);
+        Bsp_DelayUs(240);
 
+        Bsp_RunLed(eLedOn);
         Mod_TransSmapleHigh();
+        Bsp_RunLed(eLedOff);
     }
 
 //==================================================================================
@@ -85,9 +87,11 @@ BOOL App_DevicrRun(void)
     if(st_Laser.e_State == eLaserLow)
     {
         //采集透过率高点
-        Bsp_DelayUs(200);
+        Bsp_DelayUs(240);
 
+        Bsp_RunLed(eLedOn);
         Mod_TransSmapleLow();
+        Bsp_RunLed(eLedOff);
 
         if(st_Laser.e_State != eLaserIdle)            //如果在采样透过率下限时发生触发则不发送数据
         {
@@ -110,7 +114,7 @@ BOOL App_DevicrRun(void)
 //                                   核心计算
 //==================================================================================
 
-    Mod_SpectrumProc(&st_IrSpectrum);
+    Mod_GasMeasPoll(&st_GasMeasForIr);
 
 
     /**

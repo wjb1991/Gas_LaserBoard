@@ -7,6 +7,7 @@ typedef struct {
     INT16U  uch_ScanAvg;
     INT16U  uch_ScanCnt;
     INT16U  uin_SpectrumLen;
+
     FP32    af_RawSpectrum[200];
     FP32    af_SumSpectrum[200];
     FP32    af_ProceSpectrum[200];
@@ -16,6 +17,7 @@ typedef struct {
 
 extern IrSpectrum_t st_IrSpectrum;
 BOOL Mod_SpectrumPost(INT16U* pui_Spectrum, INT16U uin_Len);
-BOOL Mod_SpectrumProc(IrSpectrum_t* pst_Spe);
+BOOL Mod_SpectrumProc(IrSpectrum_t* pst_Spe,INT16U uin_SpeLimitCenter,INT16U uin_Gas1Center,INT16U uin_Gas2Center);
+
 
 #endif

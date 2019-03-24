@@ -68,9 +68,9 @@ INT16U Bsp_Ltc1867SampleOne(INT16U ch)
     return ((msb << 8) | lsb);
 }
 
-INT16U Bsp_Ltc1867SampleAvg(INT16U ch,INT16U avg)
+FP32 Bsp_Ltc1867SampleAvg(INT16U ch,INT16U avg)
 {
-    uint32_t sum = 0;
+    FP32 sum = 0;
     INT16U i = 0;
     Bsp_Ltc1867SampleOne(ch);
 
