@@ -60,11 +60,11 @@ void TimeOut(void* timer)
     {
     case e_MeasureWait:
         PostMsg((void*)e_MeasureTimeOut);	//等待超时
-        Mod_MeasurePoll(&st_Measure);       //立即处理
+        //Mod_MeasurePoll(&st_Measure);       //立即处理
         break;
     case e_MeasureDead:
         PostMsg((void*)e_MeasureSample);	//死区结束开始采样
-        Mod_MeasurePoll(&st_Measure);       //立即处理
+        //Mod_MeasurePoll(&st_Measure);       //立即处理
         break;
     case e_MeasureSample:
         PostMsg((void*)e_MeasureCal);		//采样结束开始计算  等待到主程序处理
@@ -186,7 +186,7 @@ void Mod_MeasurePoll(Measure_t* pst_Meas)
         else
         {
 			PostMsg((void*)e_MeasureSample);	                        //死区结束开始采样
-			Mod_MeasurePoll(pst_Meas);                                  //递归注意
+			//Mod_MeasurePoll(pst_Meas);                                  //递归注意
         }
         break;
 
@@ -301,7 +301,7 @@ void Bsp_GpioEvent(INT32U ul_Pin, BOOL b_IsRising)
         {
             //Mod_LaserDoStop(&st_Laser);           //停止激光器扫描
             PostMsg((void*)e_MeasureWait);
-            Mod_MeasurePoll(&st_Measure);           //立即处理
+            //Mod_MeasurePoll(&st_Measure);           //立即处理
         }
     }
     else if(ul_Pin == 56  && b_IsRising == FALSE )   //车位离开第二个传感器
@@ -311,7 +311,7 @@ void Bsp_GpioEvent(INT32U ul_Pin, BOOL b_IsRising)
             //Mod_LaserExitIdle(&st_Laser);         //退出空闲模式 开启激光器扫描
             //Mod_TransmissionClear();             //透过率清楚
             PostMsg((void*)e_MeasureDead);
-            Mod_MeasurePoll(&st_Measure);           //立即处理
+            //Mod_MeasurePoll(&st_Measure);           //立即处理
         }
     }
 #else
