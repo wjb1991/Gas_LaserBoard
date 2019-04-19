@@ -10,7 +10,7 @@ static StdbusDev_t* ast_DevList[DEF_STDBUS_MASTER_DEV_LEN] = {0};
 
 
 StdbusPort_t st_StdbusMaster ={
-                               (INT8U*)"主机端口",                             /* 端口名称 */
+    (INT8U*)"主机端口",                     /* 端口名称 */
     e_StdbusIdle,                           /* 状态 */
     NULL,                                   /* 端口占用锁  OS情况下是一个信号量 */
     NULL,                                   /* 端口消息 OS情况下是一个消息队列*/

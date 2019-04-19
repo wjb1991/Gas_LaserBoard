@@ -292,7 +292,6 @@ void Mod_MeasureGasCONotification(FP32 f_Concentration)
     }
 }
 
-
 void Bsp_GpioEvent(INT32U ul_Pin, BOOL b_IsRising)
 {
 #if 1
@@ -300,7 +299,7 @@ void Bsp_GpioEvent(INT32U ul_Pin, BOOL b_IsRising)
     {
         if(st_Measure.e_State == e_MeasureIdle)
         {
-            Mod_LaserDoStop(&st_Laser);           //停止激光器扫描
+            //Mod_LaserDoStop(&st_Laser);           //停止激光器扫描
             PostMsg((void*)e_MeasureWait);
             Mod_MeasurePoll(&st_Measure);           //立即处理
         }
@@ -309,8 +308,8 @@ void Bsp_GpioEvent(INT32U ul_Pin, BOOL b_IsRising)
     {
         if(st_Measure.e_State == e_MeasureWait)
         {
-            Mod_LaserExitIdle(&st_Laser);
-            Mod_TransmissionClear();
+            //Mod_LaserExitIdle(&st_Laser);         //退出空闲模式 开启激光器扫描
+            //Mod_TransmissionClear();             //透过率清楚
             PostMsg((void*)e_MeasureDead);
             Mod_MeasurePoll(&st_Measure);           //立即处理
         }

@@ -38,6 +38,9 @@ typedef enum {
     eGasAbsMeasure,                             /* 绝对浓度测量 */
     eGasDiffBackground,                         /* 差分测量采集背景 */
     eGasDiffMeasure,                            /* 差分浓度测量 */
+    eGasCalibCorrectionGas1,                    /* 现场矫正 */
+    eGasCalibCorrectionGas2,                    /* 现场矫正 */
+    eGasCalibCorrectionGasAll,                  /* 现场矫正 */
 }GasMeasureState_e;
 
 typedef struct {
